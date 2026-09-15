@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+  --color-guard-accent: #c8d400;
+  --color-guard-accent-bright: #e4f132;
+  --color-guard-text-muted: #c8c8ad;
+  --color-guard-surface: #131313;
+  --color-guard-surface-raised: #1a1a1a;
+  --color-guard-surface-card: #2a2a2a;
+  --color-guard-success: #4edea3;
+  --color-guard-success-strong: #10b981;
+}
