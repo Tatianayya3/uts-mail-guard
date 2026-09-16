@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Usuarios | Mail Guard",
-  description: "Gestiona los usuarios de tu extensión Mail Guard.",
+  title: "Dashboard | Mail Guard",
+  description: "Gestiona los datos de tu extensión Mail Guard.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
