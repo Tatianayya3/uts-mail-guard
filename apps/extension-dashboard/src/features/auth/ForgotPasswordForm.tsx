@@ -64,12 +64,13 @@ export default function ForgotPasswordForm({
         value={values.email}
         error={errors.email}
         disabled={isLoading}
+        autoComplete="email"
         onChange={(value) => updateValue("email", value)}
       />
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full mt-2 bg-guard-accent hover:bg-guard-accent-bright text-guard-surface font-bold text-lg py-4 rounded-xl transition-all duration-300 shadow-[0_0_15px_rgba(200,212,0,0.15)] hover:shadow-[0_0_25px_rgba(228,241,50,0.3)] transform hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 disabled:hover:translate-y-0"
+        className="w-full mt-2 cursor-pointer bg-guard-accent hover:bg-guard-accent-bright text-guard-surface font-bold text-lg py-4 rounded-xl transition-all duration-300 shadow-[0_0_15px_rgba(200,212,0,0.15)] hover:shadow-[0_0_25px_rgba(228,241,50,0.3)] transform hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 disabled:hover:translate-y-0"
       >
         {isLoading ? "Enviando..." : "Enviar enlace"}
       </button>
@@ -77,7 +78,7 @@ export default function ForgotPasswordForm({
         type="button"
         onClick={onBack}
         disabled={isLoading}
-        className="w-full text-center text-sm text-guard-text-muted hover:text-white transition-colors disabled:opacity-50"
+        className="w-full cursor-pointer text-center text-sm text-guard-text-muted hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         Volver a iniciar sesión
       </button>

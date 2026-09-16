@@ -111,7 +111,7 @@ export default function ProfileDashboard({
                 onClick={() => void onRefresh()}
                 disabled={isRefreshing}
                 title="Actualizar métricas"
-                className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-guard-text-muted transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
+                className="flex cursor-pointer items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-guard-text-muted transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <svg
                   className={`h-3 w-3 ${isRefreshing ? "animate-spin text-guard-accent" : ""}`}
@@ -206,7 +206,7 @@ export default function ProfileDashboard({
           type="button"
           onClick={() => void onSignOut()}
           disabled={status === "loading"}
-          className="h-11 rounded-xl bg-guard-surface-card text-xs font-semibold text-white transition-colors hover:bg-white/10 disabled:opacity-60 border border-white/5"
+          className="h-11 cursor-pointer rounded-xl border border-white/5 bg-guard-surface-card text-xs font-semibold text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {status === "loading" ? "Cerrando sesión..." : "Cerrar sesión"}
         </button>
