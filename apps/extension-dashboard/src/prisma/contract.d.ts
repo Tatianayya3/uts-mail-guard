@@ -34,9 +34,8 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'1e8412e162dbbe69f4bb3bf8d07f0280ae67eaab15c34dcf201e67468315428d'>;
-export type ExecutionHash =
-  ExecutionHashBase<'4abff323cc88151ef9c9a0ec90122cfee6d46814a118cdb66a9fdd94a4123463'>;
+  StorageHashBase<'b34332c5d5cbff5a07ab4ce46444bdcb41997b049c485f1c7ae7e917238aad74'>;
+export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -242,112 +241,226 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
 
 export type FieldOutputTypes = {
   readonly public: {
-    readonly Post: {
-      readonly id: CodecTypes['pg/int4@1']['output'];
-      readonly title: CodecTypes['pg/text@1']['output'];
-      readonly content: CodecTypes['pg/text@1']['output'] | null;
-      readonly authorId: CodecTypes['pg/int4@1']['output'];
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    readonly MailScans: {
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly profileId: CodecTypes['pg/uuid@1']['output'];
+      readonly provider: CodecTypes['pg/text@1']['output'];
+      readonly subject: CodecTypes['pg/text@1']['output'];
+      readonly senderEmail: CodecTypes['pg/text@1']['output'];
+      readonly senderDomain: CodecTypes['pg/text@1']['output'];
+      readonly senderDisplayName: CodecTypes['pg/text@1']['output'];
+      readonly trustScore: CodecTypes['pg/int2@1']['output'];
+      readonly verdict: CodecTypes['pg/text@1']['output'];
+      readonly summary: CodecTypes['pg/text@1']['output'];
+      readonly advice: CodecTypes['pg/text@1']['output'];
+      readonly signals: CodecTypes['pg/jsonb@1']['output'];
+      readonly links: CodecTypes['pg/jsonb@1']['output'];
+      readonly _model: CodecTypes['pg/text@1']['output'];
+      readonly analyzedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly emailHash: CodecTypes['pg/text@1']['output'] | null;
     };
-    readonly User: {
-      readonly id: CodecTypes['pg/int4@1']['output'];
-      readonly email: CodecTypes['pg/text@1']['output'];
-      readonly username: CodecTypes['pg/text@1']['output'] | null;
-      readonly name: CodecTypes['pg/text@1']['output'] | null;
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    readonly ProfileAnalytics: {
+      readonly profileId: CodecTypes['pg/uuid@1']['output'];
+      readonly totalScans: CodecTypes['pg/int4@1']['output'];
+      readonly safeScans: CodecTypes['pg/int4@1']['output'];
+      readonly suspiciousScans: CodecTypes['pg/int4@1']['output'];
+      readonly dangerousScans: CodecTypes['pg/int4@1']['output'];
+      readonly unknownScans: CodecTypes['pg/int4@1']['output'];
+      readonly linksReviewed: CodecTypes['pg/int4@1']['output'];
+      readonly averageTrustScore: Numeric<5, 2>;
+      readonly lastScannedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    };
+    readonly Profiles: {
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly role: 'default' | 'user' | null;
+      readonly displayName: CodecTypes['pg/text@1']['output'] | null;
+      readonly avatarUrl: CodecTypes['pg/text@1']['output'] | null;
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
     };
   };
 };
 export type FieldInputTypes = {
   readonly public: {
-    readonly Post: {
-      readonly id: CodecTypes['pg/int4@1']['input'];
-      readonly title: CodecTypes['pg/text@1']['input'];
-      readonly content: CodecTypes['pg/text@1']['input'] | null;
-      readonly authorId: CodecTypes['pg/int4@1']['input'];
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
+    readonly MailScans: {
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly profileId: CodecTypes['pg/uuid@1']['input'];
+      readonly provider: CodecTypes['pg/text@1']['input'];
+      readonly subject: CodecTypes['pg/text@1']['input'];
+      readonly senderEmail: CodecTypes['pg/text@1']['input'];
+      readonly senderDomain: CodecTypes['pg/text@1']['input'];
+      readonly senderDisplayName: CodecTypes['pg/text@1']['input'];
+      readonly trustScore: CodecTypes['pg/int2@1']['input'];
+      readonly verdict: CodecTypes['pg/text@1']['input'];
+      readonly summary: CodecTypes['pg/text@1']['input'];
+      readonly advice: CodecTypes['pg/text@1']['input'];
+      readonly signals: CodecTypes['pg/jsonb@1']['input'];
+      readonly links: CodecTypes['pg/jsonb@1']['input'];
+      readonly _model: CodecTypes['pg/text@1']['input'];
+      readonly analyzedAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly emailHash: CodecTypes['pg/text@1']['input'] | null;
     };
-    readonly User: {
-      readonly id: CodecTypes['pg/int4@1']['input'];
-      readonly email: CodecTypes['pg/text@1']['input'];
-      readonly username: CodecTypes['pg/text@1']['input'] | null;
-      readonly name: CodecTypes['pg/text@1']['input'] | null;
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
+    readonly ProfileAnalytics: {
+      readonly profileId: CodecTypes['pg/uuid@1']['input'];
+      readonly totalScans: CodecTypes['pg/int4@1']['input'];
+      readonly safeScans: CodecTypes['pg/int4@1']['input'];
+      readonly suspiciousScans: CodecTypes['pg/int4@1']['input'];
+      readonly dangerousScans: CodecTypes['pg/int4@1']['input'];
+      readonly unknownScans: CodecTypes['pg/int4@1']['input'];
+      readonly linksReviewed: CodecTypes['pg/int4@1']['input'];
+      readonly averageTrustScore: CodecTypes['pg/numeric@1']['input'];
+      readonly lastScannedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly updatedAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
+    };
+    readonly Profiles: {
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly role: 'default' | 'user' | null;
+      readonly displayName: CodecTypes['pg/text@1']['input'] | null;
+      readonly avatarUrl: CodecTypes['pg/text@1']['input'] | null;
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
     };
   };
 };
 export type StorageColumnTypes = {
   readonly public: {
-    readonly post: {
-      readonly authorId: CodecTypes['pg/int4@1']['output'];
-      readonly content: CodecTypes['pg/text@1']['output'] | null;
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly id: CodecTypes['pg/int4@1']['output'];
-      readonly title: CodecTypes['pg/text@1']['output'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    readonly mail_scans: {
+      readonly advice: CodecTypes['pg/text@1']['output'];
+      readonly analyzed_at: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly created_at: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly email_hash: CodecTypes['pg/text@1']['output'] | null;
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly links: CodecTypes['pg/jsonb@1']['output'];
+      readonly model: CodecTypes['pg/text@1']['output'];
+      readonly profile_id: CodecTypes['pg/uuid@1']['output'];
+      readonly provider: CodecTypes['pg/text@1']['output'];
+      readonly sender_display_name: CodecTypes['pg/text@1']['output'];
+      readonly sender_domain: CodecTypes['pg/text@1']['output'];
+      readonly sender_email: CodecTypes['pg/text@1']['output'];
+      readonly signals: CodecTypes['pg/jsonb@1']['output'];
+      readonly subject: CodecTypes['pg/text@1']['output'];
+      readonly summary: CodecTypes['pg/text@1']['output'];
+      readonly trust_score: CodecTypes['pg/int2@1']['output'];
+      readonly verdict: CodecTypes['pg/text@1']['output'];
     };
-    readonly user: {
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly email: CodecTypes['pg/text@1']['output'];
-      readonly id: CodecTypes['pg/int4@1']['output'];
-      readonly name: CodecTypes['pg/text@1']['output'] | null;
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly username: CodecTypes['pg/text@1']['output'] | null;
+    readonly profile_analytics: {
+      readonly average_trust_score: Numeric<5, 2>;
+      readonly dangerous_scans: CodecTypes['pg/int4@1']['output'];
+      readonly last_scanned_at: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly links_reviewed: CodecTypes['pg/int4@1']['output'];
+      readonly profile_id: CodecTypes['pg/uuid@1']['output'];
+      readonly safe_scans: CodecTypes['pg/int4@1']['output'];
+      readonly suspicious_scans: CodecTypes['pg/int4@1']['output'];
+      readonly total_scans: CodecTypes['pg/int4@1']['output'];
+      readonly unknown_scans: CodecTypes['pg/int4@1']['output'];
+      readonly updated_at: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    };
+    readonly profiles: {
+      readonly avatar_url: CodecTypes['pg/text@1']['output'] | null;
+      readonly created_at: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly display_name: CodecTypes['pg/text@1']['output'] | null;
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly role: 'default' | 'user' | null;
     };
   };
 };
 export type StorageColumnInputTypes = {
   readonly public: {
-    readonly post: {
-      readonly authorId: CodecTypes['pg/int4@1']['input'];
-      readonly content: CodecTypes['pg/text@1']['input'] | null;
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly id: CodecTypes['pg/int4@1']['input'];
-      readonly title: CodecTypes['pg/text@1']['input'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
+    readonly mail_scans: {
+      readonly advice: CodecTypes['pg/text@1']['input'];
+      readonly analyzed_at: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly created_at: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly email_hash: CodecTypes['pg/text@1']['input'] | null;
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly links: CodecTypes['pg/jsonb@1']['input'];
+      readonly model: CodecTypes['pg/text@1']['input'];
+      readonly profile_id: CodecTypes['pg/uuid@1']['input'];
+      readonly provider: CodecTypes['pg/text@1']['input'];
+      readonly sender_display_name: CodecTypes['pg/text@1']['input'];
+      readonly sender_domain: CodecTypes['pg/text@1']['input'];
+      readonly sender_email: CodecTypes['pg/text@1']['input'];
+      readonly signals: CodecTypes['pg/jsonb@1']['input'];
+      readonly subject: CodecTypes['pg/text@1']['input'];
+      readonly summary: CodecTypes['pg/text@1']['input'];
+      readonly trust_score: CodecTypes['pg/int2@1']['input'];
+      readonly verdict: CodecTypes['pg/text@1']['input'];
     };
-    readonly user: {
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly email: CodecTypes['pg/text@1']['input'];
-      readonly id: CodecTypes['pg/int4@1']['input'];
-      readonly name: CodecTypes['pg/text@1']['input'] | null;
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly username: CodecTypes['pg/text@1']['input'] | null;
+    readonly profile_analytics: {
+      readonly average_trust_score: CodecTypes['pg/numeric@1']['input'];
+      readonly dangerous_scans: CodecTypes['pg/int4@1']['input'];
+      readonly last_scanned_at: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly links_reviewed: CodecTypes['pg/int4@1']['input'];
+      readonly profile_id: CodecTypes['pg/uuid@1']['input'];
+      readonly safe_scans: CodecTypes['pg/int4@1']['input'];
+      readonly suspicious_scans: CodecTypes['pg/int4@1']['input'];
+      readonly total_scans: CodecTypes['pg/int4@1']['input'];
+      readonly unknown_scans: CodecTypes['pg/int4@1']['input'];
+      readonly updated_at: CodecTypes['pg/timestamptz-temporal@1']['input'];
+    };
+    readonly profiles: {
+      readonly avatar_url: CodecTypes['pg/text@1']['input'] | null;
+      readonly created_at: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly display_name: CodecTypes['pg/text@1']['input'] | null;
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly role: 'default' | 'user' | null;
     };
   };
 };
 
 export namespace Models {
-  export type public_User = {
-    id: CodecTypes['pg/int4@1']['output'];
-    email: CodecTypes['pg/text@1']['output'];
-    username: CodecTypes['pg/text@1']['output'] | null;
-    name: CodecTypes['pg/text@1']['output'] | null;
-    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
-    updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
-    posts: public_Post[];
-    readonly [RelationKeys]?: 'posts';
+  export type public_Profiles = {
+    id: CodecTypes['pg/uuid@1']['output'];
+    role: 'default' | 'user' | null;
+    displayName: CodecTypes['pg/text@1']['output'] | null;
+    avatarUrl: CodecTypes['pg/text@1']['output'] | null;
+    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+    mailScans: public_MailScans[];
+    profileAnalytics: public_ProfileAnalytics | null;
+    readonly [RelationKeys]?: 'mailScans' | 'profileAnalytics';
   };
-  export type public_Post = {
-    id: CodecTypes['pg/int4@1']['output'];
-    title: CodecTypes['pg/text@1']['output'];
-    content: CodecTypes['pg/text@1']['output'] | null;
-    authorId: CodecTypes['pg/int4@1']['output'];
-    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
-    updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
-    author: public_User;
-    readonly [RelationKeys]?: 'author';
+  export type public_MailScans = {
+    id: CodecTypes['pg/uuid@1']['output'];
+    profileId: CodecTypes['pg/uuid@1']['output'];
+    provider: CodecTypes['pg/text@1']['output'];
+    subject: CodecTypes['pg/text@1']['output'];
+    senderEmail: CodecTypes['pg/text@1']['output'];
+    senderDomain: CodecTypes['pg/text@1']['output'];
+    senderDisplayName: CodecTypes['pg/text@1']['output'];
+    trustScore: CodecTypes['pg/int2@1']['output'];
+    verdict: CodecTypes['pg/text@1']['output'];
+    summary: CodecTypes['pg/text@1']['output'];
+    advice: CodecTypes['pg/text@1']['output'];
+    signals: CodecTypes['pg/jsonb@1']['output'];
+    links: CodecTypes['pg/jsonb@1']['output'];
+    _model: CodecTypes['pg/text@1']['output'];
+    analyzedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    emailHash: CodecTypes['pg/text@1']['output'] | null;
+    profile: public_Profiles;
+    readonly [RelationKeys]?: 'profile';
+  };
+  export type public_ProfileAnalytics = {
+    profileId: CodecTypes['pg/uuid@1']['output'];
+    totalScans: CodecTypes['pg/int4@1']['output'];
+    safeScans: CodecTypes['pg/int4@1']['output'];
+    suspiciousScans: CodecTypes['pg/int4@1']['output'];
+    dangerousScans: CodecTypes['pg/int4@1']['output'];
+    unknownScans: CodecTypes['pg/int4@1']['output'];
+    linksReviewed: CodecTypes['pg/int4@1']['output'];
+    averageTrustScore: Numeric<5, 2>;
+    lastScannedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+    updatedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    profile: public_Profiles;
+    readonly [RelationKeys]?: 'profile';
   };
 }
 
 export declare const models: {
   public: {
-    User: Models.public_User;
-    Post: Models.public_Post;
+    Profiles: Models.public_Profiles;
+    MailScans: Models.public_MailScans;
+    ProfileAnalytics: Models.public_ProfileAnalytics;
   };
 };
 
@@ -369,51 +482,147 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
-            readonly post: {
+            readonly mail_scans: {
               columns: {
                 readonly id: {
-                  readonly nativeType: 'int4';
-                  readonly codecId: 'pg/int4@1';
+                  readonly nativeType: 'uuid';
+                  readonly codecId: 'pg/uuid@1';
                   readonly nullable: false;
                   readonly default: {
                     readonly kind: 'function';
-                    readonly expression: 'autoincrement()';
+                    readonly expression: 'gen_random_uuid()';
                   };
                 };
-                readonly title: {
+                readonly profile_id: {
+                  readonly nativeType: 'uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'auth.uid()';
+                  };
+                };
+                readonly provider: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
-                readonly content: {
+                readonly subject: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', ''>;
+                  };
+                };
+                readonly sender_email: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly sender_domain: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly sender_display_name: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', ''>;
+                  };
+                };
+                readonly trust_score: {
+                  readonly nativeType: 'int2';
+                  readonly codecId: 'pg/int2@1';
+                  readonly nullable: false;
+                };
+                readonly verdict: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly summary: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', ''>;
+                  };
+                };
+                readonly advice: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', ''>;
+                  };
+                };
+                readonly signals: {
+                  readonly nativeType: 'jsonb';
+                  readonly codecId: 'pg/jsonb@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: "'[]'::jsonb";
+                  };
+                };
+                readonly links: {
+                  readonly nativeType: 'jsonb';
+                  readonly codecId: 'pg/jsonb@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: "'[]'::jsonb";
+                  };
+                };
+                readonly model: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', ''>;
+                  };
+                };
+                readonly analyzed_at: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                };
+                readonly created_at: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                };
+                readonly email_hash: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: true;
                 };
-                readonly authorId: {
-                  readonly nativeType: 'int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
-                };
-                readonly createdAt: {
-                  readonly nativeType: 'timestamptz';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                  readonly nullable: false;
-                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
-                };
-                readonly updatedAt: {
-                  readonly nativeType: 'timestamptz';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                  readonly nullable: false;
-                };
               };
-              primaryKey: { readonly columns: readonly ['id'] };
+              primaryKey: { readonly columns: readonly ['id']; readonly name: 'mail_scans_pkey' };
               uniques: readonly [];
               indexes: readonly [
                 {
-                  readonly name: 'post_authorId_idx_e47547ed';
-                  readonly prefix: 'post_authorId_idx';
-                  readonly columns: readonly ['authorId'];
+                  readonly name: 'mail_scans_profile_created_idx';
+                  readonly columns: readonly ['profile_id', 'created_at'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'mail_scans_profile_domain_idx';
+                  readonly columns: readonly ['profile_id', 'sender_domain'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'mail_scans_profile_hash_idx';
+                  readonly columns: readonly ['profile_id', 'email_hash'];
                   readonly unique: false;
                 },
               ];
@@ -421,59 +630,171 @@ type ContractBase = Omit<
                 {
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'post';
-                    readonly columns: readonly ['authorId'];
+                    readonly tableName: 'mail_scans';
+                    readonly columns: readonly ['profile_id'];
                   };
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'user';
+                    readonly tableName: 'profiles';
                     readonly columns: readonly ['id'];
                   };
+                  readonly name: 'mail_scans_profile_id_fkey';
                 },
               ];
             };
-            readonly user: {
+            readonly profile_analytics: {
               columns: {
-                readonly id: {
+                readonly profile_id: {
+                  readonly nativeType: 'uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                };
+                readonly total_scans: {
                   readonly nativeType: 'int4';
                   readonly codecId: 'pg/int4@1';
                   readonly nullable: false;
                   readonly default: {
-                    readonly kind: 'function';
-                    readonly expression: 'autoincrement()';
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
                   };
                 };
-                readonly email: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
+                readonly safe_scans: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
                   readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
                 };
-                readonly username: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
+                readonly suspicious_scans: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
                 };
-                readonly name: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
+                readonly dangerous_scans: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
                 };
-                readonly createdAt: {
+                readonly unknown_scans: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
+                };
+                readonly links_reviewed: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
+                };
+                readonly average_trust_score: {
+                  readonly nativeType: 'numeric';
+                  readonly codecId: 'pg/numeric@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/numeric@1', 0>;
+                  };
+                  readonly typeParams: { readonly precision: 5; readonly scale: 2 };
+                };
+                readonly last_scanned_at: {
                   readonly nativeType: 'timestamptz';
-                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: true;
+                };
+                readonly updated_at: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
                   readonly nullable: false;
                   readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
                 };
-                readonly updatedAt: {
-                  readonly nativeType: 'timestamptz';
-                  readonly codecId: 'pg/timestamptz-string@1';
+              };
+              primaryKey: {
+                readonly columns: readonly ['profile_id'];
+                readonly name: 'profile_analytics_pkey';
+              };
+              uniques: readonly [];
+              indexes: readonly [];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'profile_analytics';
+                    readonly columns: readonly ['profile_id'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'profiles';
+                    readonly columns: readonly ['id'];
+                  };
+                  readonly name: 'profile_analytics_profile_id_fkey';
+                },
+              ];
+            };
+            readonly profiles: {
+              columns: {
+                readonly id: {
+                  readonly nativeType: 'uuid';
+                  readonly codecId: 'pg/uuid@1';
                   readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'gen_random_uuid()';
+                  };
+                };
+                readonly role: {
+                  readonly nativeType: 'roles';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: true;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/enum@1', 'default'>;
+                  };
+                  readonly typeParams: { readonly typeName: 'roles' };
+                };
+                readonly display_name: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly avatar_url: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly created_at: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: true;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
                 };
               };
-              primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [{ readonly columns: readonly ['email'] }];
+              primaryKey: { readonly columns: readonly ['id']; readonly name: 'profiles_pkey' };
+              uniques: readonly [];
               indexes: readonly [];
               foreignKeys: readonly [];
+            };
+          };
+          readonly valueSet: {
+            readonly Roles: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['default', 'user'];
             };
           };
         };
@@ -486,123 +807,283 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
-    readonly user: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
-    readonly post: { readonly namespace: 'public' & NamespaceId; readonly model: 'Post' };
+    readonly profiles: { readonly namespace: 'public' & NamespaceId; readonly model: 'Profiles' };
+    readonly mail_scans: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'MailScans';
+    };
+    readonly profile_analytics: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'ProfileAnalytics';
+    };
   };
   readonly domain: {
     readonly namespaces: {
       readonly public: {
         readonly models: {
-          readonly Post: {
+          readonly MailScans: {
             readonly fields: {
               readonly id: {
                 readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
               };
-              readonly title: {
+              readonly profileId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+              readonly provider: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly content: {
-                readonly nullable: true;
+              readonly subject: {
+                readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly authorId: {
+              readonly senderEmail: {
                 readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly senderDomain: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly senderDisplayName: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly trustScore: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int2@1' };
+              };
+              readonly verdict: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly summary: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly advice: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly signals: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/jsonb@1' };
+              };
+              readonly links: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/jsonb@1' };
+              };
+              readonly _model: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly analyzedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
               };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
                 };
               };
-              readonly updatedAt: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                };
+              readonly emailHash: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
             };
             readonly relations: {
-              readonly author: {
-                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+              readonly profile: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Profiles';
+                };
                 readonly cardinality: 'N:1';
                 readonly nullable: false;
                 readonly on: {
-                  readonly localFields: readonly ['authorId'];
+                  readonly localFields: readonly ['profileId'];
                   readonly targetFields: readonly ['id'];
                 };
               };
             };
             readonly storage: {
-              readonly table: 'post';
+              readonly table: 'mail_scans';
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly id: { readonly column: 'id' };
-                readonly title: { readonly column: 'title' };
-                readonly content: { readonly column: 'content' };
-                readonly authorId: { readonly column: 'authorId' };
-                readonly createdAt: { readonly column: 'createdAt' };
-                readonly updatedAt: { readonly column: 'updatedAt' };
+                readonly profileId: { readonly column: 'profile_id' };
+                readonly provider: { readonly column: 'provider' };
+                readonly subject: { readonly column: 'subject' };
+                readonly senderEmail: { readonly column: 'sender_email' };
+                readonly senderDomain: { readonly column: 'sender_domain' };
+                readonly senderDisplayName: { readonly column: 'sender_display_name' };
+                readonly trustScore: { readonly column: 'trust_score' };
+                readonly verdict: { readonly column: 'verdict' };
+                readonly summary: { readonly column: 'summary' };
+                readonly advice: { readonly column: 'advice' };
+                readonly signals: { readonly column: 'signals' };
+                readonly links: { readonly column: 'links' };
+                readonly _model: { readonly column: 'model' };
+                readonly analyzedAt: { readonly column: 'analyzed_at' };
+                readonly createdAt: { readonly column: 'created_at' };
+                readonly emailHash: { readonly column: 'email_hash' };
               };
             };
           };
-          readonly User: {
+          readonly ProfileAnalytics: {
             readonly fields: {
-              readonly id: {
+              readonly profileId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+              readonly totalScans: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
-              readonly email: {
+              readonly safeScans: {
                 readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
-              readonly username: {
-                readonly nullable: true;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              readonly suspiciousScans: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
-              readonly name: {
-                readonly nullable: true;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              readonly dangerousScans: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
-              readonly createdAt: {
+              readonly unknownScans: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly linksReviewed: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly averageTrustScore: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly codecId: 'pg/numeric@1';
+                  readonly typeParams: { readonly precision: 5; readonly scale: 2 };
+                };
+              };
+              readonly lastScannedAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
                 };
               };
               readonly updatedAt: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
                 };
               };
             };
             readonly relations: {
-              readonly posts: {
-                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Post' };
-                readonly cardinality: '1:N';
+              readonly profile: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Profiles';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
                 readonly on: {
-                  readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['authorId'];
+                  readonly localFields: readonly ['profileId'];
+                  readonly targetFields: readonly ['id'];
                 };
               };
             };
             readonly storage: {
-              readonly table: 'user';
+              readonly table: 'profile_analytics';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly profileId: { readonly column: 'profile_id' };
+                readonly totalScans: { readonly column: 'total_scans' };
+                readonly safeScans: { readonly column: 'safe_scans' };
+                readonly suspiciousScans: { readonly column: 'suspicious_scans' };
+                readonly dangerousScans: { readonly column: 'dangerous_scans' };
+                readonly unknownScans: { readonly column: 'unknown_scans' };
+                readonly linksReviewed: { readonly column: 'links_reviewed' };
+                readonly averageTrustScore: { readonly column: 'average_trust_score' };
+                readonly lastScannedAt: { readonly column: 'last_scanned_at' };
+                readonly updatedAt: { readonly column: 'updated_at' };
+              };
+            };
+          };
+          readonly Profiles: {
+            readonly fields: {
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+              readonly role: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'roles' };
+                };
+              };
+              readonly displayName: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly avatarUrl: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+            };
+            readonly relations: {
+              readonly mailScans: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'MailScans';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['profileId'];
+                };
+              };
+              readonly profileAnalytics: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'ProfileAnalytics';
+                };
+                readonly cardinality: '1:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['profileId'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'profiles';
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly id: { readonly column: 'id' };
-                readonly email: { readonly column: 'email' };
-                readonly username: { readonly column: 'username' };
-                readonly name: { readonly column: 'name' };
-                readonly createdAt: { readonly column: 'createdAt' };
-                readonly updatedAt: { readonly column: 'updatedAt' };
+                readonly role: { readonly column: 'role' };
+                readonly displayName: { readonly column: 'display_name' };
+                readonly avatarUrl: { readonly column: 'avatar_url' };
+                readonly createdAt: { readonly column: 'created_at' };
               };
             };
           };
@@ -629,31 +1110,6 @@ type ContractBase = Omit<
     };
   };
   readonly extensions: {};
-  readonly execution: {
-    readonly executionHash: ExecutionHash;
-    readonly mutations: {
-      readonly defaults: readonly [
-        {
-          readonly ref: {
-            readonly namespace: 'public';
-            readonly table: 'post';
-            readonly column: 'updatedAt';
-          };
-          readonly onCreate: { readonly kind: 'generator'; readonly id: 'timestampNow' };
-          readonly onUpdate: { readonly kind: 'generator'; readonly id: 'timestampNow' };
-        },
-        {
-          readonly ref: {
-            readonly namespace: 'public';
-            readonly table: 'user';
-            readonly column: 'updatedAt';
-          };
-          readonly onCreate: { readonly kind: 'generator'; readonly id: 'timestampNow' };
-          readonly onUpdate: { readonly kind: 'generator'; readonly id: 'timestampNow' };
-        },
-      ];
-    };
-  };
   readonly meta: {};
 
   readonly profileHash: ProfileHash;

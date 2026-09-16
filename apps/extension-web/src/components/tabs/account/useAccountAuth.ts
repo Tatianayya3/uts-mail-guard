@@ -5,40 +5,14 @@ import type {
   Profile,
   ProfileAnalytics,
 } from "@mail-guard/supabase";
+import { computeDerivedAnalytics } from "@mail-guard/supabase";
 import { analytics, auth, profiles } from "@/utils/supabase";
-import type { SignInValues, SignUpValues } from "./account.schema";
+import type { SignInValues, SignUpValues } from "@mail-guard/auth-contract";
 import { syncPendingScans } from "@/components/tabs/scan/scan.storage";
 
 export type AccountStatus = "idle" | "loading" | "success" | "error";
 
 export type AccountStats = ProfileAnalytics;
-
-function computeDerivedStats(
-  scans: MailScanSummary[],
-  profileId: string,
-): ProfileAnalytics {
-  const total = scans.length;
-  const safe = scans.filter((s) => s.verdict === "safe").length;
-  const suspicious = scans.filter((s) => s.verdict === "suspicious").length;
-  const dangerous = scans.filter((s) => s.verdict === "dangerous").length;
-  const unknown = scans.filter((s) => s.verdict === "unknown").length;
-  const avg = total
-    ? Math.round(scans.reduce((acc, s) => acc + s.trust_score, 0) / total)
-    : 100;
-
-  return {
-    profile_id: profileId,
-    total_scans: total,
-    safe_scans: safe,
-    suspicious_scans: suspicious,
-    dangerous_scans: dangerous,
-    unknown_scans: unknown,
-    links_reviewed: 0,
-    average_trust_score: avg,
-    last_scanned_at: scans[0]?.analyzed_at ?? null,
-    updated_at: new Date().toISOString(),
-  };
-}
 
 export function useAccountAuth() {
   const [session, setSession] = useState<Session | null>(null);
@@ -103,7 +77,10 @@ export function useAccountAuth() {
       !resolvedStats ||
       (resolvedStats.total_scans === 0 && resolvedScans.length > 0)
     ) {
-      resolvedStats = computeDerivedStats(resolvedScans, nextSession.user.id);
+      resolvedStats = computeDerivedAnalytics(
+        resolvedScans,
+        nextSession.user.id,
+      );
     }
 
     // Atomically set all user data alongside session so the UI never displays an intermediate state
@@ -140,7 +117,7 @@ export function useAccountAuth() {
           : null;
 
       if (!loadedStats || (loadedStats.total_scans === 0 && scans.length > 0)) {
-        loadedStats = computeDerivedStats(scans, session.user.id);
+        loadedStats = computeDerivedAnalytics(scans, session.user.id);
       }
       setStats(loadedStats);
     } finally {

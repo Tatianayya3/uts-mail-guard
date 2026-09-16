@@ -100,19 +100,7 @@ export default function ScanTab({
           Escanea el correo que estás viendo para detectar dominios falsos,
           amenazas ocultas y enlaces maliciosos.
         </p>
-        <button
-          type="button"
-          onClick={handleScan}
-          disabled={isScanning}
-          className="mt-6 flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-guard-accent text-lg font-bold text-guard-surface shadow-[0_8px_24px_rgba(200,212,0,0.16)] transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
-        >
-          {/* TODO: Reemplazar este espacio por el icono de escaneo. */}
-          <span className="h-5 w-5" />
-          {isScanning ? "Analizando..." : "Escanear correo"}
-        </button>
-        <p className="mt-3 text-xs text-guard-text-muted">
-          Seguridad de correo con IA
-        </p>
+
         {scanError && (
           <p
             role="alert"
@@ -121,12 +109,38 @@ export default function ScanTab({
             {scanError}
           </p>
         )}
+
+        <button
+          type="button"
+          onClick={handleScan}
+          disabled={isScanning}
+          className="mt-6 cursor-pointer flex h-14 w-full items-center justify-center gap-0.5 rounded-2xl bg-guard-accent text-lg font-bold text-guard-surface shadow-[0_8px_24px_rgba(200,212,0,0.16)] transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
+        >
+          {isScanning ? "Analizando..." : "Escanear correo"}
+        </button>
+        <p className="mt-3 text-xs text-guard-text-muted">
+          Seguridad de correo con IA
+        </p>
       </section>
 
       <section className="w-full rounded-2xl bg-guard-surface-card p-4">
         <div className="flex items-center gap-3">
-          {/* TODO: Reemplazar este espacio por el icono de Gmail. */}
-          <div className="h-10 w-10 rounded-xl bg-white/5" />
+          <div className="h-10 w-10 rounded-xl bg-white/5">
+            {activeProvider === "Gmail" && (
+              <img
+                src="../../src/components/icons/gmail.svg"
+                alt="Gmail"
+                className="h-8 w-8 m-auto mt-1"
+              />
+            )}
+            {activeProvider === "Outlook" && (
+              <img
+                src="../../src/components/icons/outlook.svg"
+                alt="Outlook"
+                className="h-8 w-8 m-auto mt-1"
+              />
+            )}
+          </div>
           <div className="flex-1">
             <p className="text-sm font-medium">{activeProvider}</p>
             <p className="text-xs text-guard-text-muted">

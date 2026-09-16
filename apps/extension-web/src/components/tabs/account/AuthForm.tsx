@@ -5,7 +5,7 @@ import {
   type AuthValues,
   type SignInValues,
   type SignUpValues,
-} from "./account.schema";
+} from "@mail-guard/auth-contract";
 import type { AccountStatus } from "./useAccountAuth";
 
 type AuthMode = "signin" | "signup";

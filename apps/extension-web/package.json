@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mail-guard/auth-contract": "workspace:*",
     "@mail-guard/supabase": "workspace:*",
     "@mail-guard/scan-contract": "workspace:*",
     "@supabase/supabase-js": "^2.116.0",

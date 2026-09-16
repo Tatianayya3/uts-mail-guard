@@ -76,6 +76,35 @@ export type MailScanSummary = {
   created_at: string;
 };
 
+// Derives the same shape as the `profile_analytics` table from raw scans, for
+// accounts whose aggregate row hasn't been generated (or refreshed) yet.
+export const computeDerivedAnalytics = (
+  scans: MailScanSummary[],
+  profileId: string,
+): ProfileAnalytics => {
+  const total = scans.length;
+  const safe = scans.filter((s) => s.verdict === "safe").length;
+  const suspicious = scans.filter((s) => s.verdict === "suspicious").length;
+  const dangerous = scans.filter((s) => s.verdict === "dangerous").length;
+  const unknown = scans.filter((s) => s.verdict === "unknown").length;
+  const average = total
+    ? Math.round(scans.reduce((acc, s) => acc + s.trust_score, 0) / total)
+    : 100;
+
+  return {
+    profile_id: profileId,
+    total_scans: total,
+    safe_scans: safe,
+    suspicious_scans: suspicious,
+    dangerous_scans: dangerous,
+    unknown_scans: unknown,
+    links_reviewed: 0,
+    average_trust_score: average,
+    last_scanned_at: scans[0]?.analyzed_at ?? null,
+    updated_at: new Date().toISOString(),
+  };
+};
+
 export const createAnalyticsApi = (supabase: SupabaseClient) => ({
   getAnalyticsByUserId: async (userId: string) => {
     const { data, error } = await supabase

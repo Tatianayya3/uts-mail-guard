@@ -43,7 +43,7 @@ export default function SecurityPulseChart({
   };
 
   return (
-    <section className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
+    <section className="flex min-h-[178px] flex-col justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -72,49 +72,56 @@ export default function SecurityPulseChart({
         </div>
       </div>
 
-      {/* Dynamic Hover/Detail Banner */}
-      {hoveredScan ? (
-        <div className="flex items-center justify-between rounded-xl bg-guard-surface-raised/90 px-3 py-2 text-xs transition-all">
-          <div className="min-w-0 pr-2">
-            <p className="truncate font-semibold text-white">
-              {hoveredScan.subject || "Correo analizado"}
-            </p>
-            <p className="truncate text-[10px] text-guard-text-muted">
-              {hoveredScan.sender_domain ||
-                hoveredScan.sender_email ||
-                "Remitente"}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <span
-              className="rounded-md px-1.5 py-0.5 text-[10px] font-bold"
-              style={{
-                backgroundColor: `${getVerdictColor(hoveredScan.verdict)}22`,
-                color: getVerdictColor(hoveredScan.verdict),
-              }}
-            >
-              {getVerdictLabel(hoveredScan.verdict)}
+      {/* Dynamic Hover/Detail Banner (Fixed Height to prevent Layout Shift) */}
+      <div className="flex h-12 w-full items-center justify-between rounded-xl border border-white/5 bg-white/[0.04] px-3 py-1.5 text-xs transition-colors">
+        {hoveredScan ? (
+          <>
+            <div className="min-w-0 flex-1 pr-2">
+              <p className="truncate text-xs font-semibold text-white">
+                {hoveredScan.subject || "Correo analizado"}
+              </p>
+              <p className="truncate text-[10px] text-guard-text-muted">
+                {hoveredScan.sender_domain ||
+                  hoveredScan.sender_email ||
+                  "Remitente"}
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <span
+                className="rounded-md px-1.5 py-0.5 text-[10px] font-bold"
+                style={{
+                  backgroundColor: `${getVerdictColor(hoveredScan.verdict)}22`,
+                  color: getVerdictColor(hoveredScan.verdict),
+                }}
+              >
+                {getVerdictLabel(hoveredScan.verdict)}
+              </span>
+              <span className="text-xs font-black text-white">
+                {hoveredScan.trust_score}%
+              </span>
+            </div>
+          </>
+        ) : (
+          <div className="flex w-full items-center justify-between">
+            <div className="min-w-0 pr-2">
+              <p className="truncate text-xs font-medium text-white/90">
+                {hasScans ? "Detalle del análisis" : "Sin análisis registrados"}
+              </p>
+              <p className="truncate text-[10px] text-guard-text-muted">
+                {hasScans
+                  ? "Pasa el cursor sobre una barra para ver detalles"
+                  : "Listo para escanear correos"}
+              </p>
+            </div>
+            <span className="shrink-0 text-[10px] font-medium text-guard-accent">
+              {hasScans ? "Monitoreo en vivo" : "En espera"}
             </span>
-            <span className="text-xs font-black text-white">
-              {hoveredScan.trust_score}%
-            </span>
           </div>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between rounded-xl bg-white/[0.03] px-3 py-2 text-xs">
-          <span className="text-[10px] text-guard-text-muted">
-            {hasScans
-              ? "Pasa el cursor sobre una barra para ver detalles"
-              : "Sin análisis registrados"}
-          </span>
-          <span className="text-[10px] font-medium text-guard-accent">
-            {hasScans ? "Monitoreo en vivo" : "Listo para escanear"}
-          </span>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Bar Chart */}
-      <div className="flex h-16 items-end gap-1.5 pt-2">
+      <div className="flex h-16 items-end gap-1.5 pt-1">
         {hasScans
           ? displayScans.map((scan, index) => {
               const barHeight = Math.max(12, scan.trust_score);
@@ -129,15 +136,15 @@ export default function SecurityPulseChart({
                   onMouseLeave={() => setHoveredScan(null)}
                 >
                   <div
-                    className={`w-full rounded-t transition-all duration-300 ${
+                    className={`w-full rounded-t transition-all duration-200 ${
                       isHovered
-                        ? "scale-y-105 brightness-125"
-                        : "hover:brightness-110"
+                        ? "brightness-125"
+                        : "opacity-90 hover:brightness-110"
                     }`}
                     style={{
                       height: `${barHeight}%`,
                       backgroundColor: color,
-                      boxShadow: isHovered ? `0 0 10px ${color}88` : undefined,
+                      boxShadow: isHovered ? `0 0 10px ${color}aa` : undefined,
                     }}
                   />
                 </div>

@@ -24,7 +24,7 @@ export function SignalCard({
         <p className="text-[10px] font-medium uppercase tracking-wide text-guard-text-muted">
           {label}
         </p>
-        {/* TODO: Reemplazar este espacio por el icono de la señal. */}
+
         <span className={`h-2 w-2 rounded-full ${statusColor}`} />
       </div>
       <p className="mt-1 text-xs text-white">{value}</p>

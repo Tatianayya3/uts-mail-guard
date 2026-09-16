@@ -1,3 +1,6 @@
+import AccountIcon from "./icons/Account";
+import ScanIcon from "./icons/Scan";
+
 export type AppTab = "scan" | "account";
 
 type TabNavigationProps = {
@@ -5,9 +8,9 @@ type TabNavigationProps = {
   onChange: (tab: AppTab) => void;
 };
 
-const tabs: { id: AppTab; label: string }[] = [
-  { id: "scan", label: "Escanear" },
-  { id: "account", label: "Cuenta" },
+const tabs: { id: AppTab; label: string; icon: React.ReactNode }[] = [
+  { id: "scan", label: "Escanear", icon: <ScanIcon /> },
+  { id: "account", label: "Cuenta", icon: <AccountIcon /> },
 ];
 
 export default function TabNavigation({
@@ -24,14 +27,10 @@ export default function TabNavigation({
           key={tab.id}
           type="button"
           onClick={() => onChange(tab.id)}
-          className={`relative flex h-11 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium transition-colors ${activeTab === tab.id ? "bg-guard-accent/10 text-guard-accent" : "text-guard-text-muted hover:bg-white/5"}`}
+          className={`relative flex h-12 flex-col items-center justify-center gap-1 rounded-xl text-[12px] font-medium transition-colors ${activeTab === tab.id ? "bg-guard-accent/10 text-guard-accent" : "text-guard-text-muted hover:bg-white/5"}`}
         >
-          {/* TODO: Reemplazar este espacio por el icono de navegación. */}
-          <span className="h-4 w-4" />
+          {tab.icon}
           {tab.label}
-          {activeTab === tab.id && (
-            <span className="absolute bottom-1 h-0.5 w-5 rounded-full bg-guard-accent" />
-          )}
         </button>
       ))}
     </nav>

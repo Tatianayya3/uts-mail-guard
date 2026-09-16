@@ -1,6 +1,10 @@
+import VeredictoIcon from "@/components/icons/Veredicto";
 import { SignalCard } from "./AnalysisCards";
 import type { ScanResult } from "./scan.types";
 import TrustScoreRing from "./TrustScoreRing";
+import ConsejoIcon from "@/components/icons/Consejo";
+import NuevoAnalisisIcon from "@/components/icons/NuevoAnalisis";
+import LeftArrowIcon from "@/components/icons/LeftArrow";
 
 type AnalysisResultProps = {
   result: ScanResult;
@@ -43,83 +47,58 @@ export default function AnalysisResult({
   return (
     <div className="flex flex-col gap-4">
       {/* Header row: back button + status label + new scan button */}
-      <div className="flex items-center gap-2 pt-4">
+      <div className="flex items-center justify-between gap-2 pt-4">
         {/* Back button */}
         <button
           type="button"
           onClick={onBack}
           disabled={isScanning}
           title="Volver al escáner"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-guard-surface-card text-guard-text-muted transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
+          className="flex cursor-pointer h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-guard-surface-card text-guard-text-muted transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
           aria-label="Volver al escáner"
         >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
+          <LeftArrowIcon />
         </button>
 
-        {/* Status label — grows to fill space */}
-        <span className="flex-1 text-[10px] uppercase tracking-wider text-guard-success">
-          Análisis listo
-        </span>
-
-        {/* New scan button */}
         <button
           type="button"
           onClick={() => void onNewScan()}
           disabled={isScanning}
-          className="flex h-9 items-center gap-2 rounded-xl border border-guard-accent/40 bg-guard-accent px-3 text-xs font-bold text-guard-surface shadow-[0_0_20px_rgba(200,212,0,0.18)] transition-all hover:brightness-110 active:scale-[0.97] disabled:cursor-wait disabled:opacity-70"
+          className="flex cursor-pointer h-9 items-center gap-2 rounded-xl border border-guard-accent/40 bg-guard-accent px-3 text-xs font-bold text-guard-surface shadow-[0_0_20px_rgba(200,212,0,0.18)] transition-all hover:brightness-110 active:scale-[0.97] disabled:cursor-wait disabled:opacity-70"
         >
           {isScanning ? (
             <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-guard-surface/30 border-t-guard-surface" />
           ) : (
-            <span aria-hidden="true" className="text-sm leading-none">
-              ↻
-            </span>
+            <NuevoAnalisisIcon />
           )}
           {isScanning ? "Analizando..." : "Nuevo análisis"}
         </button>
       </div>
 
-      {/* Email meta pill */}
-      <div className="rounded-xl border border-white/10 bg-guard-surface-card/70 px-3 py-2">
-        <p className="truncate text-xs font-semibold text-white">
-          {result.subject}
-        </p>
-        <p className="mt-1 text-[10px] text-guard-text-muted">
-          {result.provider} · {result.sender.email}
-        </p>
-      </div>
-
       {/* ─── Content area with scanning overlay ─── */}
       <div className="relative">
-        {/* Scanning overlay — fixed to popup viewport so the loader is always visible */}
+        {/* Scanning overlay */}
         {isScanning && (
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-guard-surface/80 backdrop-blur-sm">
-            {/* Animated ring */}
-            <div className="relative flex h-16 w-16 items-center justify-center">
-              <div className="absolute inset-0 rounded-full border-2 border-guard-accent/20" />
-              <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-guard-accent" />
-              <div className="absolute inset-2 animate-[spin_3s_linear_infinite_reverse] rounded-full border border-dashed border-guard-accent/30" />
-              <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-guard-accent shadow-[0_0_10px_#c8d400]" />
-            </div>
-            <div className="text-center">
-              <p className="text-sm font-semibold text-white">
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-start pt-14 rounded-2xl bg-guard-surface/85 backdrop-blur-sm transition-all animate-fade-in">
+            <div className="sticky top-16 flex flex-col items-center rounded-2xl border border-guard-accent/25 bg-guard-surface-raised/95 px-6 py-5 text-center shadow-[0_10px_40px_rgba(0,0,0,0.6)] backdrop-blur-md">
+              {/* Animated ring */}
+              <div className="relative flex h-14 w-14 items-center justify-center">
+                <div className="absolute inset-0 rounded-full border-2 border-guard-accent/20 animate-ping opacity-25" />
+                <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-guard-accent border-r-guard-success" />
+                <div className="absolute inset-2 animate-[spin_3s_linear_infinite_reverse] rounded-full border border-dashed border-guard-accent/40" />
+                <div className="h-2.5 w-2.5 rounded-full bg-guard-accent shadow-[0_0_12px_#c8d400] animate-pulse" />
+              </div>
+
+              <p className="mt-3 text-sm font-bold tracking-tight text-white">
                 Analizando correo
               </p>
-              <p className="mt-1 text-[11px] text-guard-text-muted">
-                Consultando escudo neural...
+              <p className="mt-1 max-w-[210px] text-[11px] text-guard-text-muted">
+                Consultando escudo neural e inspeccionando señales...
               </p>
+
+              <div className="mt-3.5 h-1 w-24 overflow-hidden rounded-full bg-white/10">
+                <div className="h-full w-full bg-gradient-to-r from-guard-accent to-guard-success animate-pulse" />
+              </div>
             </div>
           </div>
         )}
@@ -139,7 +118,6 @@ export default function AnalysisResult({
             <div
               className={`mx-auto mt-5 w-fit rounded-full border px-3 py-1 text-[11px] font-medium ${result.verdict === "safe" ? "border-guard-success/10 bg-guard-success-strong/15 text-guard-success" : result.verdict === "dangerous" ? "border-red-300/20 bg-red-400/10 text-red-300" : result.verdict === "suspicious" ? "border-amber-300/20 bg-amber-300/10 text-amber-200" : "border-white/10 bg-white/5 text-guard-text-muted"}`}
             >
-              <span className="mr-1 inline-block h-3 w-3 align-[-2px]" />
               {result.sender.domainStatus === "valid"
                 ? "Dominio válido"
                 : "Revisa el dominio"}
@@ -148,10 +126,12 @@ export default function AnalysisResult({
 
           <section className="rounded-2xl bg-guard-surface-card p-4">
             <div className="flex items-center justify-between">
-              <p className={`text-xs font-bold ${verdictTone}`}>
-                <span className="mr-1 inline-block h-3 w-3 align-[-2px]" />
-                VEREDICTO DE IA
-              </p>
+              <div className="flex items-center gap-1 justify-center">
+                <VeredictoIcon className={`${verdictTone}`} />
+                <p className={`text-xs font-bold ${verdictTone}`}>
+                  VEREDICTO DE IA
+                </p>
+              </div>
               <span className="rounded bg-guard-surface-raised px-2 py-1 text-[10px] text-guard-text-muted">
                 Modelo: {result.model}
               </span>
@@ -164,9 +144,12 @@ export default function AnalysisResult({
               {result.summary}
             </p>
             <div className="mt-4 rounded-xl border border-guard-accent/15 bg-guard-accent/10 px-3 py-3 text-left">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-guard-accent">
-                Consejo de seguridad
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-[12px] font-bold uppercase tracking-wide text-guard-accent">
+                  Consejo de seguridad
+                </p>
+                <ConsejoIcon />
+              </div>
               <p className="mt-1 text-xs leading-5 text-guard-text-muted">
                 {result.advice ||
                   "Verifica el remitente y evita abrir enlaces o archivos si tienes dudas."}
