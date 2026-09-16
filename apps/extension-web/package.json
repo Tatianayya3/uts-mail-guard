@@ -10,12 +10,13 @@
   },
   "dependencies": {
     "@mail-guard/auth-contract": "workspace:*",
-    "@mail-guard/supabase": "workspace:*",
     "@mail-guard/scan-contract": "workspace:*",
+    "@mail-guard/supabase": "workspace:*",
     "@supabase/supabase-js": "^2.116.0",
     "@tailwindcss/vite": "^4.3.3",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "sonner": "^2.0.8",
     "tailwindcss": "^4.3.3",
     "zod": "^4.6.5"
   },

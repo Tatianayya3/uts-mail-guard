@@ -14,7 +14,6 @@ export default function AccountTab() {
     recentScans,
     status,
     isRefreshing,
-    message,
     signIn,
     signUp,
     signOut,
@@ -55,7 +54,6 @@ export default function AccountTab() {
     <AuthForm
       mode={mode}
       status={status}
-      message={message}
       onModeChange={setMode}
       onSignIn={signIn}
       onSignUp={signUp}

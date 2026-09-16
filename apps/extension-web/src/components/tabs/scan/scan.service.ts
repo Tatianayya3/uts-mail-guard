@@ -27,13 +27,28 @@ export async function getActiveMailProvider(): Promise<MailProvider> {
   return "Proveedor no compatible";
 }
 
+function isEmailOpen(url: URL, provider: "Gmail" | "Outlook"): boolean {
+  if (provider === "Gmail") {
+    // An opened Gmail thread has a hash like #inbox/<threadId> or
+    // #label/foo/<threadId>. The list view hash (#inbox, #label/foo) has no
+    // trailing message/thread id segment.
+    const segments = url.hash.replace(/^#/, "").split("/").filter(Boolean);
+    const lastSegment = segments[segments.length - 1];
+    return segments.length >= 2 && /^[A-Za-z0-9_-]{10,}$/.test(lastSegment);
+  }
+  // Outlook Web App only adds an "/id/<messageId>" segment to the path when a
+  // message is open in the reading pane; the bare inbox/list view has none.
+  return /\/id\//.test(url.pathname);
+}
+
 export async function scanActiveEmail(): Promise<ScanResult> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id || !tab.url) {
     throw new Error("No hay una pestaña activa disponible.");
   }
 
-  const hostname = new URL(tab.url).hostname;
+  const url = new URL(tab.url);
+  const hostname = url.hostname;
   if (
     !supportedHosts.some(
       (host) => hostname === host || hostname.endsWith(`.${host}`),
@@ -42,10 +57,15 @@ export async function scanActiveEmail(): Promise<ScanResult> {
     throw new Error("Abre un correo en Gmail u Outlook para escanearlo.");
   }
 
+  const provider = hostname.includes("google") ? "Gmail" : "Outlook";
+  if (!isEmailOpen(url, provider)) {
+    throw new Error("Abre un correo para analizarlo. El escáner solo funciona sobre un correo abierto, no sobre la bandeja de entrada.");
+  }
+
   const [{ result }] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     func: readEmailSnapshot,
-    args: [hostname.includes("google") ? "Gmail" : "Outlook"],
+    args: [provider],
   });
 
   const snapshot = result as PageSnapshot | undefined;
@@ -53,7 +73,6 @@ export async function scanActiveEmail(): Promise<ScanResult> {
     throw new Error("No encontramos el remitente del correo abierto.");
   }
 
-  const provider = hostname.includes("google") ? "Gmail" : "Outlook";
   const apiUrl = import.meta.env.VITE_SCAN_API_URL;
   if (!apiUrl) throw new Error("El servicio de análisis no está configurado.");
 
