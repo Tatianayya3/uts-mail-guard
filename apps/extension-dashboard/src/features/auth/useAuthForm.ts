@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { SignInValues, SignUpValues } from "@mail-guard/auth-contract";
 import { auth } from "@/utils/supabase/client";
 
@@ -10,15 +11,13 @@ export type AuthFormStatus = "idle" | "loading" | "success" | "error";
 export function useAuthForm() {
   const router = useRouter();
   const [status, setStatus] = useState<AuthFormStatus>("idle");
-  const [message, setMessage] = useState("");
 
   const signIn = async (values: SignInValues) => {
     setStatus("loading");
-    setMessage("");
     const { error } = await auth.signIn(values.email, values.password);
     if (error) {
       setStatus("error");
-      setMessage(error.message);
+      toast.error(error.message);
       return;
     }
     setStatus("success");
@@ -28,7 +27,6 @@ export function useAuthForm() {
 
   const signUp = async (values: SignUpValues) => {
     setStatus("loading");
-    setMessage("");
     const { data, error } = await auth.signUp(
       values.email,
       values.password,
@@ -36,7 +34,7 @@ export function useAuthForm() {
     );
     if (error) {
       setStatus("error");
-      setMessage(error.message);
+      toast.error(error.message);
       return;
     }
 
@@ -46,8 +44,8 @@ export function useAuthForm() {
       router.refresh();
       return;
     }
-    setMessage("Cuenta creada. Revisa tu correo para confirmarla.");
+    toast.success("Cuenta creada. Revisa tu correo para confirmarla.");
   };
 
-  return { status, message, signIn, signUp };
+  return { status, signIn, signUp };
 }

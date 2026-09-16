@@ -7,8 +7,8 @@ import {
 } from "@mail-guard/scan-contract";
 import { consumeScanQuota } from "./rate-limit";
 import { computeEmailHash, getCachedScan, setCachedScan } from "./cache";
+import { corsPreflight, jsonWithCors } from "./cors";
 
-const allowedOrigin = process.env.EXTENSION_ORIGIN ?? "*";
 const responseShape = `{
   "trustScore": 0,
   "verdict": "safe",
@@ -54,7 +54,7 @@ Devuelve exactamente esta estructura:
 ${responseShape}`;
 
 export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders() });
+  return corsPreflight();
 }
 
 export async function POST(request: NextRequest) {
@@ -396,13 +396,5 @@ function isDate(value: unknown): value is string {
 }
 
 function response(body: unknown, status: number) {
-  return NextResponse.json(body, { status, headers: corsHeaders() });
-}
-
-function corsHeaders() {
-  return {
-    "Access-Control-Allow-Origin": allowedOrigin,
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-  };
+  return jsonWithCors(body, status);
 }

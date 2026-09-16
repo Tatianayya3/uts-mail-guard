@@ -1,25 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import {
   scanHistoryRequestSchema,
   type StoredScan,
 } from "@mail-guard/scan-contract";
+import { corsPreflight, jsonWithCors } from "../cors";
+
+export async function OPTIONS() {
+  return corsPreflight();
+}
 
 export async function POST(request: NextRequest) {
   const client = await getUserClient(request);
   if (!client)
-    return NextResponse.json(
-      { error: "Autenticación requerida." },
-      { status: 401 },
-    );
+    return jsonWithCors({ error: "Autenticación requerida." }, 401);
 
   const body = await request.json().catch(() => null);
   const parsed = scanHistoryRequestSchema.safeParse(body);
   if (!parsed.success)
-    return NextResponse.json(
-      { error: "El análisis no es válido." },
-      { status: 400 },
-    );
+    return jsonWithCors({ error: "El análisis no es válido." }, 400);
 
   const scan = parsed.data.scan;
 
@@ -33,7 +32,7 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (existing) {
-        return NextResponse.json({ saved: true, deduplicated: true });
+        return jsonWithCors({ saved: true, deduplicated: true });
       }
     } catch {
       // Non-blocking if column does not exist yet
@@ -49,12 +48,9 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     console.error("scan_history_insert_failed", error.message);
-    return NextResponse.json(
-      { error: "No se pudo guardar el análisis." },
-      { status: 500 },
-    );
+    return jsonWithCors({ error: "No se pudo guardar el análisis." }, 500);
   }
-  return NextResponse.json({ saved: true });
+  return jsonWithCors({ saved: true });
 }
 
 export async function getUserClient(request: NextRequest) {
