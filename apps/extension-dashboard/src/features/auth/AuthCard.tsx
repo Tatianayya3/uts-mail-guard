@@ -4,13 +4,15 @@ import { useState } from "react";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 import { useAuthForm } from "./useAuthForm";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 type AuthMode = "signin" | "signup";
 
 export default function AuthCard() {
   const [mode, setMode] = useState<AuthMode>("signin");
-  const { status, message, signIn, signUp } = useAuthForm();
+  const { status, signIn, signUp } = useAuthForm();
   const isSignUp = mode === "signup";
+  const isLoading = status === "loading";
 
   return (
     <div className="bg-guard-surface-card/60 backdrop-blur-2xl p-8 md:p-10 rounded-3xl shadow-2xl border border-guard-surface-raised relative group transition-all duration-500 hover:border-guard-accent/30 hover:shadow-[0_10px_40px_rgba(200,212,0,0.05)]">
@@ -42,17 +44,15 @@ export default function AuthCard() {
         <LoginForm status={status} onSubmit={signIn} />
       )}
 
-      {message && (
-        <p
-          role="status"
-          className={`mt-5 rounded-xl px-3 py-2.5 text-xs leading-5 ${
-            status === "error"
-              ? "bg-red-400/10 text-red-200"
-              : "bg-guard-success-strong/10 text-guard-success"
-          }`}
-        >
-          {message}
-        </p>
+      {isLoading && (
+        <LoadingOverlay
+          title={isSignUp ? "Creando tu cuenta" : "Iniciando sesión"}
+          description={
+            isSignUp
+              ? "Configurando tu escudo de protección..."
+              : "Verificando tus credenciales..."
+          }
+        />
       )}
     </div>
   );

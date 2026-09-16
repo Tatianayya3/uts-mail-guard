@@ -1,22 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { scanHistorySyncSchema } from "@mail-guard/scan-contract";
 import { getUserClient, toRow } from "../route";
+import { corsPreflight, jsonWithCors } from "../../cors";
+
+export async function OPTIONS() {
+  return corsPreflight();
+}
 
 export async function POST(request: NextRequest) {
   const client = await getUserClient(request);
   if (!client)
-    return NextResponse.json(
-      { error: "Autenticación requerida." },
-      { status: 401 },
-    );
+    return jsonWithCors({ error: "Autenticación requerida." }, 401);
 
   const body = await request.json().catch(() => null);
   const parsed = scanHistorySyncSchema.safeParse(body);
   if (!parsed.success)
-    return NextResponse.json(
-      { error: "Los análisis no son válidos." },
-      { status: 400 },
-    );
+    return jsonWithCors({ error: "Los análisis no son válidos." }, 400);
 
   // In-memory deduplication of the batch itself
   const seenHashes = new Set<string>();
@@ -41,10 +40,10 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     console.error("scan_history_sync_failed", error.message);
-    return NextResponse.json(
+    return jsonWithCors(
       { error: "No se pudieron sincronizar los análisis." },
-      { status: 500 },
+      500,
     );
   }
-  return NextResponse.json({ saved: uniqueScans.length });
+  return jsonWithCors({ saved: uniqueScans.length });
 }
