@@ -20,7 +20,9 @@ export function useAuthForm() {
       toast.error(error.message);
       return;
     }
-    setStatus("success");
+    // Keep status "loading" so the overlay stays visible until the
+    // dashboard route finishes fetching data and swaps in, instead of
+    // dropping back to the bare form for a few seconds mid-navigation.
     router.push("/dashboard");
     router.refresh();
   };
@@ -38,12 +40,13 @@ export function useAuthForm() {
       return;
     }
 
-    setStatus("success");
     if (data.session) {
+      // Same as signIn: leave status "loading" through the redirect.
       router.push("/dashboard");
       router.refresh();
       return;
     }
+    setStatus("success");
     toast.success("Cuenta creada. Revisa tu correo para confirmarla.");
   };
 
