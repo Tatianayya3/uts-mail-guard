@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { SignInValues, SignUpValues } from "@mail-guard/auth-contract";
+import type {
+  ForgotPasswordValues,
+  SignInValues,
+  SignUpValues,
+} from "@mail-guard/auth-contract";
 import { auth } from "@/utils/supabase/client";
 
 export type AuthFormStatus = "idle" | "loading" | "success" | "error";
@@ -50,5 +54,23 @@ export function useAuthForm() {
     toast.success("Cuenta creada. Revisa tu correo para confirmarla.");
   };
 
-  return { status, signIn, signUp };
+  const forgotPassword = async (values: ForgotPasswordValues) => {
+    setStatus("loading");
+    const { error } = await auth.resetPasswordForEmail(
+      values.email,
+      `${window.location.origin}/reset-password`,
+    );
+    if (error) {
+      setStatus("error");
+      toast.error(error.message);
+      return false;
+    }
+    setStatus("success");
+    toast.success(
+      "Te enviamos un enlace para restablecer tu contraseña. Revisa tu correo.",
+    );
+    return true;
+  };
+
+  return { status, signIn, signUp, forgotPassword };
 }
