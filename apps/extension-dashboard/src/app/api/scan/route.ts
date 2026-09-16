@@ -33,8 +33,7 @@ const responseShape = `{
     "status": "safe",
     "detail": "Razón breve del resultado."
   }],
-  "model": "modelo-usado",
-  "analyzedAt": "2026-09-14T00:00:00.000Z"
+  "model": "modelo-usado"
 }`;
 
 const analysisPrompt = `Eres un analista de seguridad de correo. Analiza el snapshot recibido y devuelve SOLO JSON válido, sin Markdown ni texto adicional.
@@ -291,9 +290,10 @@ function normalizeAnalysis(raw: unknown, email: EmailSnapshot, model: string) {
     signals: fallbackSignals,
     links: normalizeLinks(value.links, email.links),
     model: stringValue(value.model, model),
-    analyzedAt: isDate(value.analyzedAt)
-      ? value.analyzedAt
-      : new Date().toISOString(),
+    // Always the real analysis time, not model output: the AI has no
+    // reliable notion of "now" and tends to echo a date from the email
+    // content instead, which broke the dashboard's trend chart.
+    analyzedAt: new Date().toISOString(),
   };
 }
 
@@ -389,10 +389,6 @@ function normalizeLinkStatus(
   if (["dangerous", "peligroso", "malicious"].includes(text))
     return "dangerous";
   return "unknown";
-}
-
-function isDate(value: unknown): value is string {
-  return typeof value === "string" && !Number.isNaN(Date.parse(value));
 }
 
 function response(body: unknown, status: number) {

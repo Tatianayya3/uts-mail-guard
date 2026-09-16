@@ -10,11 +10,16 @@ type FieldErrors = Partial<Record<keyof SignInValues, string>>;
 type LoginFormProps = {
   status: AuthFormStatus;
   onSubmit: (values: SignInValues) => Promise<void>;
+  onForgotPassword: () => void;
 };
 
 const initialValues: SignInValues = { email: "", password: "" };
 
-export default function LoginForm({ status, onSubmit }: LoginFormProps) {
+export default function LoginForm({
+  status,
+  onSubmit,
+  onForgotPassword,
+}: LoginFormProps) {
   const [values, setValues] = useState<SignInValues>(initialValues);
   const [errors, setErrors] = useState<FieldErrors>({});
   const isLoading = status === "loading";
@@ -64,6 +69,14 @@ export default function LoginForm({ status, onSubmit }: LoginFormProps) {
         disabled={isLoading}
         onChange={(value) => updateValue("password", value)}
       />
+      <button
+        type="button"
+        onClick={onForgotPassword}
+        disabled={isLoading}
+        className="block w-full text-right text-xs text-guard-accent-bright hover:text-guard-accent disabled:opacity-50"
+      >
+        ¿Olvidaste tu contraseña?
+      </button>
       <button
         type="submit"
         disabled={isLoading}
