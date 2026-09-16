@@ -57,6 +57,7 @@ export default function LoginForm({
         value={values.email}
         error={errors.email}
         disabled={isLoading}
+        autoComplete="email"
         onChange={(value) => updateValue("email", value)}
       />
       <FormField
@@ -67,20 +68,21 @@ export default function LoginForm({
         value={values.password}
         error={errors.password}
         disabled={isLoading}
+        autoComplete="current-password"
         onChange={(value) => updateValue("password", value)}
       />
       <button
         type="button"
         onClick={onForgotPassword}
         disabled={isLoading}
-        className="block w-full text-right text-xs text-guard-accent-bright hover:text-guard-accent disabled:opacity-50"
+        className="block w-full cursor-pointer text-right text-xs text-guard-accent-bright hover:text-guard-accent disabled:cursor-not-allowed disabled:opacity-50"
       >
         ¿Olvidaste tu contraseña?
       </button>
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full mt-6 bg-guard-accent hover:bg-guard-accent-bright text-guard-surface font-bold text-lg py-4 rounded-xl transition-all duration-300 shadow-[0_0_15px_rgba(200,212,0,0.15)] hover:shadow-[0_0_25px_rgba(228,241,50,0.3)] transform hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 disabled:hover:translate-y-0"
+        className="w-full mt-6 cursor-pointer bg-guard-accent hover:bg-guard-accent-bright text-guard-surface font-bold text-lg py-4 rounded-xl transition-all duration-300 shadow-[0_0_15px_rgba(200,212,0,0.15)] hover:shadow-[0_0_25px_rgba(228,241,50,0.3)] transform hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 disabled:hover:translate-y-0"
       >
         {isLoading ? "Ingresando..." : "Entrar al Dashboard"}
       </button>

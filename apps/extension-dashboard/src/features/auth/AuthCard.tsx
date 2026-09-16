@@ -53,10 +53,18 @@ export default function AuthCard() {
 
       {mode !== "forgot" && (
         <div className="flex p-1 mb-8 space-x-1 bg-guard-surface-raised/50 rounded-xl border border-guard-surface-raised">
-          <ModeButton active={mode === "signin"} onClick={() => setMode("signin")}>
+          <ModeButton
+            active={mode === "signin"}
+            disabled={isLoading}
+            onClick={() => setMode("signin")}
+          >
             Iniciar sesión
           </ModeButton>
-          <ModeButton active={mode === "signup"} onClick={() => setMode("signup")}>
+          <ModeButton
+            active={mode === "signup"}
+            disabled={isLoading}
+            onClick={() => setMode("signup")}
+          >
             Registrarse
           </ModeButton>
         </div>
@@ -103,10 +111,12 @@ export default function AuthCard() {
 
 function ModeButton({
   active,
+  disabled,
   onClick,
   children,
 }: {
   active: boolean;
+  disabled?: boolean;
   onClick: () => void;
   children: string;
 }) {
@@ -114,7 +124,8 @@ function ModeButton({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 ${
+      disabled={disabled}
+      className={`w-full cursor-pointer py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 ${
         active
           ? "bg-guard-surface-card text-white shadow-sm border border-guard-surface-raised/50"
           : "text-guard-text-muted hover:text-white"

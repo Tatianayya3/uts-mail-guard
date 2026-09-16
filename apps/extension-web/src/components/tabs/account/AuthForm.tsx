@@ -9,6 +9,8 @@ import {
   type SignInValues,
   type SignUpValues,
 } from "@mail-guard/auth-contract";
+import ShowPasswordIcon from "@/components/icons/ShowPassword";
+import HidePasswordIcon from "@/components/icons/HidePassword";
 import type { AccountStatus } from "./useAccountAuth";
 
 type AuthMode = "signin" | "signup";
@@ -79,11 +81,13 @@ export default function AuthForm({
             placeholder="tu@correo.com"
             value={forgotEmail}
             onChange={setForgotEmail}
+            autoComplete="email"
+            disabled={status === "loading"}
           />
           <button
             type="submit"
             disabled={status === "loading"}
-            className="mt-2 h-12 rounded-xl bg-guard-accent text-sm font-bold text-guard-surface transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+            className="mt-2 h-12 cursor-pointer rounded-xl bg-guard-accent text-sm font-bold text-guard-surface transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
           >
             {status === "loading" ? "Enviando..." : "Enviar enlace"}
           </button>
@@ -91,7 +95,7 @@ export default function AuthForm({
             type="button"
             onClick={() => setShowForgotPassword(false)}
             disabled={status === "loading"}
-            className="text-center text-xs text-guard-text-muted disabled:opacity-50"
+            className="cursor-pointer text-center text-xs text-guard-text-muted disabled:cursor-not-allowed disabled:opacity-50"
           >
             Volver a iniciar sesión
           </button>
@@ -123,10 +127,18 @@ export default function AuthForm({
   return (
     <section className="flex flex-col pt-7">
       <div className="mb-6 grid grid-cols-2 rounded-xl bg-guard-surface-card p-1">
-        <ModeButton active={!isSignUp} onClick={() => onModeChange("signin")}>
+        <ModeButton
+          active={!isSignUp}
+          disabled={status === "loading"}
+          onClick={() => onModeChange("signin")}
+        >
           Iniciar sesión
         </ModeButton>
-        <ModeButton active={isSignUp} onClick={() => onModeChange("signup")}>
+        <ModeButton
+          active={isSignUp}
+          disabled={status === "loading"}
+          onClick={() => onModeChange("signup")}
+        >
           Crear cuenta
         </ModeButton>
       </div>
@@ -154,6 +166,8 @@ export default function AuthForm({
             placeholder="Tu nombre"
             value={values.fullName ?? ""}
             onChange={(value) => updateValue("fullName", value)}
+            autoComplete="name"
+            disabled={status === "loading"}
           />
         )}
         <AuthInput
@@ -162,6 +176,8 @@ export default function AuthForm({
           placeholder="tu@correo.com"
           value={values.email}
           onChange={(value) => updateValue("email", value)}
+          autoComplete="email"
+          disabled={status === "loading"}
         />
         <AuthInput
           label="Contraseña"
@@ -169,6 +185,8 @@ export default function AuthForm({
           placeholder="Escribe tu contraseña"
           value={values.password}
           onChange={(value) => updateValue("password", value)}
+          autoComplete={isSignUp ? "new-password" : "current-password"}
+          disabled={status === "loading"}
         />
         {isSignUp && (
           <AuthInput
@@ -177,13 +195,16 @@ export default function AuthForm({
             placeholder="Repite tu contraseña"
             value={values.confirmPassword ?? ""}
             onChange={(value) => updateValue("confirmPassword", value)}
+            autoComplete="new-password"
+            disabled={status === "loading"}
           />
         )}
         {!isSignUp && (
           <button
             type="button"
             onClick={() => setShowForgotPassword(true)}
-            className="block w-full text-right text-xs text-guard-accent-bright hover:text-guard-accent"
+            disabled={status === "loading"}
+            className="block w-full cursor-pointer text-right text-xs text-guard-accent-bright hover:text-guard-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
             ¿Olvidaste tu contraseña?
           </button>
@@ -191,7 +212,7 @@ export default function AuthForm({
         <button
           type="submit"
           disabled={status === "loading"}
-          className="mt-2 h-12 rounded-xl bg-guard-accent text-sm font-bold text-guard-surface transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+          className="mt-2 h-12 cursor-pointer rounded-xl bg-guard-accent text-sm font-bold text-guard-surface transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
         >
           {status === "loading"
             ? "Conectando..."
@@ -214,10 +235,12 @@ export default function AuthForm({
 
 function ModeButton({
   active,
+  disabled,
   onClick,
   children,
 }: {
   active: boolean;
+  disabled?: boolean;
   onClick: () => void;
   children: string;
 }) {
@@ -225,7 +248,8 @@ function ModeButton({
     <button
       type="button"
       onClick={onClick}
-      className={`h-9 rounded-lg text-xs font-semibold transition-colors ${active ? "bg-guard-accent text-guard-surface" : "text-guard-text-muted"}`}
+      disabled={disabled}
+      className={`h-9 cursor-pointer rounded-lg text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${active ? "bg-guard-accent text-guard-surface" : "text-guard-text-muted"}`}
     >
       {children}
     </button>
@@ -238,24 +262,48 @@ function AuthInput({
   placeholder,
   value,
   onChange,
+  autoComplete,
+  disabled,
 }: {
   label: string;
   type: string;
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
+  autoComplete?: string;
+  disabled?: boolean;
 }) {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === "password";
+  const inputType = isPassword && showPassword ? "text" : type;
+
   return (
     <label className="flex flex-col gap-2 text-xs font-medium text-guard-text-muted">
       {label}
-      <input
-        required
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        type={type}
-        placeholder={placeholder}
-        className="h-11 rounded-xl border border-white/10 bg-guard-surface-card px-3 text-sm text-white outline-none transition-colors placeholder:text-guard-text-muted/60 focus:border-guard-accent"
-      />
+      <div className="relative">
+        <input
+          required
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          type={inputType}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          disabled={disabled}
+          className={`h-11 w-full rounded-xl border border-white/10 bg-guard-surface-card px-3 text-sm text-white outline-none transition-colors placeholder:text-guard-text-muted/60 focus:border-guard-accent disabled:opacity-50 ${isPassword ? "pr-10" : ""}`}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShowPassword((current) => !current)}
+            disabled={disabled}
+            tabIndex={-1}
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-guard-text-muted transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {showPassword ? <HidePasswordIcon /> : <ShowPasswordIcon />}
+          </button>
+        )}
+      </div>
     </label>
   );
 }
