@@ -30,6 +30,7 @@
         "react-dom": "19.2.8",
         "recharts": "^3.10.1",
         "server-only": "^0.0.1",
+        "sonner": "^2.0.8",
         "temporal-polyfill": "^1.0.5",
         "zod": "^4.6.5",
       },
@@ -59,8 +60,9 @@
         "@mail-guard/supabase": "workspace:*",
         "@supabase/supabase-js": "^2.116.0",
         "@tailwindcss/vite": "^4.3.3",
-        "react": "^19.2.4",
-        "react-dom": "^19.2.4",
+        "react": "19.2.8",
+        "react-dom": "19.2.8",
+        "sonner": "^2.0.8",
         "tailwindcss": "^4.3.3",
         "zod": "^4.6.5",
       },
@@ -1948,6 +1950,8 @@
     "sisteransi": ["sisteransi@1.0.5", "", {}, "sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg=="],
 
     "slice-ansi": ["slice-ansi@8.0.0", "", { "dependencies": { "ansi-styles": "^6.2.3", "is-fullwidth-code-point": "^5.1.0" } }, "sha512-stxByr12oeeOyY2BlviTNQlYV5xOj47GirPr4yA1hE9JCtxfQN0+tVbkxwCtYDQWhEKWFHsEK48ORg5jrouCAg=="],
+
+    "sonner": ["sonner@2.0.8", "", { "peerDependencies": { "@types/react": "^18.0.0 || ^19.0.0", "react": "^18.0.0 || ^19.0.0 || ^19.0.0-rc", "react-dom": "^18.0.0 || ^19.0.0 || ^19.0.0-rc" }, "optionalPeers": ["@types/react"] }, "sha512-UM/ByIoFra8yzV75n1o0Puu0bw5U/9UNnDacrJNspekBewIfsQ3D6ez1nvlWpt7aTsO6rujQtifBpycwIivqlg=="],
 
     "source-map": ["source-map@0.7.6", "", {}, "sha512-i5uvt8C3ikiWeNZSVZNWcfZPItFQOsYTUAOkcUPGd8DqDy1uOUikjt5dG+uRlwyvR108Fb9DOd4GvXfT0N2/uQ=="],
 

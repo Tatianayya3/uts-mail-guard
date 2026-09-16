@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import ScanShieldIcon from "@/components/icons/ScanShield";
+import gmailIcon from "@/components/icons/gmail.svg";
+import outlookIcon from "@/components/icons/outlook.svg";
 import AnalysisResult from "./AnalysisResult";
 import { StatCard } from "./AnalysisCards";
 import { getActiveMailProvider, scanActiveEmail } from "./scan.service";
@@ -17,7 +20,6 @@ export default function ScanTab({
   onScanResultChange,
 }: ScanTabProps) {
   const [isScanning, setIsScanning] = useState(false);
-  const [scanError, setScanError] = useState("");
   const [activeProvider, setActiveProvider] = useState<MailProvider>(
     "Proveedor compatible",
   );
@@ -26,39 +28,23 @@ export default function ScanTab({
     void getActiveMailProvider().then(setActiveProvider);
   }, []);
 
-  const handleScan = async () => {
+  const runScan = async (fallbackMessage: string) => {
     setIsScanning(true);
-    setScanError("");
     try {
       const result = await scanActiveEmail();
       onScanResultChange(result);
     } catch (error) {
-      setScanError(
-        error instanceof Error
-          ? error.message
-          : "No se pudo escanear este correo.",
+      toast.error(
+        error instanceof Error ? error.message : fallbackMessage,
       );
     } finally {
       setIsScanning(false);
     }
   };
 
-  const handleNewScan = async () => {
-    setIsScanning(true);
-    setScanError("");
-    try {
-      const result = await scanActiveEmail();
-      onScanResultChange(result);
-    } catch (error) {
-      setScanError(
-        error instanceof Error
-          ? error.message
-          : "No se pudo analizar este correo.",
-      );
-    } finally {
-      setIsScanning(false);
-    }
-  };
+  const handleScan = () => void runScan("No se pudo escanear este correo.");
+  const handleNewScan = () =>
+    runScan("No se pudo analizar este correo.");
 
   if (isAnalyzed) {
     return scanResult ? (
@@ -101,15 +87,6 @@ export default function ScanTab({
           amenazas ocultas y enlaces maliciosos.
         </p>
 
-        {scanError && (
-          <p
-            role="alert"
-            className="mt-4 w-full rounded-xl bg-red-400/10 px-3 py-2 text-center text-xs leading-5 text-red-200"
-          >
-            {scanError}
-          </p>
-        )}
-
         <button
           type="button"
           onClick={handleScan}
@@ -128,14 +105,14 @@ export default function ScanTab({
           <div className="h-10 w-10 rounded-xl bg-white/5">
             {activeProvider === "Gmail" && (
               <img
-                src="../../src/components/icons/gmail.svg"
+                src={gmailIcon}
                 alt="Gmail"
                 className="h-8 w-8 m-auto mt-1"
               />
             )}
             {activeProvider === "Outlook" && (
               <img
-                src="../../src/components/icons/outlook.svg"
+                src={outlookIcon}
                 alt="Outlook"
                 className="h-8 w-8 m-auto mt-1"
               />

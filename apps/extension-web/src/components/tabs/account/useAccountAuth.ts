@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import type { Session } from "@supabase/supabase-js";
 import type {
   MailScanSummary,
@@ -21,7 +22,6 @@ export function useAccountAuth() {
   const [recentScans, setRecentScans] = useState<MailScanSummary[]>([]);
   const [status, setStatus] = useState<AccountStatus>("loading");
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [message, setMessage] = useState("");
 
   const loadUserData = useCallback(async (nextSession: Session | null) => {
     if (!nextSession) {
@@ -132,7 +132,7 @@ export function useAccountAuth() {
       if (!isMounted) return;
       if (error) {
         setStatus("error");
-        setMessage(error.message);
+        toast.error(error.message);
         return;
       }
 
@@ -147,21 +147,19 @@ export function useAccountAuth() {
 
   const signIn = async (values: SignInValues) => {
     setStatus("loading");
-    setMessage("");
     const { data, error } = await auth.signIn(values.email, values.password);
     if (error) {
       setStatus("error");
-      setMessage(error.message);
+      toast.error(error.message);
       return;
     }
     await loadUserData(data.session);
     setStatus("success");
-    setMessage("Sesión iniciada correctamente.");
+    toast.success("Sesión iniciada correctamente.");
   };
 
   const signUp = async (values: SignUpValues) => {
     setStatus("loading");
-    setMessage("");
     const { data, error } = await auth.signUp(
       values.email,
       values.password,
@@ -169,12 +167,12 @@ export function useAccountAuth() {
     );
     if (error) {
       setStatus("error");
-      setMessage(error.message);
+      toast.error(error.message);
       return;
     }
     await loadUserData(data.session);
     setStatus("success");
-    setMessage(
+    toast.success(
       data.session
         ? "Tu cuenta está lista."
         : "Cuenta creada. Revisa tu correo para confirmarla.",
@@ -186,7 +184,7 @@ export function useAccountAuth() {
     const { error } = await auth.signOut();
     if (error) {
       setStatus("error");
-      setMessage(error.message);
+      toast.error(error.message);
       return;
     }
     setSession(null);
@@ -194,7 +192,7 @@ export function useAccountAuth() {
     setStats(null);
     setRecentScans([]);
     setStatus("success");
-    setMessage("Sesión cerrada correctamente.");
+    toast.success("Sesión cerrada correctamente.");
   };
 
   return {
@@ -204,7 +202,6 @@ export function useAccountAuth() {
     recentScans,
     status,
     isRefreshing,
-    message,
     signIn,
     signUp,
     signOut,

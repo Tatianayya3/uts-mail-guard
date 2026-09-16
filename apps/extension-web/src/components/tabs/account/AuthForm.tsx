@@ -1,4 +1,5 @@
 import { FormEvent, useState } from "react";
+import { toast } from "sonner";
 import {
   signInSchema,
   signUpSchema,
@@ -13,7 +14,6 @@ type AuthMode = "signin" | "signup";
 type AuthFormProps = {
   mode: AuthMode;
   status: AccountStatus;
-  message: string;
   onModeChange: (mode: AuthMode) => void;
   onSignIn: (values: SignInValues) => Promise<void>;
   onSignUp: (values: SignUpValues) => Promise<void>;
@@ -29,19 +29,15 @@ const initialValues: AuthValues = {
 export default function AuthForm({
   mode,
   status,
-  message,
   onModeChange,
   onSignIn,
   onSignUp,
 }: AuthFormProps) {
   const [values, setValues] = useState<AuthValues>(initialValues);
-  const [validationMessage, setValidationMessage] = useState("");
   const isSignUp = mode === "signup";
-  const displayMessage = validationMessage || message;
 
   const updateValue = (field: keyof AuthValues, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
-    setValidationMessage("");
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -49,9 +45,7 @@ export default function AuthForm({
     if (isSignUp) {
       const result = signUpSchema.safeParse(values);
       if (!result.success) {
-        setValidationMessage(
-          result.error.issues[0]?.message ?? "Revisa los campos.",
-        );
+        toast.error(result.error.issues[0]?.message ?? "Revisa los campos.");
         return;
       }
       await onSignUp(result.data);
@@ -60,9 +54,7 @@ export default function AuthForm({
 
     const result = signInSchema.safeParse(values);
     if (!result.success) {
-      setValidationMessage(
-        result.error.issues[0]?.message ?? "Revisa los campos.",
-      );
+      toast.error(result.error.issues[0]?.message ?? "Revisa los campos.");
       return;
     }
     await onSignIn(result.data);
@@ -147,14 +139,6 @@ export default function AuthForm({
               : "Iniciar sesión"}
         </button>
       </form>
-      {displayMessage && (
-        <p
-          role="status"
-          className={`mt-4 rounded-xl px-3 py-2 text-xs leading-5 ${validationMessage || status === "error" ? "bg-red-400/10 text-red-200" : "bg-guard-success-strong/10 text-guard-success"}`}
-        >
-          {displayMessage}
-        </p>
-      )}
       <div className="mt-7 flex items-center gap-3 text-[10px] text-guard-text-muted">
         <div className="h-px flex-1 bg-white/10" />
         <span>CONEXIÓN SEGURA</span>
