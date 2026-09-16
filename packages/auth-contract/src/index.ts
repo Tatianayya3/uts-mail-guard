@@ -21,3 +21,22 @@ export type SignInValues = z.infer<typeof signInSchema>;
 export type SignUpValues = z.infer<typeof signUpSchema>;
 export type AuthValues = SignInValues &
   Partial<Pick<SignUpValues, "fullName" | "confirmPassword">>;
+
+export const forgotPasswordSchema = z.object({
+  email: z.email("Escribe un correo válido."),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, "La contraseña debe tener al menos 8 caracteres."),
+    confirmPassword: z.string(),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    message: "Las contraseñas no coinciden.",
+    path: ["confirmPassword"],
+  });
+
+export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;

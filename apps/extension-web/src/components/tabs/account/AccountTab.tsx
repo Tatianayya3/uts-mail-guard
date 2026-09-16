@@ -17,6 +17,7 @@ export default function AccountTab() {
     signIn,
     signUp,
     signOut,
+    forgotPassword,
     refreshStats,
   } = useAccountAuth();
 
@@ -57,6 +58,7 @@ export default function AccountTab() {
       onModeChange={setMode}
       onSignIn={signIn}
       onSignUp={signUp}
+      onForgotPassword={forgotPassword}
     />
   );
 }

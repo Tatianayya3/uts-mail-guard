@@ -37,6 +37,12 @@ export const createAuthApi = (supabase: SupabaseClient) => ({
   getSession: async () => {
     return await supabase.auth.getSession();
   },
+  resetPasswordForEmail: async (email: string, redirectTo: string) => {
+    return await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+  },
+  updatePassword: async (password: string) => {
+    return await supabase.auth.updateUser({ password });
+  },
 });
 
 export const createProfilesApi = (supabase: SupabaseClient) => ({
