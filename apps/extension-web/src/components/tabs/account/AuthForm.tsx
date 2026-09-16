@@ -1,9 +1,11 @@
 import { FormEvent, useState } from "react";
 import { toast } from "sonner";
 import {
+  forgotPasswordSchema,
   signInSchema,
   signUpSchema,
   type AuthValues,
+  type ForgotPasswordValues,
   type SignInValues,
   type SignUpValues,
 } from "@mail-guard/auth-contract";
@@ -17,6 +19,7 @@ type AuthFormProps = {
   onModeChange: (mode: AuthMode) => void;
   onSignIn: (values: SignInValues) => Promise<void>;
   onSignUp: (values: SignUpValues) => Promise<void>;
+  onForgotPassword: (values: ForgotPasswordValues) => Promise<boolean>;
 };
 
 const initialValues: AuthValues = {
@@ -32,13 +35,70 @@ export default function AuthForm({
   onModeChange,
   onSignIn,
   onSignUp,
+  onForgotPassword,
 }: AuthFormProps) {
   const [values, setValues] = useState<AuthValues>(initialValues);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
   const isSignUp = mode === "signup";
 
   const updateValue = (field: keyof AuthValues, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
   };
+
+  const handleForgotSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const result = forgotPasswordSchema.safeParse({ email: forgotEmail });
+    if (!result.success) {
+      toast.error(result.error.issues[0]?.message ?? "Revisa el correo.");
+      return;
+    }
+    const ok = await onForgotPassword(result.data);
+    if (ok) setShowForgotPassword(false);
+  };
+
+  if (showForgotPassword) {
+    return (
+      <section className="flex flex-col pt-7">
+        <div className="mb-7">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-guard-accent">
+            Cuenta Mail Guard
+          </p>
+          <h1 className="mt-2 text-2xl font-bold">Recuperar contraseña</h1>
+          <p className="mt-2 text-sm leading-5 text-guard-text-muted">
+            Escribe tu correo y te enviaremos un enlace para restablecerla.
+          </p>
+        </div>
+        <form
+          onSubmit={(event) => void handleForgotSubmit(event)}
+          className="flex flex-col gap-4"
+        >
+          <AuthInput
+            label="Correo electrónico"
+            type="email"
+            placeholder="tu@correo.com"
+            value={forgotEmail}
+            onChange={setForgotEmail}
+          />
+          <button
+            type="submit"
+            disabled={status === "loading"}
+            className="mt-2 h-12 rounded-xl bg-guard-accent text-sm font-bold text-guard-surface transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+          >
+            {status === "loading" ? "Enviando..." : "Enviar enlace"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowForgotPassword(false)}
+            disabled={status === "loading"}
+            className="text-center text-xs text-guard-text-muted disabled:opacity-50"
+          >
+            Volver a iniciar sesión
+          </button>
+        </form>
+      </section>
+    );
+  }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -122,7 +182,8 @@ export default function AuthForm({
         {!isSignUp && (
           <button
             type="button"
-            className="self-end text-xs text-guard-accent-bright"
+            onClick={() => setShowForgotPassword(true)}
+            className="block w-full text-right text-xs text-guard-accent-bright hover:text-guard-accent"
           >
             ¿Olvidaste tu contraseña?
           </button>

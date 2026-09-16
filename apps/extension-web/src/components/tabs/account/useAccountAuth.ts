@@ -8,8 +8,14 @@ import type {
 } from "@mail-guard/supabase";
 import { computeDerivedAnalytics } from "@mail-guard/supabase";
 import { analytics, auth, profiles } from "@/utils/supabase";
-import type { SignInValues, SignUpValues } from "@mail-guard/auth-contract";
+import type {
+  ForgotPasswordValues,
+  SignInValues,
+  SignUpValues,
+} from "@mail-guard/auth-contract";
 import { syncPendingScans } from "@/components/tabs/scan/scan.storage";
+
+const dashboardUrl = import.meta.env.VITE_SCAN_API_URL as string | undefined;
 
 export type AccountStatus = "idle" | "loading" | "success" | "error";
 
@@ -179,6 +185,28 @@ export function useAccountAuth() {
     );
   };
 
+  const forgotPassword = async (values: ForgotPasswordValues) => {
+    if (!dashboardUrl) {
+      toast.error("El servicio de recuperación no está configurado.");
+      return false;
+    }
+    setStatus("loading");
+    const { error } = await auth.resetPasswordForEmail(
+      values.email,
+      `${dashboardUrl}/reset-password`,
+    );
+    if (error) {
+      setStatus("error");
+      toast.error(error.message);
+      return false;
+    }
+    setStatus("idle");
+    toast.success(
+      "Te enviamos un enlace para restablecer tu contraseña. Ábrelo desde tu navegador.",
+    );
+    return true;
+  };
+
   const signOut = async () => {
     setStatus("loading");
     const { error } = await auth.signOut();
@@ -205,6 +233,7 @@ export function useAccountAuth() {
     signIn,
     signUp,
     signOut,
+    forgotPassword,
     refreshStats,
   };
 }

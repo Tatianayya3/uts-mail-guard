@@ -14,6 +14,7 @@ const supportedHosts = [
   "mail.google.com",
   "outlook.live.com",
   "outlook.office.com",
+  "outlook.cloud.microsoft",
 ];
 
 export async function getActiveMailProvider(): Promise<MailProvider> {
@@ -59,7 +60,9 @@ export async function scanActiveEmail(): Promise<ScanResult> {
 
   const provider = hostname.includes("google") ? "Gmail" : "Outlook";
   if (!isEmailOpen(url, provider)) {
-    throw new Error("Abre un correo para analizarlo. El escáner solo funciona sobre un correo abierto, no sobre la bandeja de entrada.");
+    throw new Error(
+      "Abre un correo para analizarlo. El escáner solo funciona sobre un correo abierto, no sobre la bandeja de entrada.",
+    );
   }
 
   const [{ result }] = await chrome.scripting.executeScript({
