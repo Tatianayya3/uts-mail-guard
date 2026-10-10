@@ -294,12 +294,40 @@ fallos, la caché, la cuota, la deduplicación del historial y las rutas de cada
 
 ## Despliegue
 
-| Componente     | Recomendación                                                                                                                                                  |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Panel web      | **Vercel** con _Root Directory_ `apps/extension-dashboard`. Variables: las de `.env.local`.                                                                    |
-| Microservicios | Cualquier plataforma de contenedores (**Render**, **Railway**, **Fly.io**) usando el `Dockerfile` con `--build-arg SERVICE=<servicio>`. Expón solo el gateway. |
-| Cuota y caché  | **Upstash Redis** cuando haya más de una instancia.                                                                                                            |
-| Extensión      | `bun run build` con las URLs de producción y sube `apps/extension-web/release/*.zip` a la Chrome Web Store.                                                    |
+### Gratis, para pruebas (sin tarjeta)
+
+| Componente           | Servicio                                        | Plan gratuito                                     |
+| -------------------- | ----------------------------------------------- | ------------------------------------------------- |
+| 3 microservicios     | **Render** (Blueprint `render.yaml`)            | Web services free; se duermen tras 15 min sin uso |
+| Panel web            | **Vercel** Hobby                                | Uso personal / no comercial                       |
+| Auth + base de datos | **Supabase** Free                               | Proyecto pausado tras 7 días sin actividad        |
+| Cuota y caché        | Memoria del servicio (Upstash Free es opcional) | —                                                 |
+
+1. **Supabase:** crea el proyecto y ejecuta `supabase/migrations/0001_mail_guard.sql`.
+2. **Render:** _New → Blueprint_ → elige este repositorio. Render lee `render.yaml`, crea
+   `mail-guard-gateway`, `mail-guard-analysis` y `mail-guard-history`, genera el
+   `INTERNAL_SERVICE_TOKEN` compartido y te pide `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`
+   y (opcional) `TYPESAFE_API_KEY`. Si Render asigna URLs distintas a
+   `https://mail-guard-*.onrender.com`, corrígelas en las variables del gateway.
+3. **Vercel:** importa el repo con _Root Directory_ `apps/extension-dashboard` y define
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y
+   `API_GATEWAY_URL=https://mail-guard-gateway.onrender.com`.
+4. **Extensión:** en `apps/extension-web/.env` pon `VITE_API_GATEWAY_URL` (Render) y
+   `VITE_DASHBOARD_URL` (Vercel), luego `bun run build` y recarga `dist/` en Chrome.
+5. **Supabase → Authentication → URL Configuration:** agrega
+   `https://<tu-panel>.vercel.app/reset-password`.
+
+> **Antes de una demo:** abre `https://mail-guard-gateway.onrender.com/health/services`
+> y espera a que los tres digan `ok`. En el plan gratuito, el primer análisis tras un
+> rato de inactividad puede fallar mientras los servicios despiertan (~1 min).
+
+### Producción
+
+| Componente     | Recomendación                                                                                                  |
+| -------------- | -------------------------------------------------------------------------------------------------------------- |
+| Microservicios | Plan pago de Render, Railway o Fly.io con el mismo `Dockerfile` (`SERVICE=<servicio>`). Expón solo el gateway. |
+| Cuota y caché  | **Upstash Redis** cuando haya más de una instancia.                                                            |
+| Extensión      | Sube `apps/extension-web/release/*.zip` a la Chrome Web Store.                                                 |
 
 Antes de publicar: define `CORS_ORIGINS=chrome-extension://<ID>,https://<tu-panel>` y un
 `INTERNAL_SERVICE_TOKEN` largo y aleatorio en los tres servicios.
