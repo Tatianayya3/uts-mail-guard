@@ -26,7 +26,7 @@ export default function SignOutButton() {
     >
       <LogOut className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden="true" />
       <span className="hidden sm:inline">
-        {isLoading ? "Saliendo..." : "Cerrar sesión"}
+        {isLoading ? "Saliendo…" : "Cerrar sesión"}
       </span>
     </button>
   );

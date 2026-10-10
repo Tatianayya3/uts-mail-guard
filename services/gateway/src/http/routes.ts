@@ -96,7 +96,7 @@ export function createRoutes(deps: Deps) {
     const { email } = await readJson(
       c,
       scanRequestSchema,
-      "La información del correo no es válida.",
+      "No pudimos leer este correo. Recarga la página e inténtalo de nuevo.",
     );
     const result = await deps.scanEmail({
       email,
@@ -111,7 +111,7 @@ export function createRoutes(deps: Deps) {
     const body = await readJson(
       c,
       syncScansRequestSchema,
-      "Los análisis no son válidos.",
+      "No pudimos sincronizar tus análisis. Inténtalo más tarde.",
     );
     return c.json(
       await deps.history.request("/v1/scans/sync", {
@@ -165,7 +165,7 @@ export function createRoutes(deps: Deps) {
     const body = await readJson(
       c,
       updateProfileRequestSchema,
-      "El nombre no es válido.",
+      "El nombre debe tener entre 2 y 80 caracteres.",
     );
     return c.json(await toHistory(c, "/v1/me", "PATCH", body));
   });

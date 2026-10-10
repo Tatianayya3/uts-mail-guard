@@ -27,8 +27,8 @@ export default function Home() {
           </h1>
           <p className="text-lg md:text-xl text-guard-text-muted max-w-lg leading-relaxed">
             Una extensión para Chrome que revisa el correo que tienes abierto en
-            Gmail u Outlook y te dice, en segundos, si es seguro, sospechoso o
-            un intento de phishing, y por qué.
+            Gmail, Outlook, Yahoo, AOL, Proton o Zoho y te dice, en segundos, si
+            es seguro, sospechoso o un intento de phishing, y por qué.
           </p>
 
           <ul className="space-y-5 pt-4">

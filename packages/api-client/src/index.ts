@@ -81,13 +81,16 @@ export function createMailGuardApi(options: MailGuardApiOptions) {
       const message =
         payload && typeof payload === "object" && "error" in payload
           ? String((payload as { error: unknown }).error)
-          : "Ocurrió un error inesperado.";
+          : "Ocurrió un error inesperado. Inténtalo de nuevo.";
       throw new ApiError(message, response.status);
     }
 
     const parsed = schema.safeParse(payload);
     if (!parsed.success) {
-      throw new ApiError("La respuesta del servidor no es válida.", 502);
+      throw new ApiError(
+        "La respuesta del servidor no es válida. Inténtalo de nuevo.",
+        502,
+      );
     }
     return parsed.data;
   }

@@ -37,7 +37,7 @@ export function createServiceClient(
         });
       } catch {
         throw unavailable(
-          `El servicio ${name} no está disponible en este momento.`,
+          "Mail Guard no está disponible en este momento. Inténtalo de nuevo en unos minutos.",
         );
       }
 
@@ -46,7 +46,7 @@ export function createServiceClient(
         const message =
           payload && typeof payload === "object" && "error" in payload
             ? String((payload as { error: unknown }).error)
-            : `El servicio ${name} falló.`;
+            : "Algo falló en el servidor. Inténtalo de nuevo en unos minutos.";
         // Los 4xx se propagan tal cual; los 5xx se exponen como 502.
         const status = (
           response.status < 500 ? response.status : 502

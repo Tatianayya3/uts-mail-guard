@@ -18,6 +18,7 @@ import {
 import { Button, TextField, useZodForm } from "@mail-guard/ui";
 import ResetPasswordForm from "@/features/auth/ResetPasswordForm";
 import { auth } from "@/lib/supabase/client";
+import { authErrorMessage } from "@mail-guard/supabase";
 import { deleteHistoryAction, updateProfileAction } from "../actions";
 import { downloadCsv, downloadJson } from "../download";
 
@@ -92,7 +93,7 @@ export default function AccountSettings({
     setIsChangingPassword(true);
     const { error } = await auth.updatePassword(values.password);
     setIsChangingPassword(false);
-    if (error) toast.error(error.message);
+    if (error) toast.error(authErrorMessage(error));
     else toast.success("Tu contraseña se actualizó.");
   };
 
@@ -183,7 +184,7 @@ export default function AccountSettings({
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <TextField
-            label='Escribe "BORRAR" para confirmar'
+            label="Escribe «BORRAR» para confirmar"
             className="flex-1"
             value={confirmation}
             onValueChange={setConfirmation}

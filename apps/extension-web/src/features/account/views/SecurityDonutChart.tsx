@@ -63,7 +63,11 @@ export default function SecurityDonutChart({ total, ...counts }: Props) {
             Distribución de seguridad
           </p>
           <p className="text-xs text-guard-text-muted">
-            {hasData ? `${total} análisis registrados` : "Sin análisis aún"}
+            {hasData
+              ? total === 1
+                ? "1 análisis registrado"
+                : `${total} análisis registrados`
+              : "Sin análisis aún"}
           </p>
         </div>
         {hasData && (

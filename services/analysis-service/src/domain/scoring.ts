@@ -94,7 +94,7 @@ export function heuristicSignals(evidence: Evidence): ScanSignal[] {
         "sender",
         "Remitente",
         "warning",
-        `Nombre de ${evidence.displayNameBrand} sin respaldo`,
+        `Usa el nombre de ${evidence.displayNameBrand}`,
         `El nombre visible menciona a ${evidence.displayNameBrand}, pero el correo viene de ${evidence.senderDomain}.`,
       ),
     );
@@ -193,9 +193,13 @@ export function heuristicSignals(evidence: Evidence): ScanSignal[] {
         status,
         `${evidence.links.length} ${evidence.links.length === 1 ? "revisado" : "revisados"} · ${dangerous + suspicious} con alertas`,
         dangerous
-          ? `${dangerous} enlace(s) con patrones de phishing.`
+          ? dangerous === 1
+            ? "1 enlace tiene patrones de phishing."
+            : `${dangerous} enlaces tienen patrones de phishing.`
           : suspicious
-            ? `${suspicious} enlace(s) ocultan o debilitan su destino.`
+            ? suspicious === 1
+              ? "1 enlace oculta su destino o no es seguro."
+              : `${suspicious} enlaces ocultan su destino o no son seguros.`
             : "Ningún enlace presenta patrones de riesgo conocidos.",
       ),
     );

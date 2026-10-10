@@ -39,7 +39,7 @@ export const formatFullDate = (iso: string) => fullDate.format(new Date(iso));
 
 export function formatRelativeTime(iso: string, now = Date.now()): string {
   const minutes = Math.round((now - new Date(iso).getTime()) / 60_000);
-  if (minutes < 1) return "hace instantes";
+  if (minutes < 1) return "hace un momento";
   if (minutes < 60) return `hace ${minutes} min`;
   const hours = Math.round(minutes / 60);
   if (hours < 24) return `hace ${hours} h`;
@@ -440,7 +440,7 @@ export function buildInsights(
     if (share >= 50) {
       insights.push({
         tone: "warning",
-        text: `El ${share} % de las amenazas llegó de noche (7 p. m. – 7 a. m.).`,
+        text: `El ${share} % de las amenazas se detectó de noche (7 p. m. – 7 a. m.).`,
       });
     }
   }
@@ -460,11 +460,11 @@ export function buildInsights(
       thisWeek > lastWeek
         ? {
             tone: "success",
-            text: `Tu confianza promedio subió ${thisWeek - lastWeek} puntos frente a la semana anterior.`,
+            text: `La confianza promedio de tus correos subió ${thisWeek - lastWeek} puntos frente a la semana anterior.`,
           }
         : {
             tone: "warning",
-            text: `Tu confianza promedio bajó ${lastWeek - thisWeek} puntos frente a la semana anterior.`,
+            text: `La confianza promedio de tus correos bajó ${lastWeek - thisWeek} puntos frente a la semana anterior.`,
           },
     );
   }
@@ -475,7 +475,7 @@ export function buildInsights(
   if (worstSignal && worstSignal.alertRate > 0) {
     insights.push({
       tone: "info",
-      text: `La señal que más alerta es «${worstSignal.label}»: aparece en el ${worstSignal.alertRate} % de los correos.`,
+      text: `La señal con más alertas es «${worstSignal.label}»: se activa en el ${worstSignal.alertRate} % de los correos.`,
     });
   }
 

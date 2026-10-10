@@ -33,7 +33,7 @@ export function createScanEmail({ analysis, history, quota, logger }: Deps) {
     if (currentQuota.remaining <= 0) {
       throw tooManyRequests(
         authenticated
-          ? "Alcanzaste tu límite diario de análisis."
+          ? "Alcanzaste tu límite diario de análisis. Podrás analizar más correos mañana."
           : "Alcanzaste el límite diario sin cuenta. Inicia sesión para analizar más correos.",
       );
     }

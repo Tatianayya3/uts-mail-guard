@@ -53,7 +53,7 @@ export default function ScansVolumeChart({
             )
             .join("");
           return `<div style="min-width:170px">
-            <div style="color:${COLORS.muted};font-size:11px;margin-bottom:6px">${bucket.label} · ${bucket.total} correos</div>
+            <div style="color:${COLORS.muted};font-size:11px;margin-bottom:6px">${bucket.label} · ${bucket.total} ${bucket.total === 1 ? "correo" : "correos"}</div>
             ${rows || "<div>Sin análisis</div>"}
             ${bucket.averageTrust !== null ? `<div style="margin-top:6px;border-top:1px solid rgba(255,255,255,.08);padding-top:6px">${dot(COLORS.accent)}Confianza <b style="float:right">${bucket.averageTrust}%</b></div>` : ""}
             ${bucket.total ? `<div style="color:${COLORS.muted};font-size:11px;margin-top:6px">Clic para ver ese día</div>` : ""}

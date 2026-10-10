@@ -24,7 +24,9 @@ export default function SecurityPulseChart({ scans, averageScore }: Props) {
           </p>
           <p className="text-xs text-guard-text-muted">
             {hasScans
-              ? `Últimos ${bars.length} correos analizados`
+              ? bars.length === 1
+                ? "Último correo analizado"
+                : `Últimos ${bars.length} correos analizados`
               : "Historial de confianza"}
           </p>
         </div>
@@ -74,7 +76,7 @@ export default function SecurityPulseChart({ scans, averageScore }: Props) {
               <button
                 key={scan.id}
                 type="button"
-                aria-label={`${scan.subject}: ${VERDICT_LABEL[scan.verdict]}, ${scan.trustScore}%`}
+                aria-label={`${scan.subject || "Correo sin asunto"}: ${VERDICT_LABEL[scan.verdict]}, ${scan.trustScore}%`}
                 onMouseEnter={() => setHovered(scan)}
                 onFocus={() => setHovered(scan)}
                 className="flex h-full flex-1 cursor-pointer flex-col justify-end focus-visible:outline-1 focus-visible:outline-guard-accent"

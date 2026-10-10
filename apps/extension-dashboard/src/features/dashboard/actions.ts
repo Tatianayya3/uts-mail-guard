@@ -30,7 +30,7 @@ export async function updateProfileAction(
     refresh();
     return { ok: true, message: "Guardamos tu nombre." };
   } catch (reason) {
-    return failure(reason, "No pudimos guardar tu perfil.");
+    return failure(reason, "No pudimos guardar tu nombre. Inténtalo de nuevo.");
   }
 }
 
@@ -51,6 +51,9 @@ export async function deleteHistoryAction(
       message: `Borramos ${deleted} análisis de tu historial.`,
     };
   } catch (reason) {
-    return failure(reason, "No pudimos borrar tu historial.");
+    return failure(
+      reason,
+      "No pudimos borrar tu historial. Inténtalo de nuevo.",
+    );
   }
 }

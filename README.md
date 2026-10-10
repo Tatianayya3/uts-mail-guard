@@ -286,7 +286,7 @@ Solicita acceso en [typesafe.ai](https://typesafe.ai) y define `TYPESAFE_API_KEY
 ## Calidad
 
 ```bash
-bun run test          # 57 pruebas unitarias y de integración HTTP (bun test)
+bun run test          # 90 pruebas unitarias y de integración HTTP (bun test)
 bun run check-types   # TypeScript estricto en los 10 proyectos
 bun run build         # build de la extensión y del panel
 ```

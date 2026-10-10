@@ -20,7 +20,7 @@ type AuthFormProps = {
 
 const HEADINGS: Record<AuthMode, { title: string; subtitle: string }> = {
   signin: {
-    title: "Qué bueno verte",
+    title: "¡Qué bueno verte!",
     subtitle: "Inicia sesión para guardar tu historial.",
   },
   signup: {
@@ -150,7 +150,7 @@ function SignInForm({
         ¿Olvidaste tu contraseña?
       </Button>
       <Button type="submit" size="lg" loading={isBusy}>
-        {isBusy ? "Conectando..." : "Iniciar sesión"}
+        {isBusy ? "Iniciando sesión…" : "Iniciar sesión"}
       </Button>
     </form>
   );
@@ -211,7 +211,7 @@ function SignUpForm({
         {...form.field("confirmPassword")}
       />
       <Button type="submit" size="lg" loading={isBusy}>
-        {isBusy ? "Creando cuenta..." : "Crear cuenta"}
+        {isBusy ? "Creando cuenta…" : "Crear cuenta"}
       </Button>
     </form>
   );
@@ -243,7 +243,7 @@ function ForgotForm({
         {...form.field("email")}
       />
       <Button type="submit" size="lg" loading={isBusy}>
-        {isBusy ? "Enviando..." : "Enviar enlace"}
+        {isBusy ? "Enviando…" : "Enviar enlace"}
       </Button>
       <Button variant="ghost" onClick={onBack} disabled={isBusy}>
         Volver a iniciar sesión

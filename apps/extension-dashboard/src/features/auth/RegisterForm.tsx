@@ -58,7 +58,7 @@ export default function RegisterForm({
         {...form.field("confirmPassword")}
       />
       <Button type="submit" size="lg" loading={isLoading} className="w-full">
-        {isLoading ? "Creando cuenta..." : "Crear cuenta"}
+        {isLoading ? "Creando cuenta…" : "Crear cuenta"}
       </Button>
     </form>
   );

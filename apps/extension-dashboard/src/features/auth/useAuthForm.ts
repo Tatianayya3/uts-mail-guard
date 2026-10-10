@@ -9,6 +9,7 @@ import type {
   SignUpValues,
 } from "@mail-guard/contracts";
 import { auth } from "@/lib/supabase/client";
+import { authErrorMessage } from "@mail-guard/supabase";
 
 export type AuthFormStatus = "idle" | "loading" | "success" | "error";
 
@@ -21,7 +22,7 @@ export function useAuthForm() {
     const { error } = await auth.signIn(values.email, values.password);
     if (error) {
       setStatus("error");
-      toast.error(error.message);
+      toast.error(authErrorMessage(error));
       return;
     }
     // Keep status "loading" so the overlay stays visible until the
@@ -40,7 +41,7 @@ export function useAuthForm() {
     );
     if (error) {
       setStatus("error");
-      toast.error(error.message);
+      toast.error(authErrorMessage(error));
       return;
     }
 
@@ -62,7 +63,7 @@ export function useAuthForm() {
     );
     if (error) {
       setStatus("error");
-      toast.error(error.message);
+      toast.error(authErrorMessage(error));
       return false;
     }
     setStatus("success");

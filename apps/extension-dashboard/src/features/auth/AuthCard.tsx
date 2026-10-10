@@ -27,15 +27,15 @@ const HEADINGS: Record<AuthMode, { title: string; subtitle: string }> = {
 const LOADING_COPY: Record<AuthMode, { title: string; description: string }> = {
   signin: {
     title: "Iniciando sesión",
-    description: "Verificando tus credenciales...",
+    description: "Verificando tus credenciales…",
   },
   signup: {
     title: "Creando tu cuenta",
-    description: "Configurando tu escudo de protección...",
+    description: "Configurando tu escudo de protección…",
   },
   forgot: {
     title: "Enviando enlace",
-    description: "Preparando tu correo de recuperación...",
+    description: "Preparando tu correo de recuperación…",
   },
 };
 
@@ -64,7 +64,7 @@ export default function AuthCard() {
             disabled={isLoading}
             onClick={() => setMode("signup")}
           >
-            Registrarse
+            Crear cuenta
           </ModeButton>
         </div>
       )}

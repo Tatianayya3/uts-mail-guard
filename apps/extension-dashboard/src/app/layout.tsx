@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Mail Guard · Detección de phishing en tu correo",
   description:
-    "Extensión para Gmail y Outlook que detecta phishing y explica cada veredicto. Consulta tu historial y métricas.",
+    "Extensión para Chrome que detecta phishing en Gmail, Outlook, Yahoo, AOL, Proton y Zoho, y explica cada veredicto. Consulta tu historial y métricas.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

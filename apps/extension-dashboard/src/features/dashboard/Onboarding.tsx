@@ -9,7 +9,7 @@ const STEPS = [
   {
     icon: MailOpen,
     title: "Abre un correo",
-    text: "En Gmail u Outlook, el correo que quieras revisar.",
+    text: "El que quieras revisar, en Gmail, Outlook, Yahoo u otro webmail compatible.",
   },
   {
     icon: MousePointerClick,

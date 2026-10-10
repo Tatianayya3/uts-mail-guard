@@ -73,7 +73,7 @@ export default function ProfileView({
               </div>
             )}
             <div className="min-w-0">
-              <p className="text-xs text-guard-text-muted">Qué bueno verte</p>
+              <p className="text-xs text-guard-text-muted">¡Qué bueno verte!</p>
               <h1 className="truncate text-xl font-bold tracking-tight text-white">
                 {displayName}
               </h1>
@@ -95,7 +95,7 @@ export default function ProfileView({
               className={`h-3 w-3 ${isRefreshing ? "animate-spin text-guard-accent" : ""}`}
               aria-hidden="true"
             />
-            {isRefreshing ? "Cargando" : "Actualizar"}
+            {isRefreshing ? "Actualizando…" : "Actualizar"}
           </button>
         </div>
 
@@ -107,7 +107,7 @@ export default function ProfileView({
             <p className="mt-0.5 text-sm font-semibold text-white">
               {stats.lastScannedAt
                 ? timeAgo(stats.lastScannedAt)
-                : "Aún no analizas correos"}
+                : "Aún no has analizado correos"}
             </p>
           </div>
           {dashboardUrl && (
@@ -127,7 +127,7 @@ export default function ProfileView({
         <ProfileMetric
           label="Correos analizados"
           value={stats.totalScans}
-          detail={hasScans ? "Historial guardado" : "Esperando escaneos"}
+          detail={hasScans ? "Historial guardado" : "Aún sin análisis"}
           variant="accent"
         />
         <ProfileMetric
@@ -175,7 +175,7 @@ export default function ProfileView({
           disabled={isBusy}
           className="h-11 cursor-pointer rounded-xl border border-white/5 bg-guard-surface-card text-xs font-semibold text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isBusy ? "Cerrando sesión..." : "Cerrar sesión"}
+          {isBusy ? "Cerrando sesión…" : "Cerrar sesión"}
         </button>
         <p className="truncate px-2 text-center text-[10px] text-guard-text-muted">
           {email}

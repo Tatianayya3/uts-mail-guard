@@ -26,3 +26,4 @@ export const createAuthApi = (supabase: SupabaseClient) => ({
 });
 
 export type AuthApi = ReturnType<typeof createAuthApi>;
+export { authErrorMessage, GENERIC_AUTH_ERROR } from "./errors";

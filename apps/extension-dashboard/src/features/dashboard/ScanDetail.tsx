@@ -133,7 +133,7 @@ export default function ScanDetail({ scan }: { scan: ScanRecord }) {
           ) : (
             <>
               <p className="mb-3 text-xs text-guard-text-muted/80">
-                Por seguridad los enlaces no son clicables. Cópialos solo si
+                Por seguridad, los enlaces no son clicables. Cópialos solo si
                 necesitas revisarlos.
               </p>
               <ul className="stagger flex flex-col gap-2">

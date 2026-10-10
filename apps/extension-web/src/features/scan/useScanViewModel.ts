@@ -55,7 +55,7 @@ export function useScanViewModel() {
       toast.error(
         error instanceof Error
           ? error.message
-          : "No se pudo analizar este correo.",
+          : "No pudimos analizar este correo. Inténtalo de nuevo.",
       );
     } finally {
       setIsScanning(false);

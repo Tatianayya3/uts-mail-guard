@@ -80,7 +80,7 @@ export default function ActivityHeatmap({ matrix }: { matrix: HeatCell[][] }) {
 
   return (
     <ChartCard
-      title="¿Cuándo llegan tus correos?"
+      title="¿Cuándo analizas tus correos?"
       subtitle="Día y hora (Colombia) · rojo: la mayoría tenía alertas"
       className="xl:col-span-2"
     >
@@ -88,7 +88,7 @@ export default function ActivityHeatmap({ matrix }: { matrix: HeatCell[][] }) {
         <EmptyChartState
           icon={Clock}
           title="Sin datos"
-          description="Aquí verás a qué horas recibes más correos y cuándo llegan las amenazas."
+          description="Aquí verás a qué horas analizas más correos y cuándo aparecen las amenazas."
         />
       ) : (
         <>

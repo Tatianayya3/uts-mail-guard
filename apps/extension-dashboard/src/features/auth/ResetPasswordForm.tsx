@@ -50,7 +50,7 @@ export default function ResetPasswordForm({
         {...form.field("confirmPassword")}
       />
       <Button type="submit" size="lg" loading={isLoading} className="w-full">
-        {isLoading ? "Guardando..." : submitLabel}
+        {isLoading ? "Guardando…" : submitLabel}
       </Button>
     </form>
   );

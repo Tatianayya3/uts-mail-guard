@@ -50,7 +50,7 @@ export default function LoginForm({
         </Button>
       </div>
       <Button type="submit" size="lg" loading={isLoading} className="w-full">
-        {isLoading ? "Ingresando..." : "Entrar al panel"}
+        {isLoading ? "Entrando…" : "Entrar al panel"}
       </Button>
     </form>
   );

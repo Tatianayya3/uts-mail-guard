@@ -46,7 +46,7 @@ const TIPS = [
   "Pasa el cursor sobre un enlace y lee el dominio real antes de hacer clic.",
   "Desconfía de la urgencia: el apuro es la herramienta favorita del fraude.",
   "Si dudas, entra al sitio escribiendo tú mismo la dirección, no desde el correo.",
-  "Reporta el correo como phishing en Gmail u Outlook: ayuda a proteger a otros.",
+  "Reporta el correo como phishing en tu webmail: así ayudas a proteger a otros.",
 ];
 
 const INSTALL: { icon: LucideIcon; text: string }[] = [
@@ -56,11 +56,11 @@ const INSTALL: { icon: LucideIcon; text: string }[] = [
   },
   {
     icon: MailCheck,
-    text: "Abre un correo en Gmail u Outlook (el correo, no la bandeja).",
+    text: "Abre un correo en Gmail, Outlook, Yahoo, AOL, Proton o Zoho (el correo, no la bandeja de entrada).",
   },
   {
     icon: MousePointerClick,
-    text: "Haz clic en el ícono de Mail Guard y pulsa «Escanear correo». Atajo: Alt + Shift + M.",
+    text: "Haz clic en el ícono de Mail Guard y pulsa «Escanear correo». También puedes abrirla con Alt + Shift + M.",
   },
 ];
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { ResetPasswordValues } from "@mail-guard/contracts";
 import { auth, supabase } from "@/lib/supabase/client";
+import { authErrorMessage } from "@mail-guard/supabase";
 
 export type ResetPasswordStatus = "checking" | "ready" | "invalid" | "loading";
 
@@ -41,7 +42,7 @@ export function useResetPassword() {
     const { error } = await auth.updatePassword(values.password);
     if (error) {
       setStatus("ready");
-      toast.error(error.message);
+      toast.error(authErrorMessage(error));
       return;
     }
     toast.success("Tu contraseña se actualizó correctamente.");

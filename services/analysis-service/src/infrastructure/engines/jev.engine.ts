@@ -167,7 +167,7 @@ export function createJevEngine(config: {
             url,
             label: (safeHost(url) || "Enlace").slice(0, 120),
             status: answer.choice,
-            detail: `Jev clasifica este destino como ${answer.choice} (confianza ${pct(answer.confidence)}).`,
+            detail: `Jev clasifica este destino como ${{ safe: "seguro", suspicious: "sospechoso", dangerous: "peligroso" }[answer.choice]} (confianza ${pct(answer.confidence)}).`,
           },
         ];
       });

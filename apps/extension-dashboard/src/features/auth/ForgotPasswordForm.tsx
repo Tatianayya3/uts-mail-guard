@@ -38,7 +38,7 @@ export default function ForgotPasswordForm({
         {...form.field("email")}
       />
       <Button type="submit" size="lg" loading={isLoading} className="w-full">
-        {isLoading ? "Enviando..." : "Enviar enlace"}
+        {isLoading ? "Enviando…" : "Enviar enlace"}
       </Button>
       <Button
         variant="ghost"

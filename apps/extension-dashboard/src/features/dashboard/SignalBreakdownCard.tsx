@@ -35,7 +35,7 @@ export default function SignalBreakdownCard({
         formatter: (p: { dataIndex: number }) => {
           const s = rings[p.dataIndex];
           return s
-            ? `<b>${s.label}</b>: ${s.alertRate}% con alertas<br/><span style="color:${COLORS.muted};font-size:11px">${s.fail} fallos · ${s.warning} advertencias · ${s.pass} correctos</span>`
+            ? `<b>${s.label}</b>: ${s.alertRate}% con alertas<br/><span style="color:${COLORS.muted};font-size:11px">${s.fail} ${s.fail === 1 ? "fallo" : "fallos"} · ${s.warning} ${s.warning === 1 ? "advertencia" : "advertencias"} · ${s.pass} ${s.pass === 1 ? "correcta" : "correctas"}</span>`
             : "";
         },
       },

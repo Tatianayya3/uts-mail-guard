@@ -27,7 +27,7 @@ export default function ResetPasswordPage() {
 
           {status === "checking" && (
             <p className="text-sm text-guard-text-muted">
-              Verificando tu enlace de recuperación...
+              Verificando tu enlace de recuperación…
             </p>
           )}
 
@@ -56,7 +56,7 @@ export default function ResetPasswordPage() {
           {status === "loading" && (
             <LoadingOverlay
               title="Actualizando contraseña"
-              description="Guardando tu nueva contraseña..."
+              description="Guardando tu nueva contraseña…"
             />
           )}
         </div>

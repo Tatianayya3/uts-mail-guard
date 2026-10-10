@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import type { Session } from "@supabase/supabase-js";
+import { isAuthError, type Session } from "@supabase/supabase-js";
 import type {
   ForgotPasswordValues,
   Overview,
@@ -12,6 +12,7 @@ import { env } from "@/config/env";
 import { api } from "@/lib/api";
 import { auth, supabase } from "@/lib/supabase";
 import { syncPendingScans } from "@/features/scan/model/pending-scans";
+import { authErrorMessage } from "@mail-guard/supabase";
 
 export type AccountStatus = "loading" | "idle" | "busy";
 
@@ -35,7 +36,11 @@ export function useAccountViewModel() {
     // UC-08: primero sube lo analizado sin sesión, así las métricas lo incluyen.
     const synced = await syncPendingScans().catch(() => 0);
     if (synced > 0)
-      toast.success(`Sincronizamos ${synced} análisis hechos sin sesión.`);
+      toast.success(
+        synced === 1
+          ? "Sincronizamos 1 análisis hecho sin sesión."
+          : `Sincronizamos ${synced} análisis hechos sin sesión.`,
+      );
 
     const [overviewResult, scansResult] = await Promise.allSettled([
       api.getOverview(),
@@ -48,7 +53,7 @@ export function useAccountViewModel() {
       toast.error(
         overviewResult.reason instanceof Error
           ? overviewResult.reason.message
-          : "No pudimos cargar tus métricas.",
+          : "No pudimos cargar tus métricas. Toca «Actualizar» para reintentar.",
       );
     }
   }, []);
@@ -57,7 +62,7 @@ export function useAccountViewModel() {
     let active = true;
     void auth.getSession().then(({ data, error }) => {
       if (!active) return;
-      if (error) toast.error(error.message);
+      if (error) toast.error(authErrorMessage(error));
       // Rendimiento: al abrir el popup solo se lee la sesión local. Las
       // métricas se piden cuando el usuario abre la pestaña Cuenta.
       setSession(data.session);
@@ -90,8 +95,13 @@ export function useAccountViewModel() {
     try {
       return await action();
     } catch (error) {
+      // Los errores de Supabase llegan en inglés; los del gateway ya en español.
       toast.error(
-        error instanceof Error ? error.message : "Ocurrió un error inesperado.",
+        isAuthError(error)
+          ? authErrorMessage(error)
+          : error instanceof Error
+            ? error.message
+            : "Ocurrió un error inesperado. Inténtalo de nuevo.",
       );
       return undefined;
     } finally {
@@ -128,7 +138,9 @@ export function useAccountViewModel() {
   const forgotPassword = async (values: ForgotPasswordValues) =>
     (await run(async () => {
       if (!env.dashboardUrl)
-        throw new Error("El servicio de recuperación no está configurado.");
+        throw new Error(
+          "La recuperación de contraseña no está disponible en este momento.",
+        );
       const { error } = await auth.resetPasswordForEmail(
         values.email,
         `${env.dashboardUrl}/reset-password`,
