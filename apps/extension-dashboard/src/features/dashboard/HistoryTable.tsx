@@ -170,7 +170,7 @@ export default function HistoryTable({
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="stagger divide-y divide-white/5">
               {visible.map((scan) => {
                 const href = `/dashboard/historial/${scan.id}`;
                 return (

@@ -4,12 +4,13 @@
   "type": "module",
   "version": "2.0.0",
   "private": true,
-  "description": "Detecta phishing en el correo que tienes abierto en Gmail y Outlook.",
+  "description": "Detecta phishing en el correo que tienes abierto en Gmail, Outlook, Yahoo, AOL, Proton o Zoho.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "check-types": "tsc -b",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "bun test"
   },
   "dependencies": {
     "@mail-guard/api-client": "workspace:*",

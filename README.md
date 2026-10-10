@@ -4,7 +4,7 @@
 
 # Mail Guard
 
-**Detección de phishing explicable para Gmail y Outlook.**
+**Detección de phishing explicable para Gmail, Outlook, Yahoo, AOL, Proton y Zoho.**
 
 Una extensión de Chrome que analiza el correo que tienes abierto y te dice, en segundos,
 si es **seguro**, **sospechoso** o **peligroso**, y sobre todo, **por qué**.
@@ -30,7 +30,7 @@ el usuario queda solo frente a la pregunta: _¿puedo confiar en esto?_
 
 **Mail Guard** responde esa pregunta justo donde surge: con el correo abierto.
 
-1. Abres un correo en Gmail u Outlook y pulsas **Escanear correo**.
+1. Abres un correo en tu webmail (Gmail, Outlook, Yahoo, AOL, Proton o Zoho) y pulsas **Escanear correo**.
 2. La extensión envía solo lo necesario: remitente, asunto, texto y enlaces (**nunca adjuntos**).
 3. El backend combina **reglas verificables** con un **modelo de decisión** ([Jev](https://typesafe.ai) de TypeSafe AI).
 4. Recibes un **nivel de confianza (0–100)**, un **veredicto**, las **señales** que lo justifican y un **consejo** concreto.
@@ -42,16 +42,19 @@ extensión o en el **panel web**.
 
 ### Características
 
-|                               |                                                                                                                                                                                                                                 |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🎯 **Veredicto explicable**   | Cada resultado muestra señales por remitente, contenido y enlaces, con la evidencia que las activó.                                                                                                                             |
-| 🧠 **IA para decisiones**     | Jev responde preguntas tipadas (opción, puntaje, sí/no) con probabilidades calibradas. Sin JSON frágil ni alucinaciones de formato.                                                                                             |
-| 🛡️ **Defensa en profundidad** | Las reglas objetivas (dominios que imitan marcas, IPs, punycode, acortadores…) nunca quedan ocultas por un modelo optimista.                                                                                                    |
-| 🔌 **Motor intercambiable**   | Jev, cualquier LLM compatible con OpenAI o reglas locales, con respaldo automático si el proveedor falla.                                                                                                                       |
-| 📊 **Panel web interactivo**  | Filtrado cruzado (un clic en un veredicto filtra todo), hallazgos automáticos, mapa de calor por día y hora, zoom en la tendencia, clic en un punto o barra para ir al detalle; historial con filtros en la URL, cuenta y guía. |
-| 🔒 **Privacidad por diseño**  | Permisos mínimos (`activeTab`), RLS en Postgres, claves solo en el servidor, deduplicación por huella SHA-256.                                                                                                                  |
-| ⚡ **Rápido y económico**     | Caché por huella del correo: repetir un análisis no gasta IA ni cuota.                                                                                                                                                          |
-| 🧪 **Funciona sin claves**    | En local todo arranca con el motor heurístico: ideal para demos y pruebas.                                                                                                                                                      |
+|                                  |                                                                                                                                                                                                                                               |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🎯 **Veredicto explicable**      | Cada resultado muestra señales por remitente, contenido y enlaces, con la evidencia que las activó.                                                                                                                                           |
+| 🧠 **IA para decisiones**        | Jev responde preguntas tipadas (opción, puntaje, sí/no) con probabilidades calibradas. Sin JSON frágil ni alucinaciones de formato.                                                                                                           |
+| 🛡️ **Defensa en profundidad**    | Las reglas objetivas (dominios que imitan marcas, IPs, punycode, acortadores…) nunca quedan ocultas por un modelo optimista.                                                                                                                  |
+| 📬 **Seis webmails**             | Gmail, Outlook, Yahoo, AOL, Proton y Zoho. Cada proveedor tiene sus selectores y, si cambian, la extensión recurre a pistas genéricas (`mailto:`, atributos con correo, iframes del mismo origen).                                            |
+| 🏷️ **44 marcas vigiladas**       | Bancos y billeteras de Colombia (Bancolombia, Nequi, Banco de Bogotá, AV Villas…), comercio (Mercado Libre, Temu, Rappi…), DIAN, mensajerías y servicios globales. Detecta `bancolombiasegura.com`, `mercado-libre-pagos.com` o `paypa1.com`. |
+| 🔌 **Motor intercambiable**      | Jev, cualquier LLM compatible con OpenAI o reglas locales, con respaldo automático si el proveedor falla.                                                                                                                                     |
+| 📊 **Panel web interactivo**     | Filtrado cruzado (un clic en un veredicto filtra todo), hallazgos automáticos, mapa de calor por día y hora, zoom en la tendencia, clic en un punto o barra para ir al detalle; historial con filtros en la URL, cuenta y guía.               |
+| ✨ **Animaciones con propósito** | El anillo de confianza se dibuja y cuenta hasta el puntaje, las señales entran escalonadas y un radar indica el análisis; todo se desactiva con «reducir movimiento».                                                                         |
+| 🔒 **Privacidad por diseño**     | Permisos mínimos (`activeTab`), RLS en Postgres, claves solo en el servidor, deduplicación por huella SHA-256.                                                                                                                                |
+| ⚡ **Rápido y económico**        | Caché por huella del correo: repetir un análisis no gasta IA ni cuota.                                                                                                                                                                        |
+| 🧪 **Funciona sin claves**       | En local todo arranca con el motor heurístico: ideal para demos y pruebas.                                                                                                                                                                    |
 
 ---
 
@@ -141,7 +144,7 @@ bun run dev        # levanta gateway, análisis, historial, panel web y extensi�
 1. `cd apps/extension-web && bun run build`
 2. Abre `chrome://extensions` y activa **Modo de desarrollador**.
 3. **Cargar descomprimida** → selecciona `apps/extension-web/dist`.
-4. Abre un correo en Gmail u Outlook, haz clic en el ícono de Mail Guard y pulsa **Escanear correo**.
+4. Abre un correo en cualquiera de los webmails compatibles, haz clic en el ícono de Mail Guard y pulsa **Escanear correo**.
 
 Vuelve a compilar y recargar la extensión cada vez que cambies variables `VITE_*`.
 

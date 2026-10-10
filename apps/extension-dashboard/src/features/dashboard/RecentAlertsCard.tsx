@@ -27,7 +27,7 @@ export default function RecentAlertsCard({ scans }: { scans: ScanRecord[] }) {
           description="Ningún correo sospechoso o peligroso en este periodo."
         />
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="stagger flex flex-col gap-2">
           {alerts.map((scan) => (
             <li key={scan.id}>
               <Link

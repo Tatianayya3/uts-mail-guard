@@ -35,7 +35,7 @@ export default function StatCard({
 }: StatCardProps) {
   const TrendIcon = trend && trend.value < 0 ? TrendingDown : TrendingUp;
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-b from-white/[0.045] to-white/[0.015] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors duration-300 hover:border-guard-accent/30">
+    <div className="group overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-b from-white/[0.045] to-white/[0.015] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-[border-color,transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-guard-accent/30 hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-medium text-guard-text-muted">{label}</p>
@@ -44,7 +44,7 @@ export default function StatCard({
           </p>
         </div>
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${TONE_CLASS[tone]}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6 ${TONE_CLASS[tone]}`}
           aria-hidden="true"
         >
           <Icon className="h-5 w-5" strokeWidth={2.25} />

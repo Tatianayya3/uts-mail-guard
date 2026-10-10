@@ -86,31 +86,35 @@ export default function AnalysisResultView({
           loading={isScanning}
           icon={<RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />}
         >
-          {isScanning ? "Analizando..." : "Nuevo análisis"}
+          {isScanning ? "Analizando…" : "Analizar de nuevo"}
         </Button>
       </div>
 
       <div className="relative" aria-busy={isScanning}>
         {isScanning && (
-          <div className="absolute inset-0 z-20 flex justify-center rounded-2xl bg-guard-surface/85 pt-14 backdrop-blur-sm animate-fade-in">
-            <div className="sticky top-16 flex h-fit flex-col items-center rounded-2xl border border-guard-accent/25 bg-guard-surface-raised/95 px-6 py-5 text-center shadow-[0_10px_40px_rgba(0,0,0,0.6)]">
-              <span className="h-10 w-10 animate-spin rounded-full border-2 border-transparent border-t-guard-accent border-r-guard-success" />
+          <div className="absolute inset-0 z-20 flex animate-fade-in justify-center rounded-2xl bg-guard-surface/85 pt-14 backdrop-blur-sm">
+            <div className="sticky top-16 flex h-fit animate-scale-in flex-col items-center rounded-2xl border border-guard-accent/25 bg-guard-surface-raised/95 px-6 py-5 text-center shadow-[0_10px_40px_rgba(0,0,0,0.6)]">
+              <span className="relative h-12 w-12">
+                <span className="radar-sweep absolute inset-0 animate-radar rounded-full" />
+                <span className="absolute inset-0 rounded-full border border-guard-accent/30" />
+              </span>
               <p className="mt-3 text-sm font-bold text-white">
                 Analizando correo
               </p>
               <p className="mt-1 max-w-52 text-[11px] text-guard-text-muted">
-                Revisando remitente, contenido y enlaces…
+                Revisando el remitente, el contenido y los enlaces…
               </p>
             </div>
           </div>
         )}
 
         <div
-          className={`flex flex-col gap-4 transition-all duration-300 ${isScanning ? "pointer-events-none select-none opacity-30 blur-[1px]" : ""}`}
+          key={result.analyzedAt}
+          className={`stagger flex flex-col gap-4 transition-all duration-300 ${isScanning ? "pointer-events-none select-none opacity-30 blur-[1px]" : ""}`}
         >
           <section className="relative isolate flex flex-col items-center overflow-hidden rounded-2xl border border-white/10 bg-white/5 px-5 py-6 text-center shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
             <div
-              className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-10 blur-3xl"
+              className="pointer-events-none absolute inset-x-0 top-4 -z-10 mx-auto h-44 w-44 animate-glow rounded-full blur-3xl"
               style={{ backgroundColor: VERDICT_COLOR[result.verdict] }}
             />
             <TrustRing score={result.trustScore} verdict={result.verdict} />
@@ -124,7 +128,7 @@ export default function AnalysisResultView({
               {result.sender.email}
             </p>
             <span
-              className={`mt-3 rounded-full border px-3 py-1 text-[11px] font-medium ${VERDICT_CHIP[result.verdict]}`}
+              className={`mt-3 animate-scale-in rounded-full border px-3 py-1 text-[11px] font-medium [animation-delay:700ms] ${VERDICT_CHIP[result.verdict]}`}
             >
               {DOMAIN_LABEL[result.sender.domainStatus]}
             </span>
@@ -173,13 +177,14 @@ export default function AnalysisResultView({
             <div className="mb-2 flex items-center justify-between px-1 text-[10px] font-medium tracking-wide">
               <p className="text-guard-text-muted">SEÑALES DETECTADAS</p>
               <p className="text-guard-accent">
-                {passed}/{signals.length} sin alertas
+                {passed} de {signals.length} sin alertas
               </p>
             </div>
             {signals.length > 0 ? (
               <div className="grid grid-cols-2 gap-1">
-                {signals.map((signal) => (
+                {signals.map((signal, index) => (
                   <SignalCard
+                    index={index}
                     key={signal.key}
                     label={SIGNAL_KEY_LABEL[signal.key] ?? signal.label}
                     value={signal.value}
@@ -190,7 +195,7 @@ export default function AnalysisResultView({
               </div>
             ) : (
               <p className="rounded-xl bg-guard-surface-raised px-3 py-3 text-xs text-guard-text-muted">
-                No hubo señales suficientes para validar este correo.
+                No hay señales suficientes para evaluar este correo.
               </p>
             )}
           </section>
@@ -198,13 +203,14 @@ export default function AnalysisResultView({
           {riskyLinks.length > 0 && (
             <section className="rounded-2xl border border-red-400/15 bg-red-400/5 p-3">
               <p className="mb-2 text-[10px] font-semibold tracking-wide text-red-200">
-                ENLACES CON ALERTAS · no los abras
+                ENLACES DE RIESGO · NO LOS ABRAS
               </p>
               <ul className="flex flex-col gap-1.5">
-                {riskyLinks.slice(0, 5).map((link) => (
+                {riskyLinks.slice(0, 5).map((link, index) => (
                   <li
                     key={link.url}
-                    className="rounded-lg bg-black/20 px-2.5 py-2"
+                    className="animate-slide-in rounded-lg bg-black/20 px-2.5 py-2"
+                    style={{ animationDelay: `${300 + index * 70}ms` }}
                   >
                     <p
                       className="truncate font-mono text-[10px] text-white/90"
@@ -223,14 +229,14 @@ export default function AnalysisResultView({
 
           <div className="flex items-center justify-between gap-2 rounded-xl bg-guard-surface-card px-3 py-2.5 text-[11px]">
             {saved ? (
-              <span className="flex items-center gap-1.5 text-guard-success">
+              <span className="flex animate-fade-in items-center gap-1.5 text-guard-success">
                 <CloudCheck className="h-4 w-4" aria-hidden="true" /> Guardado
                 en tu historial
               </span>
             ) : (
               <span className="flex items-center gap-1.5 text-guard-text-muted">
                 <CloudOff className="h-4 w-4" aria-hidden="true" /> Inicia
-                sesión para guardarlo
+                sesión para guardar este análisis
               </span>
             )}
             {saved && dashboardUrl && (
@@ -238,17 +244,22 @@ export default function AnalysisResultView({
                 href={`${dashboardUrl}/dashboard/historial`}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1 font-semibold text-guard-accent hover:text-guard-accent-bright"
+                className="group flex items-center gap-1 font-semibold text-guard-accent transition-colors hover:text-guard-accent-bright"
               >
                 Ver en el panel{" "}
-                <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                <ExternalLink
+                  className="h-3 w-3 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
               </a>
             )}
           </div>
 
           <p className="mx-auto rounded-full bg-guard-surface-card px-4 py-2 text-[10px] text-guard-text-muted">
             <span className="text-guard-success">●</span> {result.links.length}{" "}
-            {result.links.length === 1 ? "enlace revisado" : "enlaces revisados"}
+            {result.links.length === 1
+              ? "enlace revisado"
+              : "enlaces revisados"}
             <span className="mx-2 text-guard-success">•</span>
             {dateFormat.format(new Date(result.analyzedAt))}
           </p>

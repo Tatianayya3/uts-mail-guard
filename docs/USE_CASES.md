@@ -46,7 +46,7 @@ flowchart LR
 ### UC-01 · Analizar correo abierto
 
 - **Actores:** Invitado, Usuario registrado, Motor de decisión.
-- **Precondición:** Hay un correo abierto en Gmail u Outlook en la pestaña activa.
+- **Precondición:** Hay un correo abierto en un webmail compatible (Gmail, Outlook, Yahoo, AOL, Proton o Zoho) en la pestaña activa.
 - **Flujo principal:**
   1. El usuario abre la extensión y pulsa **Escanear correo**.
   2. La extensión lee remitente, nombre visible, asunto, texto y enlaces.
@@ -55,7 +55,7 @@ flowchart LR
   5. Si no está, extrae evidencias, consulta al motor y combina el resultado.
   6. La extensión muestra puntaje, veredicto, señales, enlaces con alertas y un consejo.
 - **Flujos alternos:**
-  - 1a. La pestaña no es Gmail/Outlook → botón deshabilitado y aviso «Sitio no compatible».
+  - 1a. La pestaña no es un webmail compatible → botón deshabilitado y aviso «Sitio no compatible».
   - 2a. Es la bandeja y no un correo → «Abre un correo para analizarlo».
   - 3a. Sin cuota → 429 con mensaje que invita a iniciar sesión.
   - 5a. El motor falla → resultado del respaldo heurístico.

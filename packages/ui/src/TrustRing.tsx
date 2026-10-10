@@ -1,8 +1,12 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { VERDICT_COLOR, type Verdict } from "@mail-guard/contracts";
 import { cn } from "./cn";
 
 const RADIUS = 52;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+const DURATION_MS = 1100;
 
 type TrustRingProps = {
   score: number;
@@ -11,14 +15,37 @@ type TrustRingProps = {
   caption?: string;
 };
 
-/** Anillo de confianza 0–100 coloreado por veredicto. */
+/** Cuenta de 0 al valor con easing; respeta «reducir movimiento». */
+function useCountUp(target: number): number {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setValue(target);
+      return;
+    }
+    let frame = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / DURATION_MS);
+      const eased = 1 - Math.pow(1 - t, 4);
+      setValue(Math.round(target * eased));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [target]);
+  return value;
+}
+
+/** Anillo de confianza 0–100 coloreado por veredicto, que se dibuja al aparecer. */
 export function TrustRing({
   score,
   verdict,
   className,
   caption = "Nivel de confianza",
 }: TrustRingProps) {
-  const clamped = Math.max(0, Math.min(100, score));
+  const clamped = Math.max(0, Math.min(100, Math.round(score)));
+  const shown = useCountUp(clamped);
   const color = VERDICT_COLOR[verdict];
   return (
     <div className={cn("relative h-40 w-40", className)}>
@@ -45,12 +72,8 @@ export function TrustRing({
           strokeLinecap="round"
           strokeWidth="7"
           strokeDasharray={CIRCUMFERENCE}
-          strokeDashoffset={CIRCUMFERENCE - (clamped / 100) * CIRCUMFERENCE}
-          style={{
-            transition:
-              "stroke-dashoffset 900ms cubic-bezier(0.22, 1, 0.36, 1)",
-            filter: `drop-shadow(0 0 4px ${color}99)`,
-          }}
+          strokeDashoffset={CIRCUMFERENCE - (shown / 100) * CIRCUMFERENCE}
+          style={{ filter: `drop-shadow(0 0 4px ${color}99)` }}
         />
       </svg>
       <div
@@ -58,7 +81,7 @@ export function TrustRing({
         aria-hidden="true"
       >
         <p className="text-4xl font-bold leading-none text-white tabular-nums">
-          {clamped}
+          {shown}
           <span className="text-sm" style={{ color }}>
             %
           </span>

@@ -83,7 +83,7 @@ export default function OverviewView({
 
       <section
         aria-label="Resumen histórico"
-        className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        className="stagger mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
         <StatCard
           icon={Mail}

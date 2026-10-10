@@ -69,3 +69,54 @@ describe("collectEvidence", () => {
     expect(collectEvidence(emptyEmail).hasContent).toBe(false);
   });
 });
+
+describe("más marcas y dominios", () => {
+  test.each([
+    ["bancolombiasegura.com", "Bancolombia"],
+    ["mercado-libre-pagos.com", "Mercado Libre"],
+    ["banco-de-bogota.co", "Banco de Bogotá"],
+    ["avvi1las.com.co", "Banco AV Villas"],
+    ["spotlfy-premium.xyz", "Spotify"],
+    ["docusign-review.net", "DocuSign"],
+    ["interrapidisimo-envios.co", "Inter Rapidísimo"],
+  ])("%s imita a %s", (domain, brand) => {
+    expect(imitatedBrand(domain)).toBe(brand);
+  });
+
+  test.each([
+    "finance.yahoo.com",
+    "lh3.googleusercontent.com",
+    "bucket.s3.amazonaws.com",
+    "www.spotify.com",
+    "scotiabankcolpatria.com",
+    "agua-claro.com",
+  ])("%s no es suplantación", (domain) => {
+    expect(imitatedBrand(domain)).toBeUndefined();
+  });
+
+  test("las siglas cortas del nombre visible deben ser palabra completa", () => {
+    const guardian = collectEvidence({
+      ...legitEmail,
+      sender: "news@theguardian.com",
+      senderName: "The Guardian",
+    });
+    expect(guardian.displayNameBrand).toBeUndefined();
+
+    const dian = collectEvidence({
+      ...legitEmail,
+      sender: "notificaciones@dian-co.xyz",
+      senderName: "Notificaciones DIAN",
+    });
+    expect(dian.displayNameBrand).toBe("DIAN");
+  });
+
+  test("nuevos proveedores de correo gratuito y acortadores", () => {
+    const evidence = collectEvidence({
+      ...legitEmail,
+      sender: "soporte.banco@ymail.com",
+      links: ["https://surl.li/abcd"],
+    });
+    expect(evidence.freeMail).toBe(true);
+    expect(evidence.links[0]?.flags).toContain("shortener");
+  });
+});

@@ -48,7 +48,7 @@ export default function NavLinks({
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex items-center gap-2.5 rounded-xl px-3 text-sm font-medium transition-colors",
+                  "group relative flex items-center gap-2.5 rounded-xl px-3 text-sm font-medium transition-colors",
                   "focus-visible:outline-2 focus-visible:outline-guard-accent",
                   vertical ? "h-10" : "h-9",
                   active
@@ -56,8 +56,14 @@ export default function NavLinks({
                     : "text-guard-text-muted hover:bg-white/5 hover:text-white",
                 )}
               >
+                {active && vertical && (
+                  <span
+                    className="absolute inset-y-2 left-0 w-0.5 animate-scale-in rounded-full bg-guard-accent"
+                    aria-hidden="true"
+                  />
+                )}
                 <Icon
-                  className="h-4 w-4"
+                  className="h-4 w-4 transition-transform duration-200 group-hover:scale-110"
                   strokeWidth={2.25}
                   aria-hidden="true"
                 />

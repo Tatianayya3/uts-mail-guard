@@ -9,6 +9,7 @@ import {
 import {
   BRANDS,
   FREE_MAIL_DOMAINS,
+  LOOKALIKE_EXCEPTIONS,
   KEYWORDS,
   RISKY_TLDS,
   URL_SHORTENERS,
@@ -64,19 +65,27 @@ function officialBrandOf(domain: string): string | undefined {
   )?.name;
 }
 
-/** Detecta dominios tipo "paypa1-secure.com" o "bancolombla.co". */
+/** Detecta dominios tipo "paypa1-secure.com", "bancolombla.co" o "bancolombiasegura.com". */
 export function imitatedBrand(domain: string): string | undefined {
   if (!domain || officialBrandOf(domain)) return undefined;
+  const labels = domain.toLowerCase().split(".").filter(Boolean);
   // Tokens del host completo: "secure.paypa1-login.com" → secure, paypal, login, com
-  const tokens = domain
-    .toLowerCase()
-    .split(/[.-]/)
-    .filter(Boolean)
-    .map(deconfuse);
-  for (const [key, brand] of Object.entries(BRANDS)) {
+  const tokens = labels.flatMap((label) =>
+    label.split("-").filter(Boolean).map(deconfuse),
+  );
+  // Etiquetas sin guiones: "mercado-libre-pagos" → "mercadolibrepagos"
+  const joined = labels.map((label) => deconfuse(label.replace(/-/g, "")));
+  for (const [rawKey, brand] of Object.entries(BRANDS)) {
+    const key = deconfuse(rawKey); // "avvillas" se compara como "awillas"
     if (tokens.includes(key)) return brand.name;
-    // Errores de una letra solo en nombres largos (evita "apply" ≈ "apple").
-    if (key.length >= 6 && tokens.some((t) => levenshtein(t, key) === 1))
+    // Nombres cortos solo coinciden exactos (evita "apply" ≈ "apple").
+    if (key.length < 6) continue;
+    if (joined.some((label) => label.includes(key))) return brand.name;
+    if (
+      tokens.some(
+        (t) => !LOOKALIKE_EXCEPTIONS.has(t) && levenshtein(t, key) === 1,
+      )
+    )
       return brand.name;
   }
   return undefined;
@@ -128,10 +137,17 @@ export function collectEvidence(email: EmailSnapshot): Evidence {
   const senderName = (email.senderName ?? "").trim();
   const text = foldText(`${email.subject}\n${email.bodyText}`);
   const officialBrand = officialBrandOf(senderDomain);
-  const foldedName = foldText(senderName).replace(/\s+/g, "");
+  const nameWords = foldText(senderName)
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+  const joinedName = nameWords.join("");
 
+  // Siglas cortas ("DIAN", "BBVA") deben ser una palabra completa: así
+  // "The Guardian" no se confunde con la DIAN.
   const displayNameBrand = Object.entries(BRANDS).find(
-    ([key, brand]) => foldedName.includes(key) && brand.name !== officialBrand,
+    ([key, brand]) =>
+      brand.name !== officialBrand &&
+      (key.length >= 6 ? joinedName.includes(key) : nameWords.includes(key)),
   )?.[1].name;
 
   return {

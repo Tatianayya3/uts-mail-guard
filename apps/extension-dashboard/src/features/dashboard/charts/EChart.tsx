@@ -97,7 +97,10 @@ export default function EChart({
           aria-hidden="true"
         />
       )}
-      <div ref={containerRef} className="h-full w-full" />
+      <div
+        ref={containerRef}
+        className={cn("h-full w-full", ready && "animate-fade-in")}
+      />
     </div>
   );
 }

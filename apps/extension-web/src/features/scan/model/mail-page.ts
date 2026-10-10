@@ -1,30 +1,15 @@
 import { LIMITS, type EmailSnapshot } from "@mail-guard/contracts";
+import {
+  ALL_PROVIDER_HOSTS,
+  PROVIDER_LIST_TEXT,
+  PROVIDERS,
+  providerOf,
+  type ProviderSelectors,
+  type SupportedProvider,
+} from "./providers";
 
-export type SupportedProvider = "Gmail" | "Outlook";
+export type { SupportedProvider } from "./providers";
 export type ActiveProvider = SupportedProvider | "unsupported";
-
-const PROVIDER_HOSTS: Record<SupportedProvider, string[]> = {
-  Gmail: ["mail.google.com"],
-  Outlook: [
-    "outlook.live.com",
-    "outlook.office.com",
-    "outlook.office365.com",
-    "outlook.cloud.microsoft",
-  ],
-};
-
-function providerOf(url: string | undefined): SupportedProvider | null {
-  if (!url) return null;
-  const { hostname } = new URL(url);
-  for (const [provider, hosts] of Object.entries(PROVIDER_HOSTS)) {
-    if (
-      hosts.some((host) => hostname === host || hostname.endsWith(`.${host}`))
-    ) {
-      return provider as SupportedProvider;
-    }
-  }
-  return null;
-}
 
 async function activeTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -33,17 +18,6 @@ async function activeTab() {
 
 export async function getActiveProvider(): Promise<ActiveProvider> {
   return providerOf((await activeTab())?.url) ?? "unsupported";
-}
-
-/** Gmail: #inbox/<id>; Outlook: …/id/<id>. La bandeja (lista) no se analiza. */
-function isEmailOpen(url: URL, provider: SupportedProvider): boolean {
-  if (provider === "Gmail") {
-    const segments = url.hash.replace(/^#/, "").split("/").filter(Boolean);
-    return (
-      segments.length >= 2 && /^[A-Za-z0-9_-]{10,}$/.test(segments.at(-1) ?? "")
-    );
-  }
-  return /\/id\//.test(url.pathname);
 }
 
 /**
@@ -57,22 +31,26 @@ export async function readOpenEmail(): Promise<{
   const tab = await activeTab();
   const provider = providerOf(tab?.url);
   if (!tab?.id || !tab.url || !provider) {
-    throw new Error("Abre un correo en Gmail u Outlook para escanearlo.");
-  }
-  if (!isEmailOpen(new URL(tab.url), provider)) {
     throw new Error(
-      "Abre un correo para analizarlo. El escáner funciona sobre un correo abierto, no sobre la bandeja de entrada.",
+      `Abre un correo en ${PROVIDER_LIST_TEXT} para poder analizarlo.`,
+    );
+  }
+  if (!PROVIDERS[provider].isEmailOpen(new URL(tab.url))) {
+    throw new Error(
+      "Abre un correo antes de escanear. El análisis funciona sobre un mensaje abierto, no sobre la bandeja de entrada.",
     );
   }
 
   const [injection] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     func: extractFromPage,
-    args: [provider],
+    args: [PROVIDERS[provider].selectors, ALL_PROVIDER_HOSTS],
   });
   const page = injection?.result as PageExtract | undefined;
   if (!page?.sender) {
-    throw new Error("No encontramos el remitente del correo abierto.");
+    throw new Error(
+      "No pudimos identificar el remitente. Espera a que el correo cargue por completo y vuelve a intentarlo.",
+    );
   }
 
   const email: EmailSnapshot = {
@@ -104,47 +82,64 @@ type PageExtract = {
 
 /**
  * Se ejecuta DENTRO de la pestaña (chrome.scripting): debe ser autocontenida,
- * sin referencias a variables de este módulo.
+ * sin referencias a variables de este módulo. Usa primero los selectores del
+ * proveedor y, si no encuentra nada, atributos genéricos (email, title,
+ * mailto:) que comparten casi todos los webmails.
  */
-function extractFromPage(provider: SupportedProvider): PageExtract {
+export function extractFromPage(
+  selectors: ProviderSelectors,
+  ownHosts: string[],
+): PageExtract {
   const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
-  const root =
-    document.querySelector(
-      provider === "Gmail"
-        ? "[role='main']"
-        : "[role='main'], [data-app-section='MailReadCompose']",
-    ) ?? document.body;
-  const text = (root as HTMLElement).innerText ?? "";
+  const GENERIC_SENDER = [
+    "[email]",
+    "[data-email]",
+    "[data-hovercard-id*='@']",
+    "[title*='@']",
+    "a[href^='mailto:']",
+    "[aria-label*='@']",
+  ];
 
-  const senderSelectors =
-    provider === "Gmail"
-      ? ["span.gD[email]", "span[email]", "[data-hovercard-id*='@']"]
-      : [
-          "[data-testid*='sender'] [title*='@']",
-          "[email]",
-          "[data-testid*='sender']",
-          "[aria-label*='@']",
-        ];
-  const senderElement = senderSelectors
+  const root: Element =
+    document.querySelector(selectors.root) ??
+    document.querySelector("[role='main'], main") ??
+    document.body;
+
+  // Algunos webmails (p. ej. Proton) pintan el cuerpo en un iframe del mismo
+  // origen. Si no es accesible se ignora sin fallar.
+  const frames = Array.from(root.querySelectorAll("iframe")).flatMap(
+    (frame) => {
+      try {
+        const body = frame.contentDocument?.body;
+        return body ? [body] : [];
+      } catch {
+        return [];
+      }
+    },
+  );
+  const scopes: Element[] = [root, ...frames];
+
+  const emailIn = (el: Element) =>
+    [
+      el.getAttribute("email"),
+      el.getAttribute("data-email"),
+      el.getAttribute("data-hovercard-id"),
+      el.getAttribute("title"),
+      el.getAttribute("href"),
+      el.getAttribute("aria-label"),
+      el.textContent,
+    ]
+      .map((value) => value?.match(EMAIL)?.[0])
+      .find(Boolean);
+
+  const senderElement = [...selectors.sender, ...GENERIC_SENDER]
     .flatMap((selector) => Array.from(root.querySelectorAll(selector)))
-    .find((el) =>
-      EMAIL.test(
-        el.getAttribute("email") ??
-          el.getAttribute("data-hovercard-id") ??
-          el.getAttribute("title") ??
-          el.getAttribute("aria-label") ??
-          el.textContent ??
-          "",
-      ),
-    );
-  const senderSource =
-    senderElement?.getAttribute("email") ??
-    senderElement?.getAttribute("data-hovercard-id") ??
-    senderElement?.getAttribute("title") ??
-    senderElement?.getAttribute("aria-label") ??
-    senderElement?.textContent ??
-    text;
-  const sender = senderSource.match(EMAIL)?.[0] ?? "";
+    .find((el) => emailIn(el));
+  const text = scopes
+    .map((scope) => (scope as HTMLElement).innerText ?? "")
+    .join("\n");
+  const sender =
+    (senderElement && emailIn(senderElement)) ?? text.match(EMAIL)?.[0] ?? "";
   const senderName = (
     senderElement?.getAttribute("name") ??
     senderElement?.textContent?.replace(EMAIL, "").replace(/[<>]/g, "") ??
@@ -152,26 +147,23 @@ function extractFromPage(provider: SupportedProvider): PageExtract {
   ).trim();
 
   const subject =
-    document
-      .querySelector(
-        provider === "Gmail"
-          ? "h2.hP, h2[data-thread-perm-id], [role='main'] h2"
-          : "[data-testid='message-subject'], [role='main'] h1, [role='main'] h2",
-      )
-      ?.textContent?.trim() ?? "";
+    (
+      document.querySelector(selectors.subject) ?? root.querySelector("h1, h2")
+    )?.textContent?.trim() ?? "";
 
-  const ownHosts =
-    /(^|\.)(mail\.google\.com|outlook\.(live|office|office365)\.com|outlook\.cloud\.microsoft)$/i;
+  const isOwnHost = (hostname: string) =>
+    ownHosts.some((h) => hostname === h || hostname.endsWith(`.${h}`));
   const links = Array.from(
     new Set(
-      Array.from(root.querySelectorAll<HTMLAnchorElement>("a[href]"))
+      scopes
+        .flatMap((scope) =>
+          Array.from(scope.querySelectorAll<HTMLAnchorElement>("a[href]")),
+        )
         .map((a) => a.href)
         .filter((href) => {
           try {
             const url = new URL(href);
-            return (
-              /^https?:$/.test(url.protocol) && !ownHosts.test(url.hostname)
-            );
+            return /^https?:$/.test(url.protocol) && !isOwnHost(url.hostname);
           } catch {
             return false;
           }

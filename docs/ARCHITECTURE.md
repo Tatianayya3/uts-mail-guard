@@ -211,6 +211,23 @@ acortadores, lenguaje de urgencia, solicitud de credenciales) y luego:
 `DECISION_ENGINE=auto` elige Jev si hay `TYPESAFE_API_KEY`, luego un LLM
 compatible con OpenAI, y por último las reglas locales.
 
+### Webmails y listas de conocimiento
+
+- **Proveedores** (`apps/extension-web/src/features/scan/model/providers.ts`):
+  una tabla con los hosts, cómo reconocer un correo abierto (no la bandeja) y
+  los selectores de cada webmail. El mismo archivo genera los
+  `host_permissions` del manifiesto. El extractor usa primero los selectores
+  del proveedor y luego pistas genéricas (`mailto:`, atributos `email`/`title`,
+  iframes del mismo origen), así que un cambio de diseño en el webmail no lo
+  rompe del todo. iCloud no está soportado: el mensaje vive en un iframe de
+  otro origen.
+- **Marcas** (`services/analysis-service/src/domain/knowledge.ts`): 44 marcas
+  con sus dominios oficiales. Un host imita una marca si (a) un fragmento es
+  la marca, (b) una etiqueta sin guiones la contiene (`mercado-libre-pagos`),
+  o (c) está a una letra de una marca de 6+ caracteres (`paypa1`), salvo
+  palabras comunes como `finance`. Las siglas cortas del nombre visible deben
+  ser una palabra completa («The Guardian» no es la DIAN).
+
 ## 5. Seguridad
 
 - La extensión solo pide `activeTab` + `scripting` (se eliminaron `tabs`,

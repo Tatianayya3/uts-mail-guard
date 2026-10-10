@@ -75,7 +75,7 @@ export default function ScanDetail({ scan }: { scan: ScanRecord }) {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="stagger grid gap-6 lg:grid-cols-2">
         <section aria-labelledby="signals-title">
           <h2
             id="signals-title"
@@ -88,7 +88,7 @@ export default function ScanDetail({ scan }: { scan: ScanRecord }) {
               No hubo señales suficientes.
             </p>
           ) : (
-            <ul className="flex flex-col gap-2">
+            <ul className="stagger flex flex-col gap-2">
               {scan.signals.map((signal, index) => (
                 <li
                   key={`${signal.key}-${index}`}
@@ -136,7 +136,7 @@ export default function ScanDetail({ scan }: { scan: ScanRecord }) {
                 Por seguridad los enlaces no son clicables. Cópialos solo si
                 necesitas revisarlos.
               </p>
-              <ul className="flex flex-col gap-2">
+              <ul className="stagger flex flex-col gap-2">
                 {scan.links.map((link, index) => (
                   <li
                     key={`${link.url}-${index}`}

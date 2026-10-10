@@ -93,7 +93,7 @@ export default function DashboardInsights({ scans }: { scans: ScanRecord[] }) {
 
       <InsightsStrip insights={buildInsights(inRange)} />
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <div className="stagger grid grid-cols-1 gap-4 xl:grid-cols-3">
         <TrustTrendChart data={buildTrustTrend(focused)} />
         <VerdictDonutChart
           data={buildVerdictBreakdown(inRange)}

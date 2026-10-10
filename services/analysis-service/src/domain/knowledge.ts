@@ -5,10 +5,22 @@
 
 /** Marcas frecuentemente suplantadas (énfasis en Colombia) y sus dominios oficiales. */
 export const BRANDS: Record<string, { name: string; domains: string[] }> = {
-  paypal: { name: "PayPal", domains: ["paypal.com"] },
+  // Pagos, tecnología y servicios globales
+  paypal: {
+    name: "PayPal",
+    domains: ["paypal.com", "paypal.me", "paypalobjects.com"],
+  },
   google: {
     name: "Google",
-    domains: ["google.com", "gmail.com", "youtube.com"],
+    domains: [
+      "google.com",
+      "google.com.co",
+      "gmail.com",
+      "googlemail.com",
+      "googleusercontent.com",
+      "googleapis.com",
+      "youtube.com",
+    ],
   },
   microsoft: {
     name: "Microsoft",
@@ -17,24 +29,64 @@ export const BRANDS: Record<string, { name: string; domains: string[] }> = {
       "outlook.com",
       "live.com",
       "office.com",
+      "office365.com",
+      "microsoftonline.com",
       "hotmail.com",
     ],
   },
-  apple: { name: "Apple", domains: ["apple.com", "icloud.com"] },
+  apple: { name: "Apple", domains: ["apple.com", "icloud.com", "me.com"] },
   amazon: {
     name: "Amazon",
-    domains: ["amazon.com", "amazon.es", "amazonses.com"],
+    domains: [
+      "amazon.com",
+      "amazon.es",
+      "amazon.com.mx",
+      "amazonses.com",
+      "amazonaws.com",
+    ],
   },
   netflix: { name: "Netflix", domains: ["netflix.com"] },
+  spotify: { name: "Spotify", domains: ["spotify.com", "spotifycdn.com"] },
   facebook: {
     name: "Facebook",
     domains: ["facebook.com", "facebookmail.com", "meta.com"],
   },
   instagram: {
     name: "Instagram",
-    domains: ["instagram.com", "mail.instagram.com"],
+    domains: ["instagram.com", "cdninstagram.com"],
   },
-  whatsapp: { name: "WhatsApp", domains: ["whatsapp.com"] },
+  whatsapp: { name: "WhatsApp", domains: ["whatsapp.com", "whatsapp.net"] },
+  tiktok: { name: "TikTok", domains: ["tiktok.com"] },
+  linkedin: { name: "LinkedIn", domains: ["linkedin.com", "lnkd.in"] },
+  dropbox: {
+    name: "Dropbox",
+    domains: ["dropbox.com", "dropboxmail.com", "dropboxusercontent.com"],
+  },
+  docusign: { name: "DocuSign", domains: ["docusign.com", "docusign.net"] },
+  adobe: { name: "Adobe", domains: ["adobe.com"] },
+  zoom: { name: "Zoom", domains: ["zoom.us", "zoom.com"] },
+  mastercard: { name: "Mastercard", domains: ["mastercard.com"] },
+  binance: { name: "Binance", domains: ["binance.com"] },
+  coinbase: { name: "Coinbase", domains: ["coinbase.com"] },
+  // Comercio electrónico
+  mercadolibre: {
+    name: "Mercado Libre",
+    domains: ["mercadolibre.com", "mercadolibre.com.co"],
+  },
+  mercadopago: {
+    name: "Mercado Pago",
+    domains: ["mercadopago.com", "mercadopago.com.co"],
+  },
+  aliexpress: { name: "AliExpress", domains: ["aliexpress.com"] },
+  temu: { name: "Temu", domains: ["temu.com"] },
+  shein: { name: "SHEIN", domains: ["shein.com", "shein.com.co"] },
+  airbnb: { name: "Airbnb", domains: ["airbnb.com", "airbnb.com.co"] },
+  rappi: { name: "Rappi", domains: ["rappi.com", "rappi.com.co"] },
+  falabella: {
+    name: "Falabella",
+    domains: ["falabella.com", "falabella.com.co", "bancofalabella.com.co"],
+  },
+  // Bancos y billeteras en Colombia
   bancolombia: {
     name: "Bancolombia",
     domains: ["bancolombia.com", "bancolombia.com.co"],
@@ -43,38 +95,83 @@ export const BRANDS: Record<string, { name: string; domains: string[] }> = {
   nequi: { name: "Nequi", domains: ["nequi.com.co", "nequi.co"] },
   daviplata: { name: "DaviPlata", domains: ["daviplata.com"] },
   bbva: { name: "BBVA", domains: ["bbva.com", "bbva.com.co"] },
-  dian: { name: "DIAN", domains: ["dian.gov.co"] },
-  mercadolibre: {
-    name: "Mercado Libre",
-    domains: ["mercadolibre.com", "mercadolibre.com.co"],
+  bancodebogota: {
+    name: "Banco de Bogotá",
+    domains: ["bancodebogota.com", "bancodebogota.com.co"],
   },
+  colpatria: {
+    name: "Scotiabank Colpatria",
+    domains: ["scotiabankcolpatria.com", "colpatria.com"],
+  },
+  avvillas: { name: "Banco AV Villas", domains: ["avvillas.com.co"] },
+  efecty: { name: "Efecty", domains: ["efecty.com.co"] },
+  // Entidades públicas, telcos y seguros
+  dian: { name: "DIAN", domains: ["dian.gov.co"] },
+  movistar: {
+    name: "Movistar",
+    domains: ["movistar.co", "movistar.com.co", "telefonica.com"],
+  },
+  sura: { name: "SURA", domains: ["sura.com", "segurossura.com.co"] },
+  // Mensajería y envíos
   dhl: { name: "DHL", domains: ["dhl.com"] },
   fedex: { name: "FedEx", domains: ["fedex.com"] },
+  usps: { name: "USPS", domains: ["usps.com"] },
   servientrega: { name: "Servientrega", domains: ["servientrega.com"] },
-  binance: { name: "Binance", domains: ["binance.com"] },
+  interrapidisimo: {
+    name: "Inter Rapidísimo",
+    domains: ["interrapidisimo.com"],
+  },
 };
 
+/**
+ * Palabras comunes a una letra de una marca: no son suplantación
+ * ("finance" ≈ "binance", "bookings" ≈ "booking").
+ */
+export const LOOKALIKE_EXCEPTIONS = new Set(["finance", "finances"]);
+
+/** Correo gratuito: una marca o banco nunca escribe desde estos dominios. */
 export const FREE_MAIL_DOMAINS = new Set([
   "gmail.com",
   "googlemail.com",
   "outlook.com",
+  "outlook.es",
   "hotmail.com",
+  "hotmail.es",
   "live.com",
+  "msn.com",
   "yahoo.com",
   "yahoo.es",
+  "yahoo.com.mx",
+  "ymail.com",
+  "rocketmail.com",
   "icloud.com",
+  "me.com",
+  "mac.com",
   "proton.me",
   "protonmail.com",
+  "pm.me",
   "aol.com",
+  "zoho.com",
+  "zohomail.com",
+  "gmx.com",
+  "gmx.es",
+  "mail.com",
+  "yandex.com",
+  "tuta.io",
+  "tutanota.com",
 ]);
 
+/** Acortadores: ocultan el destino real del enlace. */
 export const URL_SHORTENERS = new Set([
   "bit.ly",
+  "bit.do",
+  "bl.ink",
   "tinyurl.com",
   "t.co",
   "goo.gl",
   "ow.ly",
   "is.gd",
+  "v.gd",
   "buff.ly",
   "cutt.ly",
   "rebrand.ly",
@@ -83,14 +180,21 @@ export const URL_SHORTENERS = new Set([
   "t.ly",
   "s.id",
   "tiny.cc",
+  "x.co",
+  "u.to",
+  "clck.ru",
+  "surl.li",
+  "qrco.de",
 ]);
 
+/** Dominios de primer nivel muy usados en campañas de phishing (baratos o gratuitos). */
 export const RISKY_TLDS = new Set([
   "zip",
   "mov",
   "xyz",
   "top",
   "click",
+  "link",
   "country",
   "gq",
   "tk",
@@ -104,9 +208,23 @@ export const RISKY_TLDS = new Set([
   "icu",
   "monster",
   "buzz",
+  "sbs",
+  "cfd",
+  "bond",
+  "cyou",
+  "mom",
+  "lol",
+  "quest",
+  "loan",
+  "win",
+  "bid",
+  "party",
+  "review",
+  "date",
+  "download",
+  "racing",
 ]);
 
-/** Palabras clave (sin tildes, minúsculas). */
 export const KEYWORDS = {
   urgency: [
     "urgente",
@@ -121,6 +239,9 @@ export const KEYWORDS = {
     "cuenta bloqueada",
     "cuenta suspendida",
     "expira hoy",
+    "paquete retenido",
+    "entrega fallida",
+    "accion requerida",
     "act now",
     "immediately",
     "urgent",
@@ -143,6 +264,10 @@ export const KEYWORDS = {
     "inicia sesion aqui",
     "login here",
     "actualiza tus datos",
+    "actualice sus datos",
+    "verifique su cuenta",
+    "confirme sus datos",
+    "clave dinamica",
   ],
   money: [
     "transferencia",
@@ -157,6 +282,10 @@ export const KEYWORDS = {
     "tarjeta de regalo",
     "gift card",
     "you won",
+    "comparendo",
+    "multa pendiente",
+    "embargo",
+    "devolucion de impuestos",
     "refund",
   ],
 } as const;

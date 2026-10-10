@@ -1,6 +1,14 @@
 import { z } from "zod";
 
-export const MAIL_PROVIDERS = ["Gmail", "Outlook", "Unknown"] as const;
+export const MAIL_PROVIDERS = [
+  "Gmail",
+  "Outlook",
+  "Yahoo",
+  "AOL",
+  "Proton",
+  "Zoho",
+  "Unknown",
+] as const;
 export const VERDICTS = ["safe", "suspicious", "dangerous", "unknown"] as const;
 export const SIGNAL_KEYS = [
   "sender",

@@ -44,7 +44,7 @@ export default function InsightsStrip({ insights }: { insights: Insight[] }) {
         />{" "}
         Hallazgos del periodo
       </h3>
-      <ul className="grid gap-3 md:grid-cols-3">
+      <ul className="stagger grid gap-3 md:grid-cols-3">
         {insights.map((insight) => {
           const { icon: Icon, className } = TONE[insight.tone];
           return (

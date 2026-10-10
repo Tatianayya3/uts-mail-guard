@@ -1,5 +1,6 @@
 import { defineManifest } from "@crxjs/vite-plugin";
 import pkg from "./package.json" with { type: "json" };
+import { ALL_PROVIDER_HOSTS } from "./src/features/scan/model/providers";
 
 /** Origen del gateway como patrón de host_permissions: http://localhost:4000/* */
 function originPattern(url: string | undefined): string[] {
@@ -36,11 +37,7 @@ export const createManifest = (apiGatewayUrl?: string) =>
       },
     },
     host_permissions: [
-      "https://mail.google.com/*",
-      "https://outlook.live.com/*",
-      "https://outlook.office.com/*",
-      "https://outlook.office365.com/*",
-      "https://outlook.cloud.microsoft/*",
+      ...ALL_PROVIDER_HOSTS.map((host) => `https://${host}/*`),
       ...originPattern(apiGatewayUrl),
     ],
   });
