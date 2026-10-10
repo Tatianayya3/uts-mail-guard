@@ -41,3 +41,6 @@ dist/
 
 # extensión empaquetada
 release/
+
+# generado automáticamente por turbo
+/AGENTS.md
