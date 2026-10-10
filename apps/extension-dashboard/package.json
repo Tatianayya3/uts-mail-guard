@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check-types": "next typegen && tsc --noEmit"
+    "check-types": "next typegen && tsc --noEmit",
+    "test": "bun test"
   },
   "dependencies": {
     "@mail-guard/api-client": "workspace:*",
