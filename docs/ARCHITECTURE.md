@@ -155,6 +155,14 @@ src/
         └── views/       # AccountView, AuthForm, ProfileView, gráficos
 ```
 
+### Componentes compartidos (`@mail-guard/ui`)
+
+La extensión y el panel usan los mismos `Button`, `TextField`, `VerdictBadge`,
+`TrustRing`, `Skeleton` y el hook `useZodForm`, que valida con los mismos
+schemas Zod del backend y muestra el error bajo cada campo. `cn()` (clsx +
+tailwind-merge) permite sobrescribir estilos sin conflictos. Tailwind v4 los
+incluye con `@source` en cada `globals.css`.
+
 ## 4. Motor de decisión: por qué Jev
 
 Detectar phishing **es una decisión acotada**: el resultado es una de pocas

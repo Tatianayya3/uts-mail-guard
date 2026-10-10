@@ -1,6 +1,8 @@
 import "server-only";
 
+import { cache } from "react";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import { supabaseAnonKey, supabaseUrl } from "./env";
 
@@ -30,7 +32,7 @@ export async function createServerSupabaseClient() {
  * Usuario verificado (getUser valida el token contra Supabase Auth) y su
  * access token para llamar al API Gateway en su nombre.
  */
-export async function getServerSession() {
+export const getServerSession = cache(async () => {
   const client = await createServerSupabaseClient();
   const {
     data: { user },
@@ -40,4 +42,14 @@ export async function getServerSession() {
     data: { session },
   } = await client.auth.getSession();
   return session ? { user, accessToken: session.access_token } : null;
+});
+
+/**
+ * Sesión obligatoria para las páginas del panel. Con `cache`, el layout y la
+ * página comparten una sola verificación por petición.
+ */
+export async function requireSession() {
+  const session = await getServerSession();
+  if (!session) redirect("/");
+  return session;
 }

@@ -4,6 +4,7 @@ import {
   type ScanRecord,
   type StoredScan,
 } from "@mail-guard/contracts";
+import { AppError } from "@mail-guard/service-kit";
 import { dedupeByHash, deriveAnalytics } from "../domain/analytics";
 import type { AuthenticatedUser, ScanRepository } from "./ports";
 
@@ -66,4 +67,32 @@ export async function getOverview(
     },
     analytics,
   };
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** UC-10: detalle de un análisis propio. */
+export async function getScan(
+  repo: ScanRepository,
+  id: string,
+): Promise<ScanRecord> {
+  const scan = UUID.test(id) ? await repo.getById(id) : null;
+  if (!scan)
+    throw new AppError(404, "No encontramos ese análisis.", "not_found");
+  return scan;
+}
+
+/** UC-12: editar el nombre visible del perfil. */
+export async function updateProfile(
+  repo: ScanRepository,
+  user: AuthenticatedUser,
+  changes: { displayName: string },
+): Promise<Overview> {
+  await repo.updateProfile(changes);
+  return getOverview(repo, user);
+}
+
+/** UC-13: borrar todo el historial (derecho al olvido). */
+export function deleteHistory(repo: ScanRepository): Promise<number> {
+  return repo.deleteAll();
 }

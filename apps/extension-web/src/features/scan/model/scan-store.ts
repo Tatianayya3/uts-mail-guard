@@ -15,3 +15,8 @@ export const quotaStore = createStore<Quota>(
     typeof v.remaining === "number" &&
     typeof v.limit === "number",
 );
+
+export const savedStore = createStore<boolean>(
+  "mail-guard-scan-saved",
+  (v): v is boolean => typeof v === "boolean",
+);

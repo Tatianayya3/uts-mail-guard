@@ -1,5 +1,5 @@
 import { Globe } from "lucide-react";
-import { VERDICT_BADGE_CLASS, VERDICT_LABEL } from "./dashboard.constants";
+import { VerdictBadge } from "@mail-guard/ui";
 import type { DomainInsight } from "./dashboard.utils";
 import ChartCard from "./ChartCard";
 import EmptyChartState from "./EmptyChartState";
@@ -33,13 +33,12 @@ export default function SenderDomainsCard({
                 >
                   {d.domain}
                 </span>
-                <span
-                  className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${VERDICT_BADGE_CLASS[d.worst]}`}
+                <VerdictBadge
+                  verdict={d.worst}
+                  className="shrink-0 text-[10px]"
                 >
-                  {d.risky > 0
-                    ? `${d.risky} con alertas`
-                    : VERDICT_LABEL[d.worst]}
-                </span>
+                  {d.risky > 0 ? `${d.risky} con alertas` : undefined}
+                </VerdictBadge>
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/5">

@@ -133,6 +133,38 @@ class SupabaseScanRepository implements ScanRepository {
     };
   }
 
+  async getById(id: string): Promise<ScanRecord | null> {
+    const { data, error } = await this.db
+      .from("mail_scans")
+      .select(SCAN_COLUMNS)
+      .eq("profile_id", this.userId)
+      .eq("id", id)
+      .maybeSingle();
+    if (error) throw new Error(`No se pudo leer el análisis: ${error.message}`);
+    return data ? toRecord(data as ScanRow) : null;
+  }
+
+  async updateProfile(changes: { displayName: string }): Promise<void> {
+    const { error } = await this.db
+      .from("profiles")
+      .update({ display_name: changes.displayName })
+      .eq("id", this.userId);
+    if (error)
+      throw new Error(`No se pudo actualizar el perfil: ${error.message}`);
+  }
+
+  async deleteAll(): Promise<number> {
+    const { data, error } = await this.db.rpc("delete_my_history");
+    if (error) {
+      this.logger.error("history_delete_failed", {
+        message: error.message,
+        hint: "¿Ejecutaste supabase/migrations/0002_privacy_controls.sql?",
+      });
+      throw new Error("No se pudo borrar el historial.");
+    }
+    return typeof data === "number" ? data : 0;
+  }
+
   async getProfile(): Promise<Profile | null> {
     const { data, error } = await this.db
       .from("profiles")

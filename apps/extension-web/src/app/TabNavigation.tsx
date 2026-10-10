@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import AccountIcon from "@/shared/icons/Account";
-import ScanIcon from "@/shared/icons/Scan";
+import { ScanSearch, UserRound } from "lucide-react";
 
 export type AppTab = "scan" | "account";
 
@@ -10,8 +9,16 @@ type TabNavigationProps = {
 };
 
 const tabs: { id: AppTab; label: string; icon: ReactNode }[] = [
-  { id: "scan", label: "Escanear", icon: <ScanIcon /> },
-  { id: "account", label: "Cuenta", icon: <AccountIcon /> },
+  {
+    id: "scan",
+    label: "Escanear",
+    icon: <ScanSearch className="h-5 w-5" aria-hidden="true" />,
+  },
+  {
+    id: "account",
+    label: "Cuenta",
+    icon: <UserRound className="h-5 w-5" aria-hidden="true" />,
+  },
 ];
 
 export default function TabNavigation({

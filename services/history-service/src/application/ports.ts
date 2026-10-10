@@ -20,6 +20,10 @@ export interface ScanRepository {
   listRecent(limit: number): Promise<ScanRecord[]>;
   getAnalytics(): Promise<Analytics | null>;
   getProfile(): Promise<Profile | null>;
+  getById(id: string): Promise<ScanRecord | null>;
+  updateProfile(changes: { displayName: string }): Promise<void>;
+  /** Borra todo el historial y las métricas del usuario. Devuelve cuántos análisis se borraron. */
+  deleteAll(): Promise<number>;
 }
 
 export interface UserContextFactory {
