@@ -22,7 +22,9 @@ const ADVICE: Record<Verdict, string> = {
 export function buildSummary(verdict: Verdict, signals: ScanSignal[]): string {
   const alerts = signals
     .filter((s) => s.status === "fail" || s.status === "warning")
-    .map((s) => s.value);
+    // «2 revisados · 1 con alertas» no se entiende fuera de su tarjeta: para
+    // los enlaces se usa el detalle («1 enlace oculta su destino…»).
+    .map((s) => (s.key === "links" ? s.detail.replace(/\.$/, "") : s.value));
   const detail = alerts.length ? ` Hallazgos: ${alerts.join("; ")}.` : "";
   return `${OPENING[verdict]}${detail}`.slice(0, 500);
 }
