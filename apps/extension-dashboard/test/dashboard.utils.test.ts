@@ -150,3 +150,17 @@ describe("visualizaciones nuevas", () => {
     expect(buildInsights([scan(0, "safe")], NOW)).toEqual([]);
   });
 });
+
+describe("series diarias", () => {
+  test("bucketScansByDay calcula confianza promedio, riesgo y enlaces por día", () => {
+    const buckets = bucketScansByDay(
+      [scan(0, "safe"), scan(0, "dangerous")],
+      3,
+      NOW,
+    );
+    const today = buckets.at(-1);
+    expect(today?.averageTrust).toBe(50);
+    expect(today?.risky).toBe(1);
+    expect(buckets[0]?.averageTrust).toBeNull();
+  });
+});

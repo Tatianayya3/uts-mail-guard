@@ -38,13 +38,13 @@ flowchart LR
   HI --> SB
 ```
 
-| Pieza                | Responsabilidad única                                                                                                                        | Tecnología                      |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| **API Gateway**      | Punto de entrada: CORS, verificación del JWT, cuota diaria, orquestación y traducción de errores. No contiene reglas de negocio de análisis. | Bun + Hono                      |
-| **analysis-service** | Decidir si un correo es seguro: extrae evidencias, consulta el motor (Jev / LLM / reglas) y compone el veredicto. No sabe de usuarios.       | Bun + Hono + `@typesafe-ai/sdk` |
-| **history-service**  | Persistir análisis, perfil y métricas por usuario. No sabe cómo se analiza un correo.                                                        | Bun + Hono + Supabase           |
-| **Extensión**        | Leer el correo abierto y mostrar el resultado.                                                                                               | React 19 + Vite + CRXJS         |
-| **Panel web**        | Landing, autenticación, recuperación de contraseña y métricas históricas.                                                                    | Next.js 16 (App Router)         |
+| Pieza                | Responsabilidad única                                                                                                                        | Tecnología                               |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| **API Gateway**      | Punto de entrada: CORS, verificación del JWT, cuota diaria, orquestación y traducción de errores. No contiene reglas de negocio de análisis. | Bun + Hono                               |
+| **analysis-service** | Decidir si un correo es seguro: extrae evidencias, consulta el motor (Jev / LLM / reglas) y compone el veredicto. No sabe de usuarios.       | Bun + Hono + `@typesafe-ai/sdk`          |
+| **history-service**  | Persistir análisis, perfil y métricas por usuario. No sabe cómo se analiza un correo.                                                        | Bun + Hono + Supabase                    |
+| **Extensión**        | Leer el correo abierto y mostrar el resultado.                                                                                               | React 19 + Vite + CRXJS                  |
+| **Panel web**        | Landing, autenticación, recuperación de contraseña y métricas históricas.                                                                    | Next.js 16 (App Router) + Apache ECharts |
 
 ## 2. ¿Por qué microservicios (y por qué exactamente estos tres)?
 
@@ -162,6 +162,15 @@ La extensión y el panel usan los mismos `Button`, `TextField`, `VerdictBadge`,
 schemas Zod del backend y muestra el error bajo cada campo. `cn()` (clsx +
 tailwind-merge) permite sobrescribir estilos sin conflictos. Tailwind v4 los
 incluye con `@source` en cada `globals.css`.
+
+### Gráficos (Apache ECharts)
+
+El panel usa [Apache ECharts](https://echarts.apache.org) 6 con registro modular
+(solo línea, barras, dona, mapa de calor y radial), renderizado SVG y carga
+diferida: la librería se descarga después de pintar la página. Un único
+componente `<EChart>` se encarga del tamaño, de las animaciones entre filtros,
+de «reducir movimiento» y de la descripción accesible (`aria`). El tema propio
+(`charts/theme.ts`) mantiene la identidad visual en todos los gráficos.
 
 ## 4. Motor de decisión: por qué Jev
 

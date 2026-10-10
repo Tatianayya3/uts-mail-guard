@@ -20,6 +20,8 @@ type StatCardProps = {
   tone?: StatTone;
   /** Variación frente al periodo anterior; se muestra con flecha y texto. */
   trend?: { value: number; label: string };
+  /** Mini gráfico opcional (sparkline) bajo la cifra. */
+  chart?: ReactNode;
 };
 
 export default function StatCard({
@@ -29,10 +31,11 @@ export default function StatCard({
   helper,
   tone = "neutral",
   trend,
+  chart,
 }: StatCardProps) {
   const TrendIcon = trend && trend.value < 0 ? TrendingDown : TrendingUp;
   return (
-    <div className="rounded-2xl border border-guard-surface-raised bg-guard-surface-card/60 p-5 transition-colors duration-300 hover:border-guard-accent/30">
+    <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-b from-white/[0.045] to-white/[0.015] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors duration-300 hover:border-guard-accent/30">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-medium text-guard-text-muted">{label}</p>
@@ -61,6 +64,7 @@ export default function StatCard({
         )}
         {helper && <span className="truncate">{helper}</span>}
       </div>
+      {chart && <div className="-mx-1 mt-3">{chart}</div>}
     </div>
   );
 }

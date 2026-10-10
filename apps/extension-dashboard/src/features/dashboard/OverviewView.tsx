@@ -6,6 +6,8 @@ import {
   type ScanRecord,
 } from "@mail-guard/contracts";
 import AnimatedNumber from "./AnimatedNumber";
+import Sparkline from "./charts/Sparkline";
+import { COLORS } from "./charts/theme";
 import DashboardInsights from "./DashboardInsights";
 import ErrorBanner from "./ErrorBanner";
 import Onboarding from "./Onboarding";
@@ -13,6 +15,7 @@ import PageHeader from "./PageHeader";
 import StatCard from "./StatCard";
 import {
   averageTrust,
+  bucketScansByDay,
   formatRelativeTime,
   periodDelta,
   scansInRange,
@@ -38,6 +41,20 @@ export default function OverviewView({
   const average = Math.round(stats.averageTrustScore);
   const week = periodDelta(scans, 7);
   const weekAverage = averageTrust(scansInRange(scans, 7));
+  // Últimos 14 días para los mini gráficos de cada tarjeta.
+  const days = bucketScansByDay(scans, 14);
+  const spark = (
+    pick: (d: (typeof days)[number]) => number | null,
+    color: string,
+    label: string,
+  ) =>
+    hasScans ? (
+      <Sparkline
+        data={days.map(pick)}
+        color={color}
+        label={`${label}, últimos 14 días`}
+      />
+    ) : undefined;
 
   return (
     <>
@@ -71,6 +88,7 @@ export default function OverviewView({
         <StatCard
           icon={Mail}
           label="Correos analizados"
+          chart={spark((d) => d.total, COLORS.accent, "Correos por día")}
           value={<AnimatedNumber value={stats.totalScans} />}
           helper="en total"
           tone="accent"
@@ -83,6 +101,11 @@ export default function OverviewView({
         <StatCard
           icon={Gauge}
           label="Confianza promedio"
+          chart={spark(
+            (d) => d.averageTrust,
+            COLORS.safe,
+            "Confianza promedio por día",
+          )}
           value={hasScans ? <AnimatedNumber value={average} suffix="%" /> : "—"}
           helper={
             weekAverage !== null
@@ -94,6 +117,7 @@ export default function OverviewView({
         <StatCard
           icon={ShieldAlert}
           label="Amenazas detectadas"
+          chart={spark((d) => d.risky, COLORS.dangerous, "Amenazas por día")}
           value={<AnimatedNumber value={threats} />}
           helper={`${number(stats.dangerousScans)} peligrosos · ${number(stats.suspiciousScans)} sospechosos`}
           tone={
@@ -107,6 +131,11 @@ export default function OverviewView({
         <StatCard
           icon={Link2}
           label="Enlaces revisados"
+          chart={spark(
+            (d) => d.links,
+            COLORS.unknown,
+            "Enlaces revisados por día",
+          )}
           value={<AnimatedNumber value={stats.linksReviewed} />}
           helper="en todos tus análisis"
         />

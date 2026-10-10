@@ -1,13 +1,14 @@
 "use client";
 
+import { useMemo } from "react";
 import { ShieldQuestion } from "lucide-react";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import type { Verdict } from "@mail-guard/contracts";
 import { cn } from "@mail-guard/ui";
-import type { VerdictSlice } from "./dashboard.utils";
 import ChartCard from "./ChartCard";
-import ChartTooltip from "./ChartTooltip";
 import EmptyChartState from "./EmptyChartState";
+import EChart from "./charts/EChart";
+import { COLORS, dot, tooltipBase, type ChartOption } from "./charts/theme";
+import type { VerdictSlice } from "./dashboard.utils";
 
 type Props = {
   data: VerdictSlice[];
@@ -27,11 +28,51 @@ export default function VerdictDonutChart({
   const toggle = (verdict: Verdict) =>
     onSelect(active === verdict ? null : verdict);
   const focused = active ? data.find((s) => s.key === active) : null;
+  const visible = data.filter((s) => s.value > 0);
+
+  const option = useMemo<ChartOption>(
+    () => ({
+      tooltip: {
+        ...tooltipBase,
+        trigger: "item",
+        formatter: (p: {
+          name: string;
+          value: number;
+          percent: number;
+          color: string;
+        }) =>
+          `${dot(p.color)}${p.name}: <b>${p.value}</b> (${p.percent}%)<div style="color:${COLORS.muted};font-size:11px;margin-top:4px">Clic para filtrar</div>`,
+      },
+      series: [
+        {
+          type: "pie",
+          radius: ["64%", "90%"],
+          padAngle: 3,
+          cursor: "pointer",
+          itemStyle: { borderRadius: 8 },
+          label: { show: false },
+          emphasis: { scale: true, scaleSize: 6 },
+          data: visible.map((slice) => ({
+            name: slice.label,
+            value: slice.value,
+            key: slice.key,
+            itemStyle: {
+              color: slice.color,
+              opacity: !active || active === slice.key ? 1 : 0.18,
+              shadowBlur: active === slice.key ? 18 : 0,
+              shadowColor: slice.color,
+            },
+          })),
+        },
+      ],
+    }),
+    [visible, active],
+  );
 
   return (
     <ChartCard
       title="Distribución de veredictos"
-      subtitle="Haz clic en un veredicto para filtrar todo el tablero"
+      subtitle="Clic en un veredicto para filtrar todo el tablero"
     >
       {total === 0 ? (
         <EmptyChartState
@@ -40,42 +81,18 @@ export default function VerdictDonutChart({
           description="Tus resultados aparecerán aquí cuando analices correos."
         />
       ) : (
-        <div className="flex flex-col items-center gap-5">
-          <div
-            className="relative h-48 w-48 shrink-0"
-            role="img"
-            aria-label="Distribución de veredictos"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={data}
-                  dataKey="value"
-                  nameKey="label"
-                  innerRadius={58}
-                  outerRadius={84}
-                  paddingAngle={3}
-                  strokeWidth={0}
-                  cornerRadius={4}
-                  onClick={(_, index) => {
-                    const slice = data[index];
-                    if (slice) toggle(slice.key);
-                  }}
-                  className="cursor-pointer outline-none"
-                  animationDuration={600}
-                >
-                  {data.map((slice) => (
-                    <Cell
-                      key={slice.key}
-                      fill={slice.color}
-                      fillOpacity={!active || active === slice.key ? 1 : 0.18}
-                      style={{ transition: "fill-opacity 200ms" }}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip content={<ChartTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative w-full">
+            <EChart
+              option={option}
+              className="mx-auto h-52 max-w-60"
+              ariaLabel="Distribución de veredictos"
+              onClick={({ dataIndex }) => {
+                const slice =
+                  dataIndex !== undefined ? visible[dataIndex] : undefined;
+                if (slice) toggle(slice.key);
+              }}
+            />
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-3xl font-bold text-white tabular-nums">
                 {focused ? focused.value : total}
@@ -85,7 +102,7 @@ export default function VerdictDonutChart({
               </span>
             </div>
           </div>
-          <ul className="flex w-full flex-col gap-1">
+          <ul className="grid w-full grid-cols-2 gap-1.5">
             {data.map((slice) => {
               const percentage = total
                 ? Math.round((slice.value / total) * 100)
@@ -99,23 +116,25 @@ export default function VerdictDonutChart({
                     disabled={slice.value === 0}
                     onClick={() => toggle(slice.key)}
                     className={cn(
-                      "flex w-full items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-xs transition-colors",
-                      "hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-guard-accent disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent",
-                      isActive && "bg-white/[0.07]",
+                      "flex w-full flex-col rounded-xl border px-3 py-2 text-left transition-all",
+                      "focus-visible:outline-2 focus-visible:outline-guard-accent disabled:cursor-default disabled:opacity-40",
+                      isActive
+                        ? "border-white/20 bg-white/[0.08]"
+                        : "border-white/5 bg-white/[0.02] hover:border-white/15",
                       active && !isActive && "opacity-50",
                     )}
                   >
-                    <span className="flex items-center gap-2 whitespace-nowrap text-guard-text-muted">
+                    <span className="flex items-center gap-1.5 text-[11px] text-guard-text-muted">
                       <span
-                        className="h-2.5 w-2.5 rounded-full"
+                        className="h-2 w-2 rounded-full"
                         style={{ backgroundColor: slice.color }}
                       />
                       {slice.label}
                     </span>
-                    <span className="whitespace-nowrap font-semibold text-white tabular-nums">
+                    <span className="mt-0.5 text-sm font-semibold text-white tabular-nums">
                       {slice.value}{" "}
-                      <span className="font-normal text-guard-text-muted">
-                        ({percentage}%)
+                      <span className="text-xs font-normal text-guard-text-muted">
+                        · {percentage}%
                       </span>
                     </span>
                   </button>

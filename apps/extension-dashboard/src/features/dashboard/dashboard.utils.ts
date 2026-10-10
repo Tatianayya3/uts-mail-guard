@@ -105,6 +105,11 @@ export type DailyVerdictBucket = {
   date: string;
   label: string;
   total: number;
+  /** Correos sospechosos + peligrosos del día. */
+  risky: number;
+  links: number;
+  /** Confianza promedio del día, o null si no hubo análisis. */
+  averageTrust: number | null;
 } & Record<Verdict, number>;
 
 /** Un balde por día del rango (antiguo → reciente), aunque esté vacío. */
@@ -120,17 +125,32 @@ export function bucketScansByDay(
       date: dayKey(date),
       label: shortDate.format(date),
       total: 0,
+      risky: 0,
+      links: 0,
+      averageTrust: null,
       safe: 0,
       suspicious: 0,
       dangerous: 0,
       unknown: 0,
     });
   }
+  const trustSum = new Map<string, number>();
   for (const scan of scans) {
-    const bucket = buckets.get(dayKey(scan.analyzedAt));
+    const key = dayKey(scan.analyzedAt);
+    const bucket = buckets.get(key);
     if (!bucket) continue;
     bucket[scan.verdict] += 1;
     bucket.total += 1;
+    bucket.links += scan.links.length;
+    if (scan.verdict === "dangerous" || scan.verdict === "suspicious")
+      bucket.risky += 1;
+    trustSum.set(key, (trustSum.get(key) ?? 0) + scan.trustScore);
+  }
+  for (const bucket of buckets.values()) {
+    if (bucket.total)
+      bucket.averageTrust = Math.round(
+        (trustSum.get(bucket.date) ?? 0) / bucket.total,
+      );
   }
   return [...buckets.values()];
 }

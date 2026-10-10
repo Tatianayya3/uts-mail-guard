@@ -1,92 +1,189 @@
 "use client";
 
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Activity } from "lucide-react";
-import {
-  Area,
-  AreaChart,
-  Brush,
-  CartesianGrid,
-  ReferenceLine,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import {
-  ACCENT_HEX,
-  AXIS_COLOR,
-  GRID_COLOR,
-  SAFE_THRESHOLD,
-  SUSPICIOUS_THRESHOLD,
-  VERDICT_COLOR,
-  VERDICT_LABEL,
-} from "./dashboard.constants";
-import type { TrustTrendPoint } from "./dashboard.utils";
+import { VERDICT_COLOR, VERDICT_LABEL } from "@mail-guard/contracts";
 import ChartCard from "./ChartCard";
 import EmptyChartState from "./EmptyChartState";
+import EChart from "./charts/EChart";
+import {
+  COLORS,
+  dot,
+  escapeHtml,
+  tooltipBase,
+  type ChartOption,
+} from "./charts/theme";
+import { SAFE_THRESHOLD, SUSPICIOUS_THRESHOLD } from "./dashboard.constants";
+import type { TrustTrendPoint } from "./dashboard.utils";
 
-type TooltipProps = {
-  active?: boolean;
-  payload?: { payload: TrustTrendPoint }[];
-};
+/** Con muchos puntos se activa el zoom (rueda/gesto y barra inferior). */
+const ZOOM_FROM = 16;
 
-function TrendTooltip({ active, payload }: TooltipProps) {
-  const point = payload?.[0]?.payload;
-  if (!active || !point) return null;
-  return (
-    <div className="max-w-64 rounded-lg border border-white/10 bg-guard-surface/95 px-3 py-2 shadow-xl">
-      <p className="text-[10px] font-medium uppercase tracking-wide text-guard-text-muted">
-        {point.label}
-      </p>
-      <p className="mt-0.5 truncate text-xs font-semibold text-white">
-        {point.subject || "Correo sin asunto"}
-      </p>
-      <p
-        className="mt-1 text-xs"
-        style={{ color: VERDICT_COLOR[point.verdict] }}
-      >
-        {VERDICT_LABEL[point.verdict]} · {point.trustScore}%
-      </p>
-    </div>
-  );
-}
-
-type DotProps = {
-  cx?: number;
-  cy?: number;
-  payload?: TrustTrendPoint;
-  onOpen?: (id: string) => void;
-};
-
-/** Punto coloreado por veredicto; un clic abre el análisis. */
-function VerdictDot({ cx, cy, payload, onOpen }: DotProps) {
-  if (cx === undefined || cy === undefined || !payload) return null;
-  return (
-    <g className="cursor-pointer" onClick={() => onOpen?.(payload.id)}>
-      <circle cx={cx} cy={cy} r={10} fill="transparent" />
-      <circle
-        cx={cx}
-        cy={cy}
-        r={3.5}
-        fill={VERDICT_COLOR[payload.verdict]}
-        stroke="#131313"
-        strokeWidth={1}
-      />
-    </g>
-  );
-}
-
-/** Con muchos puntos aparece una barra para hacer zoom arrastrando. */
-const BRUSH_FROM = 16;
+const zone = (
+  from: number,
+  to: number,
+  fill: string,
+  labelColor: string,
+  name: string,
+) => [
+  {
+    yAxis: from,
+    itemStyle: { color: fill },
+    name,
+    label: { color: labelColor },
+  },
+  { yAxis: to },
+];
 
 export default function TrustTrendChart({ data }: { data: TrustTrendPoint[] }) {
   const router = useRouter();
-  const open = (id: string) => router.push(`/dashboard/historial/${id}`);
+  const zoom = data.length >= ZOOM_FROM;
+
+  const option = useMemo<ChartOption>(
+    () => ({
+      grid: {
+        left: 8,
+        right: 76,
+        top: 16,
+        bottom: zoom ? 56 : 24,
+        containLabel: true,
+      },
+      tooltip: {
+        ...tooltipBase,
+        trigger: "axis",
+        axisPointer: {
+          type: "line",
+          lineStyle: { color: "rgba(200,212,0,0.35)" },
+        },
+        formatter: (params: { dataIndex: number }[]) => {
+          const point = data[params[0]?.dataIndex ?? 0];
+          if (!point) return "";
+          return `<div style="max-width:240px">
+            <div style="color:${COLORS.muted};font-size:11px;margin-bottom:4px">${point.label}</div>
+            <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(point.subject || "Correo sin asunto")}</div>
+            <div style="margin-top:6px">${dot(VERDICT_COLOR[point.verdict])}${VERDICT_LABEL[point.verdict]} · <b>${point.trustScore}%</b></div>
+            <div style="color:${COLORS.muted};font-size:11px;margin-top:6px">Clic para abrir</div>
+          </div>`;
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: data.map((p) => p.label),
+        boundaryGap: false,
+      },
+      yAxis: {
+        type: "value",
+        min: 0,
+        max: 100,
+        interval: 20,
+        axisLabel: { formatter: "{value}%" },
+      },
+      // La línea se pinta del color de la zona en la que está cada tramo.
+      visualMap: {
+        show: false,
+        dimension: 1,
+        pieces: [
+          { lt: SUSPICIOUS_THRESHOLD, color: COLORS.dangerous },
+          {
+            gte: SUSPICIOUS_THRESHOLD,
+            lt: SAFE_THRESHOLD,
+            color: COLORS.suspicious,
+          },
+          { gte: SAFE_THRESHOLD, color: COLORS.safe },
+        ],
+      },
+      dataZoom: zoom
+        ? [
+            { type: "inside", startValue: Math.max(0, data.length - 20) },
+            {
+              type: "slider",
+              height: 18,
+              bottom: 8,
+              borderColor: "transparent",
+              backgroundColor: "rgba(255,255,255,0.03)",
+              fillerColor: "rgba(200,212,0,0.12)",
+              dataBackground: {
+                lineStyle: { color: COLORS.axis },
+                areaStyle: { color: "rgba(200,212,0,0.08)" },
+              },
+              handleStyle: { color: COLORS.accent, borderColor: COLORS.accent },
+              moveHandleStyle: { color: "rgba(200,212,0,0.4)" },
+              textStyle: { color: "transparent" },
+            },
+          ]
+        : [],
+      series: [
+        {
+          type: "line",
+          smooth: 0.35,
+          symbol: "circle",
+          symbolSize: 8,
+          lineStyle: { width: 3 },
+          areaStyle: {
+            color: {
+              type: "linear",
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: "rgba(200,212,0,0.22)" },
+                { offset: 1, color: "rgba(200,212,0,0)" },
+              ],
+            },
+          },
+          emphasis: { focus: "series", scale: 1.8 },
+          cursor: "pointer",
+          data: data.map((p) => ({
+            value: p.trustScore,
+            itemStyle: {
+              color: VERDICT_COLOR[p.verdict],
+              borderColor: COLORS.surface,
+              borderWidth: 2,
+            },
+          })),
+          markArea: {
+            silent: true,
+            label: { position: "right", fontSize: 11, distance: 10 },
+            data: [
+              zone(
+                SAFE_THRESHOLD,
+                100,
+                "rgba(78,222,163,0.05)",
+                COLORS.safe,
+                "Seguro",
+              ),
+              zone(
+                SUSPICIOUS_THRESHOLD,
+                SAFE_THRESHOLD,
+                "rgba(251,191,36,0.05)",
+                COLORS.suspicious,
+                "Sospechoso",
+              ),
+              zone(
+                0,
+                SUSPICIOUS_THRESHOLD,
+                "rgba(255,92,92,0.06)",
+                COLORS.dangerous,
+                "Peligroso",
+              ),
+            ],
+          },
+        },
+      ],
+    }),
+    [data, zoom],
+  );
+
   return (
     <ChartCard
       title="Tendencia de confianza"
-      subtitle="Cada punto es un correo: haz clic para abrirlo"
+      subtitle={
+        zoom
+          ? "Clic en un punto para abrirlo · rueda o barra inferior para hacer zoom"
+          : "Clic en un punto para abrir el análisis"
+      }
       className="xl:col-span-2"
     >
       {data.length === 0 ? (
@@ -96,85 +193,16 @@ export default function TrustTrendChart({ data }: { data: TrustTrendPoint[] }) {
           description="Escanea correos desde la extensión o amplía el periodo."
         />
       ) : (
-        <div
-          className="h-60 w-full"
-          role="img"
-          aria-label={`Tendencia de confianza de ${data.length} correos`}
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 8, right: 8, left: 0 }}>
-              <defs>
-                <linearGradient id="trustFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={ACCENT_HEX} stopOpacity={0.3} />
-                  <stop offset="100%" stopColor={ACCENT_HEX} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid stroke={GRID_COLOR} vertical={false} />
-              <XAxis
-                dataKey="label"
-                stroke={AXIS_COLOR}
-                tick={{ fontSize: 11 }}
-                tickLine={false}
-                axisLine={false}
-                minTickGap={24}
-              />
-              <YAxis
-                domain={[0, 100]}
-                ticks={[0, SUSPICIOUS_THRESHOLD, SAFE_THRESHOLD, 100]}
-                stroke={AXIS_COLOR}
-                tick={{ fontSize: 11 }}
-                tickLine={false}
-                axisLine={false}
-                width={36}
-              />
-              <ReferenceLine
-                y={SAFE_THRESHOLD}
-                stroke={VERDICT_COLOR.safe}
-                strokeOpacity={0.35}
-                strokeDasharray="4 4"
-              />
-              <ReferenceLine
-                y={SUSPICIOUS_THRESHOLD}
-                stroke={VERDICT_COLOR.dangerous}
-                strokeOpacity={0.35}
-                strokeDasharray="4 4"
-              />
-              <Tooltip
-                cursor={{ stroke: "rgba(200,212,0,0.3)", strokeWidth: 1 }}
-                content={<TrendTooltip />}
-              />
-              <Area
-                type="monotone"
-                dataKey="trustScore"
-                name="Confianza"
-                stroke={ACCENT_HEX}
-                strokeWidth={2}
-                fill="url(#trustFill)"
-                dot={<VerdictDot onOpen={open} />}
-                activeDot={{ r: 5, fill: ACCENT_HEX }}
-                isAnimationActive={false}
-              />
-              {data.length >= BRUSH_FROM && (
-                <Brush
-                  dataKey="label"
-                  height={22}
-                  travellerWidth={8}
-                  stroke="rgba(200,212,0,0.6)"
-                  fill="rgba(255,255,255,0.03)"
-                  startIndex={Math.max(0, data.length - 20)}
-                  tickFormatter={() => ""}
-                />
-              )}
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        <EChart
+          option={option}
+          className={zoom ? "h-80" : "h-72"}
+          ariaLabel={`Tendencia de confianza de ${data.length} correos`}
+          onClick={({ dataIndex }) => {
+            const point = dataIndex !== undefined ? data[dataIndex] : undefined;
+            if (point) router.push(`/dashboard/historial/${point.id}`);
+          }}
+        />
       )}
-      <p className="mt-3 text-[11px] text-guard-text-muted">
-        Líneas guía: ≥ {SAFE_THRESHOLD} % seguro · &lt; {SUSPICIOUS_THRESHOLD} %
-        peligroso
-        {data.length >= BRUSH_FROM &&
-          " · arrastra los bordes de la barra inferior para hacer zoom"}
-      </p>
     </ChartCard>
   );
 }

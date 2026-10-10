@@ -17,7 +17,7 @@ export default function ChartCard({
 }: ChartCardProps) {
   return (
     <section
-      className={`flex flex-col rounded-2xl border border-guard-surface-raised bg-guard-surface-card/60 p-5 backdrop-blur-xl md:p-6 ${className}`}
+      className={`flex flex-col rounded-2xl border border-white/[0.06] bg-gradient-to-b from-white/[0.045] to-white/[0.015] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_12px_40px_rgba(0,0,0,0.25)] md:p-6 ${className}`}
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
