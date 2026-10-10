@@ -215,16 +215,22 @@ export function averageTrust(scans: ScanRecord[]): number | null {
 
 // ── Historial: filtros y exportación ─────────────────────────────────────────
 
-export type HistoryFilter = { query: string; verdict: Verdict | "all" };
+export type HistoryFilter = {
+  query: string;
+  verdict: Verdict | "all";
+  /** Día "YYYY-MM-DD" en la zona de la app; vacío = todos. */
+  day?: string;
+};
 
 export function filterScans(
   scans: ScanRecord[],
-  { query, verdict }: HistoryFilter,
+  { query, verdict, day }: HistoryFilter,
 ) {
   const needle = query.trim().toLowerCase();
   return scans.filter(
     (scan) =>
       (verdict === "all" || scan.verdict === verdict) &&
+      (!day || dayKey(scan.analyzedAt) === day) &&
       (!needle ||
         scan.subject.toLowerCase().includes(needle) ||
         scan.sender.email.toLowerCase().includes(needle) ||
@@ -264,4 +270,200 @@ export function scansToCsv(scans: ScanRecord[]): string {
       .join(";"),
   );
   return `﻿${[header.map(cell).join(";"), ...rows].join("\r\n")}`;
+}
+
+// ── Patrones de llegada ──────────────────────────────────────────────────
+
+const weekdayHourFormat = new Intl.DateTimeFormat("en-US", {
+  timeZone: APP_TIME_ZONE,
+  weekday: "short",
+  hour: "numeric",
+  hourCycle: "h23",
+});
+const WEEKDAY_INDEX: Record<string, number> = {
+  Mon: 0,
+  Tue: 1,
+  Wed: 2,
+  Thu: 3,
+  Fri: 4,
+  Sat: 5,
+  Sun: 6,
+};
+export const WEEKDAY_LABELS = [
+  "Lun",
+  "Mar",
+  "Mié",
+  "Jue",
+  "Vie",
+  "Sáb",
+  "Dom",
+] as const;
+
+export type HeatCell = {
+  day: number;
+  hour: number;
+  total: number;
+  risky: number;
+};
+
+/** Matriz 7 × 24 (día de la semana × hora, hora de Colombia). */
+export function weekdayHourMatrix(scans: ScanRecord[]): HeatCell[][] {
+  const matrix = WEEKDAY_LABELS.map((_, day) =>
+    Array.from({ length: 24 }, (_, hour) => ({
+      day,
+      hour,
+      total: 0,
+      risky: 0,
+    })),
+  );
+  for (const scan of scans) {
+    const parts = weekdayHourFormat.formatToParts(new Date(scan.analyzedAt));
+    const day =
+      WEEKDAY_INDEX[parts.find((p) => p.type === "weekday")?.value ?? ""];
+    const hour = Number(parts.find((p) => p.type === "hour")?.value);
+    const cell = day === undefined ? undefined : matrix[day]?.[hour];
+    if (!cell) continue;
+    cell.total += 1;
+    if (scan.verdict === "dangerous" || scan.verdict === "suspicious")
+      cell.risky += 1;
+  }
+  return matrix;
+}
+
+// ── Qué señales delatan los correos ───────────────────────────────────────
+
+export type SignalBreakdown = {
+  key: "sender" | "content" | "links";
+  label: string;
+  fail: number;
+  warning: number;
+  pass: number;
+  /** % de correos donde esta señal alertó (fallo o advertencia). */
+  alertRate: number;
+};
+
+const SIGNAL_LABEL = {
+  sender: "Remitente",
+  content: "Contenido",
+  links: "Enlaces",
+} as const;
+
+export function signalBreakdown(scans: ScanRecord[]): SignalBreakdown[] {
+  return (Object.keys(SIGNAL_LABEL) as (keyof typeof SIGNAL_LABEL)[]).map(
+    (key) => {
+      const statuses = scans
+        .map(
+          (scan) => scan.signals.find((signal) => signal.key === key)?.status,
+        )
+        .filter((status) => status && status !== "unknown");
+      const count = (status: string) =>
+        statuses.filter((s) => s === status).length;
+      const fail = count("fail");
+      const warning = count("warning");
+      return {
+        key,
+        label: SIGNAL_LABEL[key],
+        fail,
+        warning,
+        pass: count("pass"),
+        alertRate: statuses.length
+          ? Math.round(((fail + warning) / statuses.length) * 100)
+          : 0,
+      };
+    },
+  );
+}
+
+// ── Hallazgos automáticos ─────────────────────────────────────────────────
+
+export type Insight = {
+  tone: "danger" | "warning" | "success" | "info";
+  text: string;
+};
+
+const pct = (part: number, total: number) => Math.round((part / total) * 100);
+
+/**
+ * Frases cortas calculadas a partir de los datos (no de una IA): qué dominio
+ * concentra las alertas, a qué hora llegan, si la confianza mejora y qué
+ * señal delata más correos. Máximo `limit`, de mayor a menor relevancia.
+ */
+export function buildInsights(
+  scans: ScanRecord[],
+  now = Date.now(),
+  limit = 3,
+): Insight[] {
+  if (scans.length < 3) return [];
+  const insights: Insight[] = [];
+  const risky = scans.filter(
+    (s) => s.verdict === "dangerous" || s.verdict === "suspicious",
+  );
+
+  const [topDomain] = topSenderDomains(risky, 1);
+  if (topDomain && risky.length >= 2) {
+    insights.push({
+      tone: "danger",
+      text: `${topDomain.domain} concentra el ${pct(topDomain.total, risky.length)} % de tus correos con alertas.`,
+    });
+  }
+
+  if (risky.length >= 3) {
+    const night = risky.filter((s) => {
+      const hour = Number(
+        weekdayHourFormat
+          .formatToParts(new Date(s.analyzedAt))
+          .find((p) => p.type === "hour")?.value,
+      );
+      return hour >= 19 || hour < 7;
+    }).length;
+    const share = pct(night, risky.length);
+    if (share >= 50) {
+      insights.push({
+        tone: "warning",
+        text: `El ${share} % de las amenazas llegó de noche (7 p. m. – 7 a. m.).`,
+      });
+    }
+  }
+
+  const thisWeek = averageTrust(scansInRange(scans, 7, now));
+  const lastWeek = averageTrust(
+    scansInRange(scans, 14, now).filter(
+      (s) => !scansInRange([s], 7, now).length,
+    ),
+  );
+  if (
+    thisWeek !== null &&
+    lastWeek !== null &&
+    Math.abs(thisWeek - lastWeek) >= 5
+  ) {
+    insights.push(
+      thisWeek > lastWeek
+        ? {
+            tone: "success",
+            text: `Tu confianza promedio subió ${thisWeek - lastWeek} puntos frente a la semana anterior.`,
+          }
+        : {
+            tone: "warning",
+            text: `Tu confianza promedio bajó ${lastWeek - thisWeek} puntos frente a la semana anterior.`,
+          },
+    );
+  }
+
+  const worstSignal = signalBreakdown(scans).sort(
+    (a, b) => b.alertRate - a.alertRate,
+  )[0];
+  if (worstSignal && worstSignal.alertRate > 0) {
+    insights.push({
+      tone: "info",
+      text: `La señal que más alerta es «${worstSignal.label}»: aparece en el ${worstSignal.alertRate} % de los correos.`,
+    });
+  }
+
+  if (risky.length === 0) {
+    insights.unshift({
+      tone: "success",
+      text: "Ningún correo sospechoso o peligroso en este periodo.",
+    });
+  }
+  return insights.slice(0, limit);
 }

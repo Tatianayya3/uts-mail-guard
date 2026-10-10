@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { BarChart3 } from "lucide-react";
 import {
   Bar,
@@ -26,13 +27,20 @@ type ScansVolumeChartProps = {
 };
 
 export default function ScansVolumeChart({ data }: ScansVolumeChartProps) {
+  const router = useRouter();
   const total = data.reduce((acc, bucket) => acc + bucket.total, 0);
+  // Clic en una barra → historial filtrado por ese día.
+  const openDay = (entry: { payload?: { date?: string; total?: number } }) => {
+    if (entry.payload?.date && entry.payload.total) {
+      router.push(`/dashboard/historial?dia=${entry.payload.date}`);
+    }
+  };
   const hasData = data.some((bucket) => bucket.total > 0);
 
   return (
     <ChartCard
       title="Volumen de escaneos"
-      subtitle={`Correos analizados por día · últimos ${data.length} días`}
+      subtitle={`Correos por día · últimos ${data.length} días · clic en una barra para ver ese día`}
       className="xl:col-span-3"
     >
       {!hasData ? (
@@ -74,6 +82,8 @@ export default function ScansVolumeChart({ data }: ScansVolumeChartProps) {
                 dataKey="safe"
                 name={VERDICT_LABEL.safe}
                 stackId="verdict"
+                onClick={openDay}
+                className="cursor-pointer"
                 fill={VERDICT_COLOR.safe}
                 radius={[0, 0, 0, 0]}
               />
@@ -81,18 +91,24 @@ export default function ScansVolumeChart({ data }: ScansVolumeChartProps) {
                 dataKey="suspicious"
                 name={VERDICT_LABEL.suspicious}
                 stackId="verdict"
+                onClick={openDay}
+                className="cursor-pointer"
                 fill={VERDICT_COLOR.suspicious}
               />
               <Bar
                 dataKey="dangerous"
                 name={VERDICT_LABEL.dangerous}
                 stackId="verdict"
+                onClick={openDay}
+                className="cursor-pointer"
                 fill={VERDICT_COLOR.dangerous}
               />
               <Bar
                 dataKey="unknown"
                 name={VERDICT_LABEL.unknown}
                 stackId="verdict"
+                onClick={openDay}
+                className="cursor-pointer"
                 fill={VERDICT_COLOR.unknown}
                 radius={[4, 4, 0, 0]}
               />

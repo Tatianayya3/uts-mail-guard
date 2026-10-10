@@ -1,9 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Activity } from "lucide-react";
 import {
   Area,
   AreaChart,
+  Brush,
   CartesianGrid,
   ReferenceLine,
   ResponsiveContainer,
@@ -50,26 +52,41 @@ function TrendTooltip({ active, payload }: TooltipProps) {
   );
 }
 
-type DotProps = { cx?: number; cy?: number; payload?: TrustTrendPoint };
+type DotProps = {
+  cx?: number;
+  cy?: number;
+  payload?: TrustTrendPoint;
+  onOpen?: (id: string) => void;
+};
 
-function VerdictDot({ cx, cy, payload }: DotProps) {
+/** Punto coloreado por veredicto; un clic abre el análisis. */
+function VerdictDot({ cx, cy, payload, onOpen }: DotProps) {
   if (cx === undefined || cy === undefined || !payload) return null;
   return (
-    <circle
-      cx={cx}
-      cy={cy}
-      r={3.5}
-      fill={VERDICT_COLOR[payload.verdict]}
-      stroke="none"
-    />
+    <g className="cursor-pointer" onClick={() => onOpen?.(payload.id)}>
+      <circle cx={cx} cy={cy} r={10} fill="transparent" />
+      <circle
+        cx={cx}
+        cy={cy}
+        r={3.5}
+        fill={VERDICT_COLOR[payload.verdict]}
+        stroke="#131313"
+        strokeWidth={1}
+      />
+    </g>
   );
 }
 
+/** Con muchos puntos aparece una barra para hacer zoom arrastrando. */
+const BRUSH_FROM = 16;
+
 export default function TrustTrendChart({ data }: { data: TrustTrendPoint[] }) {
+  const router = useRouter();
+  const open = (id: string) => router.push(`/dashboard/historial/${id}`);
   return (
     <ChartCard
       title="Tendencia de confianza"
-      subtitle="Cada punto es un correo; su color indica el veredicto"
+      subtitle="Cada punto es un correo: haz clic para abrirlo"
       className="xl:col-span-2"
     >
       {data.length === 0 ? (
@@ -133,10 +150,21 @@ export default function TrustTrendChart({ data }: { data: TrustTrendPoint[] }) {
                 stroke={ACCENT_HEX}
                 strokeWidth={2}
                 fill="url(#trustFill)"
-                dot={<VerdictDot />}
+                dot={<VerdictDot onOpen={open} />}
                 activeDot={{ r: 5, fill: ACCENT_HEX }}
                 isAnimationActive={false}
               />
+              {data.length >= BRUSH_FROM && (
+                <Brush
+                  dataKey="label"
+                  height={22}
+                  travellerWidth={8}
+                  stroke="rgba(200,212,0,0.6)"
+                  fill="rgba(255,255,255,0.03)"
+                  startIndex={Math.max(0, data.length - 20)}
+                  tickFormatter={() => ""}
+                />
+              )}
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -144,6 +172,8 @@ export default function TrustTrendChart({ data }: { data: TrustTrendPoint[] }) {
       <p className="mt-3 text-[11px] text-guard-text-muted">
         Líneas guía: ≥ {SAFE_THRESHOLD} % seguro · &lt; {SUSPICIOUS_THRESHOLD} %
         peligroso
+        {data.length >= BRUSH_FROM &&
+          " · arrastra los bordes de la barra inferior para hacer zoom"}
       </p>
     </ChartCard>
   );

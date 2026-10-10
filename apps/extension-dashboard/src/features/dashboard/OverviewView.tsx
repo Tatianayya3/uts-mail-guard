@@ -5,6 +5,7 @@ import {
   type Analytics,
   type ScanRecord,
 } from "@mail-guard/contracts";
+import AnimatedNumber from "./AnimatedNumber";
 import DashboardInsights from "./DashboardInsights";
 import ErrorBanner from "./ErrorBanner";
 import Onboarding from "./Onboarding";
@@ -70,7 +71,7 @@ export default function OverviewView({
         <StatCard
           icon={Mail}
           label="Correos analizados"
-          value={number(stats.totalScans)}
+          value={<AnimatedNumber value={stats.totalScans} />}
           helper="en total"
           tone="accent"
           trend={
@@ -82,7 +83,7 @@ export default function OverviewView({
         <StatCard
           icon={Gauge}
           label="Confianza promedio"
-          value={hasScans ? `${average}%` : "—"}
+          value={hasScans ? <AnimatedNumber value={average} suffix="%" /> : "—"}
           helper={
             weekAverage !== null
               ? `Últimos 7 días: ${weekAverage}%`
@@ -93,7 +94,7 @@ export default function OverviewView({
         <StatCard
           icon={ShieldAlert}
           label="Amenazas detectadas"
-          value={number(threats)}
+          value={<AnimatedNumber value={threats} />}
           helper={`${number(stats.dangerousScans)} peligrosos · ${number(stats.suspiciousScans)} sospechosos`}
           tone={
             stats.dangerousScans > 0
@@ -106,7 +107,7 @@ export default function OverviewView({
         <StatCard
           icon={Link2}
           label="Enlaces revisados"
-          value={number(stats.linksReviewed)}
+          value={<AnimatedNumber value={stats.linksReviewed} />}
           helper="en todos tus análisis"
         />
       </section>

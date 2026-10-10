@@ -42,16 +42,16 @@ extensión o en el **panel web**.
 
 ### Características
 
-|                               |                                                                                                                                                   |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🎯 **Veredicto explicable**   | Cada resultado muestra señales por remitente, contenido y enlaces, con la evidencia que las activó.                                               |
-| 🧠 **IA para decisiones**     | Jev responde preguntas tipadas (opción, puntaje, sí/no) con probabilidades calibradas. Sin JSON frágil ni alucinaciones de formato.               |
-| 🛡️ **Defensa en profundidad** | Las reglas objetivas (dominios que imitan marcas, IPs, punycode, acortadores…) nunca quedan ocultas por un modelo optimista.                      |
-| 🔌 **Motor intercambiable**   | Jev, cualquier LLM compatible con OpenAI o reglas locales, con respaldo automático si el proveedor falla.                                         |
-| 📊 **Panel web completo**     | Resumen con periodos, historial con búsqueda y filtros en la URL, detalle de cada análisis, cuenta (perfil, contraseña, exportar, borrar) y guía. |
-| 🔒 **Privacidad por diseño**  | Permisos mínimos (`activeTab`), RLS en Postgres, claves solo en el servidor, deduplicación por huella SHA-256.                                    |
-| ⚡ **Rápido y económico**     | Caché por huella del correo: repetir un análisis no gasta IA ni cuota.                                                                            |
-| 🧪 **Funciona sin claves**    | En local todo arranca con el motor heurístico: ideal para demos y pruebas.                                                                        |
+|                               |                                                                                                                                                                                                                                 |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🎯 **Veredicto explicable**   | Cada resultado muestra señales por remitente, contenido y enlaces, con la evidencia que las activó.                                                                                                                             |
+| 🧠 **IA para decisiones**     | Jev responde preguntas tipadas (opción, puntaje, sí/no) con probabilidades calibradas. Sin JSON frágil ni alucinaciones de formato.                                                                                             |
+| 🛡️ **Defensa en profundidad** | Las reglas objetivas (dominios que imitan marcas, IPs, punycode, acortadores…) nunca quedan ocultas por un modelo optimista.                                                                                                    |
+| 🔌 **Motor intercambiable**   | Jev, cualquier LLM compatible con OpenAI o reglas locales, con respaldo automático si el proveedor falla.                                                                                                                       |
+| 📊 **Panel web interactivo**  | Filtrado cruzado (un clic en un veredicto filtra todo), hallazgos automáticos, mapa de calor por día y hora, zoom en la tendencia, clic en un punto o barra para ir al detalle; historial con filtros en la URL, cuenta y guía. |
+| 🔒 **Privacidad por diseño**  | Permisos mínimos (`activeTab`), RLS en Postgres, claves solo en el servidor, deduplicación por huella SHA-256.                                                                                                                  |
+| ⚡ **Rápido y económico**     | Caché por huella del correo: repetir un análisis no gasta IA ni cuota.                                                                                                                                                          |
+| 🧪 **Funciona sin claves**    | En local todo arranca con el motor heurístico: ideal para demos y pruebas.                                                                                                                                                      |
 
 ---
 
@@ -283,7 +283,7 @@ Solicita acceso en [typesafe.ai](https://typesafe.ai) y define `TYPESAFE_API_KEY
 ## Calidad
 
 ```bash
-bun run test          # 52 pruebas unitarias y de integración HTTP (bun test)
+bun run test          # 56 pruebas unitarias y de integración HTTP (bun test)
 bun run check-types   # TypeScript estricto en los 10 proyectos
 bun run build         # build de la extensión y del panel
 ```
