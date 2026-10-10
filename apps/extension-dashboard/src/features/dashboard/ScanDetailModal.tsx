@@ -22,7 +22,7 @@ import {
   VERDICT_LABEL,
 } from "./dashboard.constants";
 import { formatFullDate } from "./dashboard.utils";
-import type { MailScanRecord } from "./dashboard.types";
+import type { ScanRecord as MailScanRecord } from "@mail-guard/contracts";
 import CopyButton from "./CopyButton";
 
 const VERDICT_ICON: Record<MailScanRecord["verdict"], LucideIcon> = {

@@ -1,33 +1,35 @@
 {
   "name": "extension-web",
+  "displayName": "Mail Guard",
   "type": "module",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
+  "description": "Detecta phishing en el correo que tienes abierto en Gmail y Outlook.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "check-types": "tsc -b",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@mail-guard/auth-contract": "workspace:*",
-    "@mail-guard/scan-contract": "workspace:*",
+    "@mail-guard/api-client": "workspace:*",
+    "@mail-guard/contracts": "workspace:*",
     "@mail-guard/supabase": "workspace:*",
-    "@supabase/supabase-js": "^2.116.0",
-    "@tailwindcss/vite": "^4.3.3",
+    "@supabase/supabase-js": "^2.117.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "sonner": "^2.0.8",
-    "tailwindcss": "^4.3.3",
-    "zod": "^4.6.5"
+    "sonner": "^2.0.8"
   },
   "devDependencies": {
-    "@repo/tailwind-config": "*",
     "@crxjs/vite-plugin": "^2.4.0",
+    "@repo/tailwind-config": "*",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/chrome": "^0.1.37",
-    "@types/node": "^25.5.0",
+    "@types/node": "^22",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "tailwindcss": "^4.3.3",
     "typescript": "~5.9.3",
     "vite": "^8.0.0",
     "vite-plugin-zip-pack": "^1.2.4"

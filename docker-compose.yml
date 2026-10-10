@@ -1,0 +1,48 @@
+# Levanta los 3 microservicios. Copia cada .env.example a .env antes de empezar.
+#   docker compose up --build
+# Solo el gateway se expone al host; los demás viven en la red interna.
+
+x-service: &service
+  build:
+    context: .
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  environment: &env
+    INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-change-me-in-production}
+
+services:
+  gateway:
+    <<: *service
+    build: { context: ., dockerfile: Dockerfile, args: { SERVICE: gateway } }
+    env_file: [{ path: services/gateway/.env, required: false }]
+    environment:
+      <<: *env
+      PORT: 4000
+      ANALYSIS_SERVICE_URL: http://analysis-service:4001
+      HISTORY_SERVICE_URL: http://history-service:4002
+    ports: ["4000:4000"]
+    depends_on: [analysis-service, history-service]
+
+  analysis-service:
+    <<: *service
+    build:
+      {
+        context: .,
+        dockerfile: Dockerfile,
+        args: { SERVICE: analysis-service },
+      }
+    env_file: [{ path: services/analysis-service/.env, required: false }]
+    environment:
+      <<: *env
+      PORT: 4001
+    expose: ["4001"]
+
+  history-service:
+    <<: *service
+    build:
+      { context: ., dockerfile: Dockerfile, args: { SERVICE: history-service } }
+    env_file: [{ path: services/history-service/.env, required: false }]
+    environment:
+      <<: *env
+      PORT: 4002
+    expose: ["4002"]

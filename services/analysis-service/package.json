@@ -1,0 +1,26 @@
+{
+  "name": "@mail-guard/analysis-service",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Microservicio de análisis: extrae evidencias y decide el riesgo con Jev, un LLM o reglas.",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "test": "bun test",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mail-guard/contracts": "workspace:*",
+    "@mail-guard/service-kit": "workspace:*",
+    "@typesafe-ai/sdk": "^0.6.0",
+    "@upstash/redis": "^1.39.0",
+    "hono": "^4.13.13",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "@types/bun": "^1.4.2",
+    "typescript": "^5.9.3"
+  }
+}

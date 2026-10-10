@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
-import { auth } from "@/utils/supabase/client";
+import { auth } from "@/lib/supabase/client";
 
 export default function SignOutButton() {
   const router = useRouter();

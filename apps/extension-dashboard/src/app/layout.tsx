@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dashboard | Mail Guard",
-  description: "Gestiona los datos de tu extensión Mail Guard.",
+  title: "Mail Guard · Detección de phishing en tu correo",
+  description:
+    "Extensión para Gmail y Outlook que detecta phishing y explica cada veredicto. Consulta tu historial y métricas.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -48,8 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               info: "bg-guard-surface-raised/95 border-guard-accent/40 text-guard-accent-bright",
               actionButton:
                 "bg-guard-accent text-guard-surface font-bold rounded-lg",
-              cancelButton:
-                "bg-white/10 text-guard-text-muted rounded-lg",
+              cancelButton: "bg-white/10 text-guard-text-muted rounded-lg",
             },
           }}
         />
