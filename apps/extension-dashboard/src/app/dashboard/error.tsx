@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { TriangleAlert } from "lucide-react";
+import { Button } from "@mail-guard/ui";
 
 export default function DashboardError({
   error,
@@ -16,7 +17,7 @@ export default function DashboardError({
   }, [error]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-guard-surface px-6 text-white">
+    <div className="flex min-h-[60vh] items-center justify-center">
       <div className="w-full max-w-md rounded-2xl border border-guard-surface-raised bg-guard-surface-card/60 p-8 text-center">
         <TriangleAlert
           className="mx-auto h-8 w-8 text-amber-300"
@@ -33,13 +34,7 @@ export default function DashboardError({
           </p>
         )}
         <div className="mt-6 flex justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => retry()}
-            className="rounded-xl bg-guard-accent px-4 py-2 text-sm font-bold text-guard-surface hover:bg-guard-accent-bright"
-          >
-            Reintentar
-          </button>
+          <Button onClick={() => retry()}>Reintentar</Button>
           <Link
             href="/"
             className="rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-guard-text-muted hover:text-white"
@@ -48,6 +43,6 @@ export default function DashboardError({
           </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

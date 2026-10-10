@@ -78,17 +78,19 @@ export default function AuthCard() {
         </p>
       </div>
 
-      {mode === "signup" && <RegisterForm status={status} onSubmit={signUp} />}
+      {mode === "signup" && (
+        <RegisterForm isLoading={isLoading} onSubmit={signUp} />
+      )}
       {mode === "signin" && (
         <LoginForm
-          status={status}
+          isLoading={isLoading}
           onSubmit={signIn}
           onForgotPassword={() => setMode("forgot")}
         />
       )}
       {mode === "forgot" && (
         <ForgotPasswordForm
-          status={status}
+          isLoading={isLoading}
           onSubmit={async (values) => {
             const ok = await forgotPassword(values);
             if (ok) setMode("signin");

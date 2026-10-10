@@ -29,10 +29,12 @@ flowchart LR
     UC9([UC-09 Consultar métricas])
     UC10([UC-10 Ver detalle de un análisis])
     UC11([UC-11 Controlar cuota diaria])
+    UC12([UC-12 Editar perfil])
+    UC13([UC-13 Borrar historial])
   end
 
   I --> UC1 & UC2 & UC3 & UC4 & UC5
-  R --> UC1 & UC2 & UC6 & UC9 & UC10
+  R --> UC1 & UC2 & UC6 & UC9 & UC10 & UC12 & UC13
   UC1 -. include .-> UC11
   UC1 -. extend .-> UC7
   UC4 -. include .-> UC8
@@ -107,3 +109,16 @@ flowchart LR
 - **Regla:** ventana deslizante de 24 h: 5 análisis para invitados (por IP) y 100 para usuarios (por id). Configurable.
 - Un resultado servido desde caché **no** consume cuota (no gasta IA).
 - La respuesta incluye `quota.remaining` y la extensión lo muestra.
+
+### UC-12 · Editar perfil
+
+- **Actor:** Usuario registrado.
+- **Flujo:** en _Cuenta_, cambia su nombre visible → validación Zod en el navegador y de nuevo en el servidor (Server Action) → `PATCH /v1/me` → el panel se actualiza.
+- **También en Cuenta:** cambiar la contraseña (Supabase Auth) y descargar sus datos en CSV o JSON.
+
+### UC-13 · Borrar historial
+
+- **Actor:** Usuario registrado.
+- **Precondición:** escribe «BORRAR» para confirmar.
+- **Flujo:** Server Action → `DELETE /v1/scans` → la función SQL `delete_my_history()` borra sus análisis y métricas (solo los de `auth.uid()`).
+- **Postcondición:** la cuenta sigue activa; el panel muestra los primeros pasos.

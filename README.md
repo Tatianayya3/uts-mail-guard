@@ -42,16 +42,16 @@ extensión o en el **panel web**.
 
 ### Características
 
-|                               |                                                                                                                                     |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| 🎯 **Veredicto explicable**   | Cada resultado muestra señales por remitente, contenido y enlaces, con la evidencia que las activó.                                 |
-| 🧠 **IA para decisiones**     | Jev responde preguntas tipadas (opción, puntaje, sí/no) con probabilidades calibradas. Sin JSON frágil ni alucinaciones de formato. |
-| 🛡️ **Defensa en profundidad** | Las reglas objetivas (dominios que imitan marcas, IPs, punycode, acortadores…) nunca quedan ocultas por un modelo optimista.        |
-| 🔌 **Motor intercambiable**   | Jev, cualquier LLM compatible con OpenAI o reglas locales, con respaldo automático si el proveedor falla.                           |
-| 📊 **Historial y métricas**   | Tendencia de confianza, volumen diario, distribución de veredictos y detalle de cada análisis.                                      |
-| 🔒 **Privacidad por diseño**  | Permisos mínimos (`activeTab`), RLS en Postgres, claves solo en el servidor, deduplicación por huella SHA-256.                      |
-| ⚡ **Rápido y económico**     | Caché por huella del correo: repetir un análisis no gasta IA ni cuota.                                                              |
-| 🧪 **Funciona sin claves**    | En local todo arranca con el motor heurístico: ideal para demos y pruebas.                                                          |
+|                               |                                                                                                                                                   |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🎯 **Veredicto explicable**   | Cada resultado muestra señales por remitente, contenido y enlaces, con la evidencia que las activó.                                               |
+| 🧠 **IA para decisiones**     | Jev responde preguntas tipadas (opción, puntaje, sí/no) con probabilidades calibradas. Sin JSON frágil ni alucinaciones de formato.               |
+| 🛡️ **Defensa en profundidad** | Las reglas objetivas (dominios que imitan marcas, IPs, punycode, acortadores…) nunca quedan ocultas por un modelo optimista.                      |
+| 🔌 **Motor intercambiable**   | Jev, cualquier LLM compatible con OpenAI o reglas locales, con respaldo automático si el proveedor falla.                                         |
+| 📊 **Panel web completo**     | Resumen con periodos, historial con búsqueda y filtros en la URL, detalle de cada análisis, cuenta (perfil, contraseña, exportar, borrar) y guía. |
+| 🔒 **Privacidad por diseño**  | Permisos mínimos (`activeTab`), RLS en Postgres, claves solo en el servidor, deduplicación por huella SHA-256.                                    |
+| ⚡ **Rápido y económico**     | Caché por huella del correo: repetir un análisis no gasta IA ni cuota.                                                                            |
+| 🧪 **Funciona sin claves**    | En local todo arranca con el motor heurístico: ideal para demos y pruebas.                                                                        |
 
 ---
 
@@ -77,11 +77,11 @@ flowchart LR
   HI -->|RLS| SB
 ```
 
-| Microservicio        | Responsabilidad                                                                                 | Endpoints                                                                                          |
-| -------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| **gateway**          | Único punto público: CORS, verificación de JWT, cuota diaria, orquestación y errores uniformes. | `POST /v1/scans` · `POST /v1/scans/sync` · `GET /v1/scans` · `GET /v1/me` · `GET /health/services` |
-| **analysis-service** | Extrae evidencias, consulta el motor de decisión y compone el veredicto. Caché por huella.      | `POST /v1/analyze` · `GET /v1/engine`                                                              |
-| **history-service**  | Historial, perfil y métricas por usuario sobre Supabase con RLS.                                | `POST /v1/scans` · `POST /v1/scans/sync` · `GET /v1/scans` · `GET /v1/me`                          |
+| Microservicio        | Responsabilidad                                                                                 | Endpoints                                                                                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **gateway**          | Único punto público: CORS, verificación de JWT, cuota diaria, orquestación y errores uniformes. | `POST /v1/scans` · `POST /v1/scans/sync` · `GET /v1/scans` · `GET /v1/scans/:id` · `DELETE /v1/scans` · `GET/PATCH /v1/me` · `GET /health/services` |
+| **analysis-service** | Extrae evidencias, consulta el motor de decisión y compone el veredicto. Caché por huella.      | `POST /v1/analyze` · `GET /v1/engine`                                                                                                               |
+| **history-service**  | Historial, perfil y métricas por usuario sobre Supabase con RLS.                                | `POST /v1/scans` · `POST /v1/scans/sync` · `GET /v1/scans` · `GET /v1/scans/:id` · `DELETE /v1/scans` · `GET/PATCH /v1/me`                          |
 
 **Patrones:** arquitectura **hexagonal** + casos de uso en los servicios, **MVVM** en la
 extensión y Server Components + ViewModels en el panel. La justificación completa
@@ -103,6 +103,7 @@ mail-guard/
 ├── packages/
 │   ├── contracts/            # Schemas Zod y tipos compartidos (fuente única de verdad)
 │   ├── api-client/           # Cliente tipado del gateway (extensión y panel)
+│   ├── ui/                   # Componentes React compartidos (botón, campos, veredicto, anillo…)
 │   ├── service-kit/          # Base común de los servicios: errores, logs, health, auth interna
 │   ├── supabase/             # Casos de uso de autenticación
 │   ├── tailwind-config/      # Tokens de diseño
@@ -202,7 +203,8 @@ Solo el gateway se publica (`:4000`); los servicios internos quedan en la red de
 ### 1. Supabase (cuentas, historial y métricas)
 
 1. Crea un proyecto en [supabase.com](https://supabase.com).
-2. En **SQL Editor** ejecuta [`supabase/migrations/0001_mail_guard.sql`](supabase/migrations/0001_mail_guard.sql).
+2. En **SQL Editor** ejecuta, en orden, [`0001_mail_guard.sql`](supabase/migrations/0001_mail_guard.sql) y
+   [`0002_privacy_controls.sql`](supabase/migrations/0002_privacy_controls.sql).
    Es idempotente: crea o actualiza tablas, políticas RLS, deduplicación y triggers de métricas.
 3. En **Authentication → URL Configuration** agrega `http://localhost:3000/reset-password`
    (y la URL de producción) a las _Redirect URLs_.
@@ -281,8 +283,8 @@ Solicita acceso en [typesafe.ai](https://typesafe.ai) y define `TYPESAFE_API_KEY
 ## Calidad
 
 ```bash
-bun run test          # 45 pruebas unitarias y de integración HTTP (bun test)
-bun run check-types   # TypeScript estricto en los 9 proyectos
+bun run test          # 52 pruebas unitarias y de integración HTTP (bun test)
+bun run check-types   # TypeScript estricto en los 10 proyectos
 bun run build         # build de la extensión y del panel
 ```
 
@@ -303,7 +305,7 @@ fallos, la caché, la cuota, la deduplicación del historial y las rutas de cada
 | Auth + base de datos | **Supabase** Free                               | Proyecto pausado tras 7 días sin actividad        |
 | Cuota y caché        | Memoria del servicio (Upstash Free es opcional) | —                                                 |
 
-1. **Supabase:** crea el proyecto y ejecuta `supabase/migrations/0001_mail_guard.sql`.
+1. **Supabase:** crea el proyecto y ejecuta las migraciones `0001` y `0002` de `supabase/migrations/`.
 2. **Render:** _New → Blueprint_ → elige este repositorio. Render lee `render.yaml`, crea
    `mail-guard-gateway`, `mail-guard-analysis` y `mail-guard-history`, genera el
    `INTERNAL_SERVICE_TOKEN` compartido y te pide `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`

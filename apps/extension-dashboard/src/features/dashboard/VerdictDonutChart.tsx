@@ -30,7 +30,7 @@ export default function VerdictDonutChart({
           description="Tus resultados aparecerán aquí cuando analices correos."
         />
       ) : (
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col items-center gap-5">
           <div
             className="relative h-44 w-44 shrink-0"
             role="img"

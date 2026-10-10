@@ -70,7 +70,7 @@ export default function TrustTrendChart({ data }: { data: TrustTrendPoint[] }) {
     <ChartCard
       title="Tendencia de confianza"
       subtitle="Cada punto es un correo; su color indica el veredicto"
-      className="lg:col-span-2"
+      className="xl:col-span-2"
     >
       {data.length === 0 ? (
         <EmptyChartState

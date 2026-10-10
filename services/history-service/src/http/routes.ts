@@ -2,6 +2,7 @@ import type { MiddlewareHandler } from "hono";
 import {
   saveScanRequestSchema,
   syncScansRequestSchema,
+  updateProfileRequestSchema,
 } from "@mail-guard/contracts";
 import {
   bearerToken,
@@ -18,10 +19,13 @@ import type {
   UserContextFactory,
 } from "../application/ports";
 import {
+  deleteHistory,
   getOverview,
+  getScan,
   listScans,
   saveScan,
   syncScans,
+  updateProfile,
 } from "../application/use-cases";
 
 type Env = { Variables: { user: AuthenticatedUser; scans: ScanRepository } };
@@ -68,6 +72,23 @@ export function createRoutes(deps: {
   v1.get("/scans", authenticate, async (c) => {
     const limit = Number(c.req.query("limit") ?? 20);
     return c.json({ scans: await listScans(c.var.scans, limit) });
+  });
+
+  v1.get("/scans/:id", authenticate, async (c) =>
+    c.json({ scan: await getScan(c.var.scans, c.req.param("id")) }),
+  );
+
+  v1.delete("/scans", authenticate, async (c) =>
+    c.json({ deleted: await deleteHistory(c.var.scans) }),
+  );
+
+  v1.patch("/me", authenticate, async (c) => {
+    const changes = await readJson(
+      c,
+      updateProfileRequestSchema,
+      "El nombre no es válido.",
+    );
+    return c.json(await updateProfile(c.var.scans, c.var.user, changes));
   });
 
   v1.get("/me", authenticate, async (c) =>

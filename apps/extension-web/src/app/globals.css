@@ -1,4 +1,6 @@
 @import "@repo/tailwind-config";
+/* Componentes compartidos: Tailwind debe escanear sus clases. */
+@source "../../../../packages/ui/src";
 
 @keyframes fade-in {
   from {

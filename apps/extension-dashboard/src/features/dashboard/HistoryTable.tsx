@@ -1,6 +1,14 @@
 "use client";
 
-import { useDeferredValue, useState, type KeyboardEvent } from "react";
+import { useDeferredValue } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  parseAsInteger,
+  parseAsString,
+  parseAsStringLiteral,
+  useQueryStates,
+} from "nuqs";
 import {
   ChevronLeft,
   ChevronRight,
@@ -8,101 +16,70 @@ import {
   Inbox,
   Search,
 } from "lucide-react";
-import type { ScanRecord, Verdict } from "@mail-guard/contracts";
 import {
-  VERDICT_BADGE_CLASS,
-  VERDICT_ICON,
   VERDICT_LABEL,
   VERDICT_ORDER,
-} from "./dashboard.constants";
+  type ScanRecord,
+} from "@mail-guard/contracts";
+import { Button, VerdictBadge, VerdictIcon, cn } from "@mail-guard/ui";
 import {
   filterScans,
   formatFullDate,
   formatRelativeTime,
-  scansToCsv,
-  type HistoryFilter,
 } from "./dashboard.utils";
+import { downloadCsv } from "./download";
 import ChartCard from "./ChartCard";
 import EmptyChartState from "./EmptyChartState";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
+const VERDICT_FILTERS = ["all", ...VERDICT_ORDER] as const;
 
-type Props = {
+/**
+ * Historial con búsqueda, filtro y paginación. El estado vive en la URL
+ * (?q=…&veredicto=…&pagina=…): se puede compartir, recargar o volver atrás
+ * desde el detalle sin perder el filtro.
+ */
+export default function HistoryTable({
+  scans,
+  truncated,
+}: {
   scans: ScanRecord[];
-  onSelect: (scan: ScanRecord) => void;
-  /** true si hay más análisis históricos de los cargados en el panel. */
   truncated: boolean;
-};
-
-function downloadCsv(scans: ScanRecord[]) {
-  const blob = new Blob([scansToCsv(scans)], {
-    type: "text/csv;charset=utf-8",
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `mail-guard-historial-${new Date().toISOString().slice(0, 10)}.csv`;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-export default function HistoryTable({ scans, onSelect, truncated }: Props) {
-  const [filter, setFilter] = useState<HistoryFilter>({
-    query: "",
-    verdict: "all",
-  });
-  const [page, setPage] = useState(0);
-  // La búsqueda no bloquea la escritura aunque haya muchos análisis.
-  const deferredFilter = useDeferredValue(filter);
-
-  const filtered = filterScans(scans, deferredFilter);
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const currentPage = Math.min(page, pageCount - 1);
-  const visible = filtered.slice(
-    currentPage * PAGE_SIZE,
-    (currentPage + 1) * PAGE_SIZE,
+}) {
+  const router = useRouter();
+  const [params, setParams] = useQueryStates(
+    {
+      q: parseAsString.withDefault(""),
+      veredicto: parseAsStringLiteral(VERDICT_FILTERS).withDefault("all"),
+      pagina: parseAsInteger.withDefault(1),
+    },
+    { scroll: false, throttleMs: 300 },
   );
+  const query = useDeferredValue(params.q);
 
-  const updateFilter = (next: Partial<HistoryFilter>) => {
-    setFilter((current) => ({ ...current, ...next }));
-    setPage(0);
-  };
-
-  const onRowKeyDown = (
-    event: KeyboardEvent<HTMLTableRowElement>,
-    scan: ScanRecord,
-  ) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      onSelect(scan);
-    }
-  };
-
-  const chips: (Verdict | "all")[] = ["all", ...VERDICT_ORDER];
+  const filtered = filterScans(scans, { query, verdict: params.veredicto });
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const page = Math.min(Math.max(1, params.pagina), pageCount);
+  const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <ChartCard
-      title="Historial de análisis"
+      title={`${filtered.length} análisis`}
       subtitle={
         truncated
-          ? `Tus últimos ${scans.length} análisis · selecciona uno para ver el detalle`
-          : "Selecciona un análisis para ver el detalle completo"
+          ? `Mostrando tus últimos ${scans.length} análisis`
+          : "Todo tu historial"
       }
-      className="lg:col-span-3"
       action={
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
           onClick={() => downloadCsv(filtered)}
           disabled={filtered.length === 0}
-          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs font-medium text-guard-text-muted transition-colors hover:bg-white/5 hover:text-white disabled:opacity-40"
+          icon={<Download className="h-3.5 w-3.5" aria-hidden="true" />}
         >
-          <Download
-            className="h-3.5 w-3.5"
-            strokeWidth={2.25}
-            aria-hidden="true"
-          />
           Exportar CSV
-        </button>
+        </Button>
       }
     >
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -114,8 +91,10 @@ export default function HistoryTable({ scans, onSelect, truncated }: Props) {
           />
           <input
             type="search"
-            value={filter.query}
-            onChange={(event) => updateFilter({ query: event.target.value })}
+            value={params.q}
+            onChange={(event) =>
+              void setParams({ q: event.target.value || null, pagina: null })
+            }
             placeholder="Buscar por asunto o remitente"
             className="h-9 w-full rounded-lg border border-white/10 bg-guard-surface/60 pl-9 pr-3 text-sm text-white outline-none placeholder:text-guard-text-muted/70 focus:border-guard-accent"
           />
@@ -125,19 +104,25 @@ export default function HistoryTable({ scans, onSelect, truncated }: Props) {
           role="group"
           aria-label="Filtrar por veredicto"
         >
-          {chips.map((verdict) => {
-            const active = filter.verdict === verdict;
+          {VERDICT_FILTERS.map((verdict) => {
+            const active = params.veredicto === verdict;
             return (
               <button
                 key={verdict}
                 type="button"
                 aria-pressed={active}
-                onClick={() => updateFilter({ verdict })}
-                className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+                onClick={() =>
+                  void setParams({
+                    veredicto: verdict === "all" ? null : verdict,
+                    pagina: null,
+                  })
+                }
+                className={cn(
+                  "rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors",
                   active
                     ? "border-guard-accent bg-guard-accent text-guard-surface"
-                    : "border-white/10 text-guard-text-muted hover:text-white"
-                }`}
+                    : "border-white/10 text-guard-text-muted hover:text-white",
+                )}
               >
                 {verdict === "all" ? "Todos" : VERDICT_LABEL[verdict]}
               </button>
@@ -182,30 +167,26 @@ export default function HistoryTable({ scans, onSelect, truncated }: Props) {
             </thead>
             <tbody className="divide-y divide-white/5">
               {visible.map((scan) => {
-                const Icon = VERDICT_ICON[scan.verdict];
+                const href = `/dashboard/historial/${scan.id}`;
                 return (
                   <tr
                     key={scan.id}
-                    tabIndex={0}
-                    onClick={() => onSelect(scan)}
-                    onKeyDown={(event) => onRowKeyDown(event, scan)}
-                    aria-label={`Ver detalle de ${scan.subject || "correo sin asunto"}`}
-                    className="cursor-pointer transition-colors hover:bg-white/[0.04] focus:bg-white/[0.06] focus:outline-none"
+                    onClick={() => router.push(href)}
+                    className="cursor-pointer transition-colors hover:bg-white/[0.04]"
                   >
-                    <td className="max-w-[260px] px-3 py-2.5">
+                    <td className="max-w-[280px] px-3 py-2.5">
                       <div className="flex items-center gap-2.5">
-                        <span
-                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border ${VERDICT_BADGE_CLASS[scan.verdict]}`}
+                        <VerdictIcon
+                          verdict={scan.verdict}
+                          className="h-7 w-7"
+                        />
+                        <Link
+                          href={href}
+                          onClick={(event) => event.stopPropagation()}
+                          className="truncate font-medium text-white hover:underline focus-visible:outline-2 focus-visible:outline-guard-accent"
                         >
-                          <Icon
-                            className="h-3.5 w-3.5"
-                            strokeWidth={2.25}
-                            aria-hidden="true"
-                          />
-                        </span>
-                        <span className="truncate font-medium text-white">
                           {scan.subject || "Correo sin asunto"}
-                        </span>
+                        </Link>
                       </div>
                     </td>
                     <td className="max-w-[220px] px-3 py-2.5">
@@ -217,11 +198,7 @@ export default function HistoryTable({ scans, onSelect, truncated }: Props) {
                       </p>
                     </td>
                     <td className="px-3 py-2.5">
-                      <span
-                        className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold ${VERDICT_BADGE_CLASS[scan.verdict]}`}
-                      >
-                        {VERDICT_LABEL[scan.verdict]}
-                      </span>
+                      <VerdictBadge verdict={scan.verdict} />
                     </td>
                     <td className="px-3 py-2.5 text-right font-semibold text-white tabular-nums">
                       {scan.trustScore}%
@@ -247,29 +224,28 @@ export default function HistoryTable({ scans, onSelect, truncated }: Props) {
           aria-label="Paginación del historial"
         >
           <span>
-            {currentPage * PAGE_SIZE + 1}–
-            {Math.min(filtered.length, (currentPage + 1) * PAGE_SIZE)} de{" "}
-            {filtered.length}
+            {(page - 1) * PAGE_SIZE + 1}–
+            {Math.min(filtered.length, page * PAGE_SIZE)} de {filtered.length}
           </span>
           <div className="flex gap-1">
-            <button
-              type="button"
-              onClick={() => setPage(currentPage - 1)}
-              disabled={currentPage === 0}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() =>
+                void setParams({ pagina: page - 1 === 1 ? null : page - 1 })
+              }
+              disabled={page <= 1}
               aria-label="Página anterior"
-              className="rounded-lg border border-white/10 p-1.5 hover:bg-white/5 disabled:opacity-30"
-            >
-              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setPage(currentPage + 1)}
-              disabled={currentPage >= pageCount - 1}
+              icon={<ChevronLeft className="h-4 w-4" aria-hidden="true" />}
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => void setParams({ pagina: page + 1 })}
+              disabled={page >= pageCount}
               aria-label="Página siguiente"
-              className="rounded-lg border border-white/10 p-1.5 hover:bg-white/5 disabled:opacity-30"
-            >
-              <ChevronRight className="h-4 w-4" aria-hidden="true" />
-            </button>
+              icon={<ChevronRight className="h-4 w-4" aria-hidden="true" />}
+            />
           </div>
         </nav>
       )}

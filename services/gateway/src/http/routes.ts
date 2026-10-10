@@ -4,6 +4,7 @@ import { cors } from "hono/cors";
 import {
   scanRequestSchema,
   syncScansRequestSchema,
+  updateProfileRequestSchema,
 } from "@mail-guard/contracts";
 import {
   bearerToken,
@@ -49,7 +50,7 @@ export function createRoutes(deps: Deps) {
     cors({
       origin: deps.corsOrigins.includes("*") ? "*" : deps.corsOrigins,
       allowHeaders: ["Content-Type", "Authorization"],
-      allowMethods: ["GET", "POST", "OPTIONS"],
+      allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
       maxAge: 86_400,
     }),
   );
@@ -130,6 +131,43 @@ export function createRoutes(deps: Deps) {
         requestId: c.var.requestId,
       }),
     );
+  });
+
+  // Proxy autenticado hacia history-service, mismo verbo y ruta.
+  const toHistory = (
+    c: Context<Env>,
+    path: string,
+    method: "GET" | "PATCH" | "DELETE",
+    body?: unknown,
+  ) =>
+    deps.history.request(path, {
+      method,
+      body,
+      token: c.var.identity!.token,
+      requestId: c.var.requestId,
+    });
+
+  v1.get("/scans/:id", requireUser, async (c) =>
+    c.json(
+      await toHistory(
+        c,
+        `/v1/scans/${encodeURIComponent(c.req.param("id"))}`,
+        "GET",
+      ),
+    ),
+  );
+
+  v1.delete("/scans", requireUser, async (c) =>
+    c.json(await toHistory(c, "/v1/scans", "DELETE")),
+  );
+
+  v1.patch("/me", requireUser, async (c) => {
+    const body = await readJson(
+      c,
+      updateProfileRequestSchema,
+      "El nombre no es válido.",
+    );
+    return c.json(await toHistory(c, "/v1/me", "PATCH", body));
   });
 
   v1.get("/me", requireUser, async (c) =>

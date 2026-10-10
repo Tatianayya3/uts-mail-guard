@@ -33,7 +33,7 @@ export default function ScansVolumeChart({ data }: ScansVolumeChartProps) {
     <ChartCard
       title="Volumen de escaneos"
       subtitle={`Correos analizados por día · últimos ${data.length} días`}
-      className="lg:col-span-3"
+      className="xl:col-span-3"
     >
       {!hasData ? (
         <EmptyChartState
