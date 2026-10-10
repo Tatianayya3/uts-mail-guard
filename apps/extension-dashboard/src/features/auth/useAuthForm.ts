@@ -7,8 +7,8 @@ import type {
   ForgotPasswordValues,
   SignInValues,
   SignUpValues,
-} from "@mail-guard/auth-contract";
-import { auth } from "@/utils/supabase/client";
+} from "@mail-guard/contracts";
+import { auth } from "@/lib/supabase/client";
 
 export type AuthFormStatus = "idle" | "loading" | "success" | "error";
 

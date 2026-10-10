@@ -4,7 +4,7 @@ import { type FormEvent, useState } from "react";
 import {
   resetPasswordSchema,
   type ResetPasswordValues,
-} from "@mail-guard/auth-contract";
+} from "@mail-guard/contracts";
 import FormField from "./FormField";
 import type { ResetPasswordStatus } from "./useResetPassword";
 

@@ -1,0 +1,128 @@
+import ScanShieldIcon from "@/shared/icons/ScanShield";
+import ShieldIcon from "@/shared/icons/Shield";
+import gmailIcon from "@/shared/icons/gmail.svg";
+import outlookIcon from "@/shared/icons/outlook.svg";
+import type { ScanViewModel } from "../useScanViewModel";
+import AnalysisResultView from "./AnalysisResultView";
+
+const PROVIDER_ICON = { Gmail: gmailIcon, Outlook: outlookIcon } as const;
+
+export default function ScanView({ vm }: { vm: ScanViewModel }) {
+  if (vm.result) {
+    return (
+      <AnalysisResultView
+        result={vm.result}
+        isScanning={vm.isScanning}
+        onNewScan={vm.scan}
+        onBack={vm.clearResult}
+      />
+    );
+  }
+
+  const supported = vm.provider !== null && vm.provider !== "unsupported";
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <section className="relative flex w-full flex-col items-center overflow-hidden pt-5">
+        <div className="pointer-events-none absolute left-1/2 top-20 h-64 w-64 -translate-x-1/2 animate-[ambient-pulse_4s_ease-in-out_infinite] rounded-full bg-guard-accent/10 blur-3xl" />
+        <div
+          className={`relative flex h-48 w-48 items-center justify-center ${vm.isScanning ? "scan-active-ring" : ""}`}
+        >
+          <div className="absolute inset-2 rounded-full border border-dashed border-guard-success/30" />
+          <div className="absolute inset-5 rounded-full border border-guard-accent/20" />
+          <div className="absolute inset-8 rounded-full border-10 border-guard-surface-card" />
+          <div className="absolute inset-12 rounded-full bg-guard-surface-raised shadow-[0_0_35px_rgba(200,212,0,0.18)]" />
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="text-4xl text-guard-accent">
+              <ScanShieldIcon />
+            </div>
+            <p className="mt-2 text-[11px] font-bold tracking-[0.2em] text-guard-text-muted">
+              {vm.isScanning ? "ANALIZANDO" : "EN ESPERA"}
+            </p>
+          </div>
+        </div>
+        <h1 className="mt-3 text-2xl font-bold tracking-tight">
+          Analiza este correo
+        </h1>
+        <p className="mt-2 max-w-82.5 text-center text-sm leading-6 text-guard-text-muted">
+          Detecta dominios que imitan marcas, enlaces engañosos y mensajes que
+          buscan robar tus datos.
+        </p>
+
+        <button
+          type="button"
+          onClick={() => void vm.scan()}
+          disabled={vm.isScanning || !supported}
+          className="mt-5 flex h-14 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-guard-accent text-lg font-bold text-guard-surface shadow-[0_8px_24px_rgba(200,212,0,0.16)] transition-transform hover:scale-[1.01] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-guard-accent active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {vm.isScanning && (
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-guard-surface/30 border-t-guard-surface" />
+          )}
+          {vm.isScanning ? "Analizando..." : "Escanear correo"}
+        </button>
+        {vm.quota && (
+          <p className="mt-3 text-xs text-guard-text-muted">
+            Te quedan{" "}
+            <span className="font-semibold text-white">
+              {vm.quota.remaining}
+            </span>{" "}
+            de {vm.quota.limit} análisis hoy
+          </p>
+        )}
+      </section>
+
+      <section
+        className="w-full rounded-2xl bg-guard-surface-card p-4"
+        aria-live="polite"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5">
+            {supported ? (
+              <img
+                src={PROVIDER_ICON[vm.provider as keyof typeof PROVIDER_ICON]}
+                alt=""
+                className="h-7 w-7"
+              />
+            ) : (
+              <span className="text-guard-text-muted">?</span>
+            )}
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium">
+              {vm.provider === null
+                ? "Detectando…"
+                : supported
+                  ? vm.provider
+                  : "Sitio no compatible"}
+            </p>
+            <p className="text-xs text-guard-text-muted">
+              {supported
+                ? "Abre un correo y pulsa escanear"
+                : "Abre Gmail u Outlook en esta pestaña"}
+            </p>
+          </div>
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${supported ? "bg-guard-success-strong/10 text-guard-success" : "bg-amber-300/10 text-amber-200"}`}
+          >
+            {supported ? "Compatible" : "No compatible"}
+          </span>
+        </div>
+      </section>
+
+      <section className="flex w-full items-start gap-3 rounded-2xl bg-guard-surface-card p-4">
+        <span className="mt-0.5 text-guard-success">
+          <ShieldIcon />
+        </span>
+        <div>
+          <p className="text-xs font-semibold text-white">
+            Tu privacidad primero
+          </p>
+          <p className="mt-1 text-[11px] leading-4 text-guard-text-muted">
+            Solo enviamos remitente, asunto, texto y enlaces del correo abierto.
+            Nunca adjuntos ni contraseñas.
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+}

@@ -1,10 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ResetPasswordForm,
-  useResetPassword,
-} from "@/features/auth";
+import { ResetPasswordForm, useResetPassword } from "@/features/auth";
 import LoadingOverlay from "@/components/LoadingOverlay";
 
 export default function ResetPasswordPage() {

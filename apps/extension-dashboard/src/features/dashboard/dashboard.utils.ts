@@ -1,10 +1,11 @@
-import type { ProfileAnalytics } from "@mail-guard/supabase";
 import {
   VERDICT_COLOR,
   VERDICT_LABEL,
   VERDICT_ORDER,
-} from "./dashboard.constants";
-import type { MailScanRecord, Verdict } from "./dashboard.types";
+  type Analytics,
+  type ScanRecord,
+  type Verdict,
+} from "@mail-guard/contracts";
 
 const SHORT_DATE = new Intl.DateTimeFormat("es", {
   day: "numeric",
@@ -46,7 +47,7 @@ export type TrustTrendPoint = {
 // Chronological (oldest -> newest) trust score series for the trend chart.
 // `scans` arrive newest-first from the API, so this also reverses the order.
 export function buildTrustTrend(
-  scans: MailScanRecord[],
+  scans: ScanRecord[],
   limit = 20,
 ): TrustTrendPoint[] {
   return [...scans]
@@ -69,7 +70,7 @@ export type DailyVerdictBucket = {
 // Groups scans into day buckets (oldest -> newest) so the volume chart shows
 // how many emails were scanned per verdict each day over the window.
 export function bucketScansByDay(
-  scans: MailScanRecord[],
+  scans: ScanRecord[],
   days = 14,
 ): DailyVerdictBucket[] {
   const buckets = new Map<string, DailyVerdictBucket>();
@@ -111,15 +112,15 @@ export type VerdictSlice = {
 
 export function buildVerdictBreakdown(
   stats: Pick<
-    ProfileAnalytics,
-    "safe_scans" | "suspicious_scans" | "dangerous_scans" | "unknown_scans"
+    Analytics,
+    "safeScans" | "suspiciousScans" | "dangerousScans" | "unknownScans"
   > | null,
 ): VerdictSlice[] {
   const counts: Record<Verdict, number> = {
-    safe: stats?.safe_scans ?? 0,
-    suspicious: stats?.suspicious_scans ?? 0,
-    dangerous: stats?.dangerous_scans ?? 0,
-    unknown: stats?.unknown_scans ?? 0,
+    safe: stats?.safeScans ?? 0,
+    suspicious: stats?.suspiciousScans ?? 0,
+    dangerous: stats?.dangerousScans ?? 0,
+    unknown: stats?.unknownScans ?? 0,
   };
 
   return VERDICT_ORDER.map((key) => ({

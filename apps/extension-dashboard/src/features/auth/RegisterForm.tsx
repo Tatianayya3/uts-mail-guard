@@ -1,7 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import { signUpSchema, type SignUpValues } from "@mail-guard/auth-contract";
+import { signUpSchema, type SignUpValues } from "@mail-guard/contracts";
 import FormField from "./FormField";
 import type { AuthFormStatus } from "./useAuthForm";
 

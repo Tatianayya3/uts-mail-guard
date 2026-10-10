@@ -3,14 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { ResetPasswordValues } from "@mail-guard/auth-contract";
-import { auth, supabase } from "@/utils/supabase/client";
+import type { ResetPasswordValues } from "@mail-guard/contracts";
+import { auth, supabase } from "@/lib/supabase/client";
 
-export type ResetPasswordStatus =
-  | "checking"
-  | "ready"
-  | "invalid"
-  | "loading";
+export type ResetPasswordStatus = "checking" | "ready" | "invalid" | "loading";
 
 export function useResetPassword() {
   const router = useRouter();

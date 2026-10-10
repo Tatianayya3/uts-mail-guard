@@ -1,0 +1,25 @@
+{
+  "name": "@mail-guard/history-service",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Microservicio de historial: guarda análisis, perfil y métricas en Supabase (RLS).",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "test": "bun test",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mail-guard/contracts": "workspace:*",
+    "@mail-guard/service-kit": "workspace:*",
+    "@supabase/supabase-js": "^2.117.3",
+    "hono": "^4.13.13",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "@types/bun": "^1.4.2",
+    "typescript": "^5.9.3"
+  }
+}
