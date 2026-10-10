@@ -28,6 +28,13 @@ export const createManifest = (apiGatewayUrl?: string) =>
       default_popup: "src/app/index.html",
     },
     permissions: ["activeTab", "scripting"],
+    // Alt+Shift+M abre el popup sin usar el ratón.
+    commands: {
+      _execute_action: {
+        suggested_key: { default: "Alt+Shift+M", mac: "Alt+Shift+M" },
+        description: "Abrir Mail Guard",
+      },
+    },
     host_permissions: [
       "https://mail.google.com/*",
       "https://outlook.live.com/*",

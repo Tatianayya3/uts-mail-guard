@@ -47,7 +47,10 @@ export default function ResetPasswordPage() {
           )}
 
           {(status === "ready" || status === "loading") && (
-            <ResetPasswordForm status={status} onSubmit={updatePassword} />
+            <ResetPasswordForm
+              isLoading={status === "loading"}
+              onSubmit={updatePassword}
+            />
           )}
 
           {status === "loading" && (

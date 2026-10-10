@@ -18,7 +18,7 @@ export interface ServiceClient {
   request<T>(
     path: string,
     init?: {
-      method?: "GET" | "POST";
+      method?: "GET" | "POST" | "PATCH" | "DELETE";
       body?: unknown;
       token?: string;
       requestId?: string;

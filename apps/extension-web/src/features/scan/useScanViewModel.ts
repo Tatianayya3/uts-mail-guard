@@ -8,7 +8,8 @@ import {
   type ActiveProvider,
 } from "./model/mail-page";
 import { queuePendingScan } from "./model/pending-scans";
-import { lastScanStore, quotaStore } from "./model/scan-store";
+import { markTab } from "./model/tab-badge";
+import { lastScanStore, quotaStore, savedStore } from "./model/scan-store";
 
 /**
  * ViewModel del escaneo (MVVM): expone estado listo para pintar y acciones.
@@ -19,6 +20,7 @@ export function useScanViewModel() {
   const [quota, setQuota] = useState<Quota | null>(quotaStore.read);
   const [provider, setProvider] = useState<ActiveProvider | null>(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [lastSaved, setLastSaved] = useState(() => savedStore.read() ?? false);
 
   useEffect(() => {
     void getActiveProvider().then(setProvider);
@@ -33,10 +35,13 @@ export function useScanViewModel() {
     if (isScanning) return;
     setIsScanning(true);
     try {
-      const email = await readOpenEmail();
+      const { tabId, email } = await readOpenEmail();
       const response = await api.scanEmail(email);
+      void markTab(tabId, response.scan.verdict);
       // Sin sesión (o si el guardado falló) queda en cola para sincronizar luego.
       if (!response.saved) queuePendingScan(response.scan);
+      setLastSaved(response.saved);
+      savedStore.write(response.saved);
       if (response.quota) {
         setQuota(response.quota);
         quotaStore.write(response.quota);
@@ -58,6 +63,8 @@ export function useScanViewModel() {
   };
 
   return {
+    /** true si el último análisis quedó guardado en la cuenta. */
+    lastSaved,
     result,
     quota,
     provider,

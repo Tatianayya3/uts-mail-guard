@@ -120,3 +120,5 @@ export type ScanRecord = z.infer<typeof scanRecordSchema>;
 export type ScanRequest = z.infer<typeof scanRequestSchema>;
 export type Quota = z.infer<typeof quotaSchema>;
 export type ScanResponse = z.infer<typeof scanResponseSchema>;
+
+export const scanDetailResponseSchema = z.object({ scan: scanRecordSchema });

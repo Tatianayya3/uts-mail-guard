@@ -38,3 +38,17 @@ export const EMPTY_ANALYTICS: Analytics = {
   averageTrustScore: 0,
   lastScannedAt: null,
 };
+
+export const updateProfileRequestSchema = z.object({
+  displayName: z
+    .string()
+    .trim()
+    .min(2, "Escribe al menos 2 caracteres.")
+    .max(80, "Máximo 80 caracteres."),
+});
+
+export const deleteHistoryResponseSchema = z.object({
+  deleted: z.number().int(),
+});
+
+export type UpdateProfileValues = z.infer<typeof updateProfileRequestSchema>;

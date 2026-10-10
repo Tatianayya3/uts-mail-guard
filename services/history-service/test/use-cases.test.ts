@@ -5,9 +5,12 @@ import type {
   ScanRepository,
 } from "../src/application/ports";
 import {
+  deleteHistory,
   getOverview,
+  getScan,
   listScans,
   syncScans,
+  updateProfile,
 } from "../src/application/use-cases";
 import { createRoutes } from "../src/http/routes";
 import { createLogger } from "@mail-guard/service-kit";
@@ -47,15 +50,19 @@ function scan(
   };
 }
 
+const uuid = (n: number) =>
+  `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
+
 function fakeRepo(
   initial: StoredScan[] = [],
   analytics: Analytics | null = null,
 ) {
   const rows: ScanRecord[] = initial.map((s, i) => ({
     ...s,
-    id: String(i),
+    id: uuid(i),
     createdAt: s.analyzedAt,
   }));
+  let displayName: string | null = null;
   const repo: ScanRepository & { rows: ScanRecord[] } = {
     rows,
     async insertMany(scans) {
@@ -65,7 +72,7 @@ function fakeRepo(
           continue;
         rows.unshift({
           ...s,
-          id: String(rows.length),
+          id: uuid(rows.length + 100),
           createdAt: s.analyzedAt,
         });
         saved += 1;
@@ -74,7 +81,21 @@ function fakeRepo(
     },
     listRecent: async (limit) => rows.slice(0, limit),
     getAnalytics: async () => analytics,
-    getProfile: async () => null,
+    getProfile: async () =>
+      displayName
+        ? {
+            id: user.id,
+            displayName,
+            role: null,
+            avatarUrl: null,
+            createdAt: null,
+          }
+        : null,
+    getById: async (id) => rows.find((r) => r.id === id) ?? null,
+    updateProfile: async (changes) => {
+      displayName = changes.displayName;
+    },
+    deleteAll: async () => rows.splice(0).length,
   };
   return repo;
 }
@@ -107,6 +128,30 @@ describe("history use cases", () => {
   });
 });
 
+describe("detalle, perfil y borrado", () => {
+  test("getScan devuelve el análisis propio y 404 si no existe o el id no es válido", async () => {
+    const repo = fakeRepo([scan("a")]);
+    expect((await getScan(repo, uuid(0))).emailHash).toBe("a");
+    await expect(getScan(repo, uuid(9))).rejects.toThrow("No encontramos");
+    await expect(getScan(repo, "'; drop table")).rejects.toThrow(
+      "No encontramos",
+    );
+  });
+
+  test("updateProfile cambia el nombre y devuelve el resumen", async () => {
+    const overview = await updateProfile(fakeRepo(), user, {
+      displayName: "Ana María",
+    });
+    expect(overview.profile.displayName).toBe("Ana María");
+  });
+
+  test("deleteHistory borra todo y lo informa", async () => {
+    const repo = fakeRepo([scan("a"), scan("b")]);
+    expect(await deleteHistory(repo)).toBe(2);
+    expect(repo.rows).toHaveLength(0);
+  });
+});
+
 describe("history routes", () => {
   const logger = createLogger("test");
   logger.info = () => {};
@@ -123,6 +168,31 @@ describe("history routes", () => {
       headers: { "x-internal-token": "secret" },
     });
     expect(res.status).toBe(503);
+  });
+
+  test("PATCH /v1/me valida el nombre", async () => {
+    const app = createRoutes({
+      logger,
+      internalToken: "secret",
+      users: { fromToken: async () => ({ user, scans: fakeRepo() }) },
+    });
+    const headers = {
+      "x-internal-token": "secret",
+      authorization: "Bearer jwt",
+      "Content-Type": "application/json",
+    };
+    const bad = await app.request("/v1/me", {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({ displayName: "A" }),
+    });
+    expect(bad.status).toBe(400);
+    const ok = await app.request("/v1/me", {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({ displayName: "Ana" }),
+    });
+    expect(ok.status).toBe(200);
   });
 
   test("devuelve el resumen del usuario autenticado", async () => {

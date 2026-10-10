@@ -6,12 +6,17 @@ import {
   type StoredScan,
   type Verdict,
 } from "@mail-guard/contracts";
-import ConsejoIcon from "@/shared/icons/Consejo";
-import LeftArrowIcon from "@/shared/icons/LeftArrow";
-import NuevoAnalisisIcon from "@/shared/icons/NuevoAnalisis";
-import VeredictoIcon from "@/shared/icons/Veredicto";
+import {
+  ArrowLeft,
+  BadgeCheck,
+  CloudCheck,
+  CloudOff,
+  ExternalLink,
+  Lightbulb,
+  RefreshCw,
+} from "lucide-react";
+import { Button, TrustRing } from "@mail-guard/ui";
 import SignalCard from "./SignalCard";
-import TrustScoreRing from "./TrustScoreRing";
 
 const VERDICT_TEXT: Record<Verdict, string> = {
   safe: "text-guard-success",
@@ -41,6 +46,8 @@ const dateFormat = new Intl.DateTimeFormat("es", {
 type Props = {
   result: StoredScan;
   isScanning: boolean;
+  saved: boolean;
+  dashboardUrl: string;
   onNewScan: () => Promise<void>;
   onBack: () => void;
 };
@@ -48,6 +55,8 @@ type Props = {
 export default function AnalysisResultView({
   result,
   isScanning,
+  saved,
+  dashboardUrl,
   onNewScan,
   onBack,
 }: Props) {
@@ -62,29 +71,23 @@ export default function AnalysisResultView({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-2 pt-4">
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
           onClick={onBack}
           disabled={isScanning}
           aria-label="Volver al escáner"
-          title="Volver al escáner"
-          className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-guard-surface-card text-guard-text-muted transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
-        >
-          <LeftArrowIcon />
-        </button>
-        <button
-          type="button"
+          className="w-9 px-0"
+          icon={<ArrowLeft className="h-4 w-4" aria-hidden="true" />}
+        />
+        <Button
+          size="sm"
           onClick={() => void onNewScan()}
-          disabled={isScanning}
-          className="flex h-9 cursor-pointer items-center gap-2 rounded-xl border border-guard-accent/40 bg-guard-accent px-3 text-xs font-bold text-guard-surface shadow-[0_0_20px_rgba(200,212,0,0.18)] transition-all hover:brightness-110 active:scale-[0.97] disabled:cursor-wait disabled:opacity-70"
+          loading={isScanning}
+          icon={<RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />}
         >
-          {isScanning ? (
-            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-guard-surface/30 border-t-guard-surface" />
-          ) : (
-            <NuevoAnalisisIcon />
-          )}
           {isScanning ? "Analizando..." : "Nuevo análisis"}
-        </button>
+        </Button>
       </div>
 
       <div className="relative" aria-busy={isScanning}>
@@ -110,10 +113,7 @@ export default function AnalysisResultView({
               className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-10 blur-3xl"
               style={{ backgroundColor: VERDICT_COLOR[result.verdict] }}
             />
-            <TrustScoreRing
-              score={result.trustScore}
-              verdict={result.verdict}
-            />
+            <TrustRing score={result.trustScore} verdict={result.verdict} />
             <p
               className="mt-4 max-w-full truncate text-sm font-semibold text-white"
               title={result.subject}
@@ -135,7 +135,7 @@ export default function AnalysisResultView({
               <div
                 className={`flex items-center gap-1 ${VERDICT_TEXT[result.verdict]}`}
               >
-                <VeredictoIcon />
+                <BadgeCheck className="h-4 w-4" aria-hidden="true" />
                 <p className="text-xs font-bold">VEREDICTO</p>
               </div>
               <span
@@ -158,7 +158,10 @@ export default function AnalysisResultView({
                 <p className="text-[12px] font-bold uppercase tracking-wide text-guard-accent">
                   Consejo de seguridad
                 </p>
-                <ConsejoIcon />
+                <Lightbulb
+                  className="h-4 w-4 text-guard-accent"
+                  aria-hidden="true"
+                />
               </div>
               <p className="mt-1 text-xs leading-5 text-guard-text-muted">
                 {result.advice}
@@ -217,6 +220,31 @@ export default function AnalysisResultView({
               </ul>
             </section>
           )}
+
+          <div className="flex items-center justify-between gap-2 rounded-xl bg-guard-surface-card px-3 py-2.5 text-[11px]">
+            {saved ? (
+              <span className="flex items-center gap-1.5 text-guard-success">
+                <CloudCheck className="h-4 w-4" aria-hidden="true" /> Guardado
+                en tu historial
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 text-guard-text-muted">
+                <CloudOff className="h-4 w-4" aria-hidden="true" /> Inicia
+                sesión para guardarlo
+              </span>
+            )}
+            {saved && dashboardUrl && (
+              <a
+                href={`${dashboardUrl}/dashboard/historial`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1 font-semibold text-guard-accent hover:text-guard-accent-bright"
+              >
+                Ver en el panel{" "}
+                <ExternalLink className="h-3 w-3" aria-hidden="true" />
+              </a>
+            )}
+          </div>
 
           <p className="mx-auto rounded-full bg-guard-surface-card px-4 py-2 text-[10px] text-guard-text-muted">
             <span className="text-guard-success">●</span> {result.links.length}{" "}

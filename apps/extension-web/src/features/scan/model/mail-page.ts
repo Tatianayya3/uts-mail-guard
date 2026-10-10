@@ -50,7 +50,10 @@ function isEmailOpen(url: URL, provider: SupportedProvider): boolean {
  * UC-01 (lado cliente): lee del DOM del correo abierto solo lo necesario
  * (remitente, asunto, texto y enlaces). Nunca adjuntos ni encabezados.
  */
-export async function readOpenEmail(): Promise<EmailSnapshot> {
+export async function readOpenEmail(): Promise<{
+  tabId: number;
+  email: EmailSnapshot;
+}> {
   const tab = await activeTab();
   const provider = providerOf(tab?.url);
   if (!tab?.id || !tab.url || !provider) {
@@ -72,7 +75,7 @@ export async function readOpenEmail(): Promise<EmailSnapshot> {
     throw new Error("No encontramos el remitente del correo abierto.");
   }
 
-  return {
+  const email: EmailSnapshot = {
     provider,
     sender: page.sender,
     senderName: page.senderName.slice(0, 200) || undefined,
@@ -80,6 +83,7 @@ export async function readOpenEmail(): Promise<EmailSnapshot> {
     bodyText: page.bodyText.slice(0, LIMITS.bodyText),
     links: page.links.filter(isValidUrl).slice(0, LIMITS.links),
   };
+  return { tabId: tab.id, email };
 }
 
 function isValidUrl(value: string): boolean {

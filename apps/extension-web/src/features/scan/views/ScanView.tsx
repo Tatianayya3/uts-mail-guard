@@ -1,5 +1,5 @@
-import ScanShieldIcon from "@/shared/icons/ScanShield";
-import ShieldIcon from "@/shared/icons/Shield";
+import { ShieldCheck, ShieldEllipsis, Keyboard } from "lucide-react";
+import { Button } from "@mail-guard/ui";
 import gmailIcon from "@/shared/icons/gmail.svg";
 import outlookIcon from "@/shared/icons/outlook.svg";
 import type { ScanViewModel } from "../useScanViewModel";
@@ -7,12 +7,20 @@ import AnalysisResultView from "./AnalysisResultView";
 
 const PROVIDER_ICON = { Gmail: gmailIcon, Outlook: outlookIcon } as const;
 
-export default function ScanView({ vm }: { vm: ScanViewModel }) {
+export default function ScanView({
+  vm,
+  dashboardUrl,
+}: {
+  vm: ScanViewModel;
+  dashboardUrl: string;
+}) {
   if (vm.result) {
     return (
       <AnalysisResultView
         result={vm.result}
         isScanning={vm.isScanning}
+        saved={vm.lastSaved}
+        dashboardUrl={dashboardUrl}
         onNewScan={vm.scan}
         onBack={vm.clearResult}
       />
@@ -34,7 +42,11 @@ export default function ScanView({ vm }: { vm: ScanViewModel }) {
           <div className="absolute inset-12 rounded-full bg-guard-surface-raised shadow-[0_0_35px_rgba(200,212,0,0.18)]" />
           <div className="relative z-10 flex flex-col items-center">
             <div className="text-4xl text-guard-accent">
-              <ScanShieldIcon />
+              <ShieldEllipsis
+                className="h-10 w-10"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
             </div>
             <p className="mt-2 text-[11px] font-bold tracking-[0.2em] text-guard-text-muted">
               {vm.isScanning ? "ANALIZANDO" : "EN ESPERA"}
@@ -49,17 +61,19 @@ export default function ScanView({ vm }: { vm: ScanViewModel }) {
           buscan robar tus datos.
         </p>
 
-        <button
-          type="button"
+        <Button
+          size="lg"
           onClick={() => void vm.scan()}
-          disabled={vm.isScanning || !supported}
-          className="mt-5 flex h-14 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-guard-accent text-lg font-bold text-guard-surface shadow-[0_8px_24px_rgba(200,212,0,0.16)] transition-transform hover:scale-[1.01] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-guard-accent active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+          loading={vm.isScanning}
+          disabled={!supported}
+          className="mt-5 h-14 w-full rounded-2xl text-lg font-bold"
         >
-          {vm.isScanning && (
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-guard-surface/30 border-t-guard-surface" />
-          )}
           {vm.isScanning ? "Analizando..." : "Escanear correo"}
-        </button>
+        </Button>
+        <p className="mt-2 flex items-center gap-1.5 text-[11px] text-guard-text-muted">
+          <Keyboard className="h-3.5 w-3.5" aria-hidden="true" /> Atajo: Alt +
+          Shift + M
+        </p>
         {vm.quota && (
           <p className="mt-3 text-xs text-guard-text-muted">
             Te quedan{" "}
@@ -111,7 +125,7 @@ export default function ScanView({ vm }: { vm: ScanViewModel }) {
 
       <section className="flex w-full items-start gap-3 rounded-2xl bg-guard-surface-card p-4">
         <span className="mt-0.5 text-guard-success">
-          <ShieldIcon />
+          <ShieldCheck className="h-6 w-6" aria-hidden="true" />
         </span>
         <div>
           <p className="text-xs font-semibold text-white">

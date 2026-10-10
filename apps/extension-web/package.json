@@ -15,7 +15,9 @@
     "@mail-guard/api-client": "workspace:*",
     "@mail-guard/contracts": "workspace:*",
     "@mail-guard/supabase": "workspace:*",
+    "@mail-guard/ui": "workspace:*",
     "@supabase/supabase-js": "^2.117.3",
+    "lucide-react": "^1.55.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "sonner": "^2.0.8"

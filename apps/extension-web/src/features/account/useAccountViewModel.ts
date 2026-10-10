@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { Session } from "@supabase/supabase-js";
 import type {
@@ -16,6 +16,8 @@ import { syncPendingScans } from "@/features/scan/model/pending-scans";
 export type AccountStatus = "loading" | "idle" | "busy";
 
 const RECENT_SCANS = 12;
+/** Tras este tiempo, volver a la pestaña Cuenta recarga las métricas. */
+const STALE_MS = 60_000;
 
 /**
  * ViewModel de la cuenta: sesión (Supabase Auth) + datos de negocio
@@ -27,6 +29,7 @@ export function useAccountViewModel() {
   const [recentScans, setRecentScans] = useState<ScanRecord[]>([]);
   const [status, setStatus] = useState<AccountStatus>("loading");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const loadedAt = useRef<number | null>(null);
 
   const loadData = useCallback(async () => {
     // UC-08: primero sube lo analizado sin sesión, así las métricas lo incluyen.
@@ -52,18 +55,20 @@ export function useAccountViewModel() {
 
   useEffect(() => {
     let active = true;
-    void auth.getSession().then(async ({ data, error }) => {
+    void auth.getSession().then(({ data, error }) => {
       if (!active) return;
       if (error) toast.error(error.message);
+      // Rendimiento: al abrir el popup solo se lee la sesión local. Las
+      // métricas se piden cuando el usuario abre la pestaña Cuenta.
       setSession(data.session);
-      if (data.session) await loadData();
-      if (active) setStatus("idle");
+      setStatus("idle");
     });
 
     // Mantiene la sesión al día si el token se refresca o se cierra en otra vista.
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, next) => {
         if (event === "SIGNED_OUT") {
+          loadedAt.current = null;
           setSession(null);
           setOverview(null);
           setRecentScans([]);
@@ -140,6 +145,15 @@ export function useAccountViewModel() {
       toast.success("Sesión cerrada correctamente.");
     });
 
+  /** La vista la llama al mostrarse: carga si no hay datos o si están viejos. */
+  const ensureFresh = useCallback(() => {
+    if (!session) return;
+    if (loadedAt.current && Date.now() - loadedAt.current < STALE_MS) return;
+    loadedAt.current = Date.now();
+    setIsRefreshing(true);
+    void loadData().finally(() => setIsRefreshing(false));
+  }, [session, loadData]);
+
   const refresh = async () => {
     setIsRefreshing(true);
     try {
@@ -161,6 +175,7 @@ export function useAccountViewModel() {
     forgotPassword,
     signOut,
     refresh,
+    ensureFresh,
   };
 }
 
