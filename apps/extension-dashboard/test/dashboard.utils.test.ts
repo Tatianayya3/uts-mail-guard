@@ -105,3 +105,48 @@ describe("dashboard utils", () => {
     expect(csv.split("\r\n")).toHaveLength(2);
   });
 });
+
+import {
+  buildInsights,
+  signalBreakdown,
+  weekdayHourMatrix,
+} from "../src/features/dashboard/dashboard.utils";
+
+describe("visualizaciones nuevas", () => {
+  test("weekdayHourMatrix ubica cada análisis por día y hora de Colombia", () => {
+    // Sábado 2026-10-10 15:00 UTC = 10:00 en Bogotá
+    const matrix = weekdayHourMatrix([scan(0, "dangerous")]);
+    expect(matrix).toHaveLength(7);
+    expect(matrix[5]?.[10]).toEqual({ day: 5, hour: 10, total: 1, risky: 1 });
+  });
+
+  test("signalBreakdown calcula la tasa de alerta por señal", () => {
+    const withSignal = (status: "pass" | "fail") => ({
+      ...scan(0, "safe"),
+      signals: [
+        { key: "sender" as const, label: "R", value: "", status, detail: "" },
+      ],
+    });
+    const sender = signalBreakdown([
+      withSignal("fail"),
+      withSignal("pass"),
+    ]).find((s) => s.key === "sender");
+    expect(sender?.alertRate).toBe(50);
+  });
+
+  test("buildInsights destaca el dominio que concentra las alertas", () => {
+    const scans = [
+      scan(0, "dangerous", "bancolombla.com"),
+      scan(1, "dangerous", "bancolombla.com"),
+      scan(2, "suspicious", "otro.com"),
+      scan(3, "safe"),
+    ];
+    const insights = buildInsights(scans, NOW);
+    expect(insights[0]?.text).toContain("bancolombla.com concentra el 67 %");
+    expect(insights.length).toBeLessThanOrEqual(3);
+  });
+
+  test("buildInsights no inventa nada con pocos datos", () => {
+    expect(buildInsights([scan(0, "safe")], NOW)).toEqual([]);
+  });
+});

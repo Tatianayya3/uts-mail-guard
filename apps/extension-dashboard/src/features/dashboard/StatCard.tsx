@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 
@@ -14,7 +15,7 @@ const TONE_CLASS: Record<StatTone, string> = {
 type StatCardProps = {
   icon: LucideIcon;
   label: string;
-  value: string;
+  value: ReactNode;
   helper?: string;
   tone?: StatTone;
   /** Variación frente al periodo anterior; se muestra con flecha y texto. */

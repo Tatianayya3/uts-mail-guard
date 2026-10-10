@@ -52,12 +52,17 @@ export default function HistoryTable({
       q: parseAsString.withDefault(""),
       veredicto: parseAsStringLiteral(VERDICT_FILTERS).withDefault("all"),
       pagina: parseAsInteger.withDefault(1),
+      dia: parseAsString.withDefault(""),
     },
     { scroll: false, throttleMs: 300 },
   );
   const query = useDeferredValue(params.q);
 
-  const filtered = filterScans(scans, { query, verdict: params.veredicto });
+  const filtered = filterScans(scans, {
+    query,
+    verdict: params.veredicto,
+    day: params.dia,
+  });
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const page = Math.min(Math.max(1, params.pagina), pageCount);
   const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
