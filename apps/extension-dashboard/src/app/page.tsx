@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { AuthCard } from "@/features/auth";
 
 export default function Home() {
@@ -11,13 +12,9 @@ export default function Home() {
 
       <header className="relative z-10 px-6 py-6 md:px-12 md:py-8 max-w-7xl mx-auto w-full flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <img
-            src="/logo.png"
-            alt="Mailguard Logo"
-            className="object-cover size-12"
-          />
+          <Image src="/logo.png" alt="" width={48} height={48} priority />
           <span className="text-2xl font-bold tracking-tight text-white">
-            Mailguard
+            Mail Guard
           </span>
         </div>
       </header>
@@ -26,19 +23,19 @@ export default function Home() {
         <div className="space-y-8">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight drop-shadow-sm">
             Protege tu bandeja con{" "}
-            <span className="text-guard-accent">Mailguard</span>.
+            <span className="text-guard-accent">Mail Guard</span>.
           </h1>
           <p className="text-lg md:text-xl text-guard-text-muted max-w-lg leading-relaxed">
-            El escudo definitivo para tus correos electrónicos. Filtra, organiza
-            y asegura tus comunicaciones con tecnología de punta para que solo
-            te preocupes por lo que realmente importa.
+            Una extensión para Chrome que revisa el correo que tienes abierto en
+            Gmail u Outlook y te dice, en segundos, si es seguro, sospechoso o
+            un intento de phishing, y por qué.
           </p>
 
           <ul className="space-y-5 pt-4">
             {[
-              "Bloqueo avanzado de Spam y Phishing.",
-              "Panel de control (Dashboard) en tiempo real.",
-              "Integración segura y sin fricciones.",
+              "Detecta suplantación de marcas y enlaces engañosos.",
+              "Explica cada veredicto con señales verificables.",
+              "Historial y métricas de tus análisis en este panel.",
             ].map((feature, idx) => (
               <li key={idx} className="flex items-center gap-4">
                 <div className="shrink-0 w-6 h-6 rounded-full bg-guard-surface-raised flex items-center justify-center border border-guard-surface-card">

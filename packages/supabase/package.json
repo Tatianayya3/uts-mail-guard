@@ -1,26 +1,21 @@
 {
   "name": "@mail-guard/supabase",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "type": "module",
+  "description": "Casos de uso de autenticación sobre Supabase Auth, compartidos por la extensión y el panel web.",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    }
+    ".": "./src/index.ts"
   },
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch"
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.116.0"
+    "@supabase/supabase-js": "^2.117.3"
   },
   "devDependencies": {
-    "tsup": "^8.0.0",
-    "typescript": "^5.0.0"
+    "@repo/typescript-config": "*",
+    "@types/bun": "^1.4.2",
+    "typescript": "^5.9.3"
   }
 }

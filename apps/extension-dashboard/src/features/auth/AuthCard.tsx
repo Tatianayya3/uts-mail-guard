@@ -24,21 +24,20 @@ const HEADINGS: Record<AuthMode, { title: string; subtitle: string }> = {
   },
 };
 
-const LOADING_COPY: Record<AuthMode, { title: string; description: string }> =
-  {
-    signin: {
-      title: "Iniciando sesión",
-      description: "Verificando tus credenciales...",
-    },
-    signup: {
-      title: "Creando tu cuenta",
-      description: "Configurando tu escudo de protección...",
-    },
-    forgot: {
-      title: "Enviando enlace",
-      description: "Preparando tu correo de recuperación...",
-    },
-  };
+const LOADING_COPY: Record<AuthMode, { title: string; description: string }> = {
+  signin: {
+    title: "Iniciando sesión",
+    description: "Verificando tus credenciales...",
+  },
+  signup: {
+    title: "Creando tu cuenta",
+    description: "Configurando tu escudo de protección...",
+  },
+  forgot: {
+    title: "Enviando enlace",
+    description: "Preparando tu correo de recuperación...",
+  },
+};
 
 export default function AuthCard() {
   const [mode, setMode] = useState<AuthMode>("signin");

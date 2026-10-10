@@ -63,7 +63,9 @@ export default function FormField({
             onClick={() => setShowPassword((current) => !current)}
             disabled={disabled}
             tabIndex={-1}
-            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            aria-label={
+              showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+            }
             className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-guard-text-muted transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             {showPassword ? (

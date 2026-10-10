@@ -1,367 +1,331 @@
+<div align="center">
+
+<img src="apps/extension-dashboard/public/logo.png" alt="Mail Guard" width="88" />
+
 # Mail Guard
 
-Extensión de Chrome para analizar el correo visible en Gmail y Outlook. La extensión extrae un snapshot limitado del correo, lo envía al backend Next.js y muestra un resultado normalizado.
+**Detección de phishing explicable para Gmail y Outlook.**
+
+Una extensión de Chrome que analiza el correo que tienes abierto y te dice, en segundos,
+si es **seguro**, **sospechoso** o **peligroso**, y sobre todo, **por qué**.
+
+![Chrome MV3](https://img.shields.io/badge/Chrome-MV3-4285F4?logo=googlechrome&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![Bun](https://img.shields.io/badge/Bun-1.4-000?logo=bun)
+![Next.js](https://img.shields.io/badge/Next.js-16-000?logo=nextdotjs)
+![Hono](https://img.shields.io/badge/Hono-4-E36002?logo=hono&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Auth%20%2B%20Postgres-3FCF8E?logo=supabase&logoColor=white)
+![Microservicios](https://img.shields.io/badge/arquitectura-3%20microservicios-c8d400)
+
+</div>
+
+---
+
+## ¿Qué es Mail Guard?
+
+El phishing sigue siendo la puerta de entrada más común a fraudes y robos de cuentas, y en
+Colombia suplanta con frecuencia a bancos, billeteras digitales y entidades como la DIAN.
+Los filtros de los proveedores de correo ayudan, pero cuando un mensaje pasa el filtro
+el usuario queda solo frente a la pregunta: _¿puedo confiar en esto?_
+
+**Mail Guard** responde esa pregunta justo donde surge: con el correo abierto.
+
+1. Abres un correo en Gmail u Outlook y pulsas **Escanear correo**.
+2. La extensión envía solo lo necesario: remitente, asunto, texto y enlaces (**nunca adjuntos**).
+3. El backend combina **reglas verificables** con un **modelo de decisión** ([Jev](https://typesafe.ai) de TypeSafe AI).
+4. Recibes un **nivel de confianza (0–100)**, un **veredicto**, las **señales** que lo justifican y un **consejo** concreto.
+
+![Panel web de Mail Guard](docs/landing.png)
+
+Con una cuenta, cada análisis se guarda en tu historial y puedes ver tus métricas en la
+extensión o en el **panel web**.
+
+### Características
+
+|                               |                                                                                                                                     |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 🎯 **Veredicto explicable**   | Cada resultado muestra señales por remitente, contenido y enlaces, con la evidencia que las activó.                                 |
+| 🧠 **IA para decisiones**     | Jev responde preguntas tipadas (opción, puntaje, sí/no) con probabilidades calibradas. Sin JSON frágil ni alucinaciones de formato. |
+| 🛡️ **Defensa en profundidad** | Las reglas objetivas (dominios que imitan marcas, IPs, punycode, acortadores…) nunca quedan ocultas por un modelo optimista.        |
+| 🔌 **Motor intercambiable**   | Jev, cualquier LLM compatible con OpenAI o reglas locales, con respaldo automático si el proveedor falla.                           |
+| 📊 **Historial y métricas**   | Tendencia de confianza, volumen diario, distribución de veredictos y detalle de cada análisis.                                      |
+| 🔒 **Privacidad por diseño**  | Permisos mínimos (`activeTab`), RLS en Postgres, claves solo en el servidor, deduplicación por huella SHA-256.                      |
+| ⚡ **Rápido y económico**     | Caché por huella del correo: repetir un análisis no gasta IA ni cuota.                                                              |
+| 🧪 **Funciona sin claves**    | En local todo arranca con el motor heurístico: ideal para demos y pruebas.                                                          |
+
+---
 
 ## Arquitectura
 
-```text
-Gmail / Outlook
-    -> extension-web
-    -> extension-dashboard /api/scan
-    -> proveedor de IA
-    -> respuesta validada con @mail-guard/scan-contract
-    -> AnalysisResult
+Mail Guard es un monorepo con **2 clientes**, **3 microservicios** y **4 paquetes compartidos**.
+
+```mermaid
+flowchart LR
+  EXT["🧩 Extensión Chrome"] -->|JWT| GW
+  WEB["🖥️ Panel web · Next.js"] -->|JWT| GW
+  EXT & WEB -->|Auth| SB[("Supabase")]
+
+  subgraph Microservicios
+    GW["API Gateway<br/>:4000"]
+    AN["analysis-service<br/>:4001"]
+    HI["history-service<br/>:4002"]
+  end
+
+  GW -->|token interno| AN
+  GW -->|token interno + JWT| HI
+  AN --> JEV["Jev · TypeSafe AI"]
+  HI -->|RLS| SB
 ```
 
-La API key de IA y las credenciales de Upstash viven únicamente en Next.js. Nunca las pongas en `VITE_*`, React, el manifest ni el código de la extensión.
+| Microservicio        | Responsabilidad                                                                                 | Endpoints                                                                                          |
+| -------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **gateway**          | Único punto público: CORS, verificación de JWT, cuota diaria, orquestación y errores uniformes. | `POST /v1/scans` · `POST /v1/scans/sync` · `GET /v1/scans` · `GET /v1/me` · `GET /health/services` |
+| **analysis-service** | Extrae evidencias, consulta el motor de decisión y compone el veredicto. Caché por huella.      | `POST /v1/analyze` · `GET /v1/engine`                                                              |
+| **history-service**  | Historial, perfil y métricas por usuario sobre Supabase con RLS.                                | `POST /v1/scans` · `POST /v1/scans/sync` · `GET /v1/scans` · `GET /v1/me`                          |
 
-## Estructura
+**Patrones:** arquitectura **hexagonal** + casos de uso en los servicios, **MVVM** en la
+extensión y Server Components + ViewModels en el panel. La justificación completa
+(incluida la comparación MVC / MVP / MVVM) está en
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), y los 11 casos de uso con sus flujos en
+[`docs/USE_CASES.md`](docs/USE_CASES.md).
 
-- `apps/extension-web`: popup, permisos de Chrome y extracción del correo.
-- `apps/extension-dashboard`: aplicación Next.js y endpoint server-side `/api/scan`.
-- `packages/scan-contract`: schemas Zod compartidos para request y respuesta de IA.
-- `packages/supabase`: cliente y APIs compartidas de Supabase.
+### Estructura del repositorio
 
-## Requisitos
-
-- Node.js 24 o superior.
-- Bun 1.4.2.
-- Una cuenta de Supabase.
-- Un proveedor compatible con OpenAI Chat Completions, por ejemplo Gemini mediante su endpoint compatible.
-- Upstash Redis para límites distribuidos.
-
-## Variables de entorno
-
-### Backend Next.js
-
-Copia `apps/extension-dashboard/.env.example` a `apps/extension-dashboard/.env`:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=tu-clave-publicable
-
-AI_API_URL=https://generativelanguage.googleapis.com/v1beta/openai/chat/completions
-AI_API_KEY=tu-clave-privada-de-ia
-AI_MODEL=gemini-2.5-flash
-
-SCAN_ANONYMOUS_LIMIT=5
-SCAN_AUTHENTICATED_LIMIT=100
-
-UPSTASH_REDIS_REST_URL=https://tu-db.upstash.io
-UPSTASH_REDIS_REST_TOKEN=tu-token-privado
-
-EXTENSION_ORIGIN=*
+```
+mail-guard/
+├── apps/
+│   ├── extension-web/        # Extensión Chrome MV3 (React + Vite + CRXJS) · MVVM
+│   └── extension-dashboard/  # Panel web (Next.js 16): landing, auth y métricas
+├── services/
+│   ├── gateway/              # API Gateway (Bun + Hono)
+│   ├── analysis-service/     # Motor de análisis: reglas + Jev / LLM
+│   └── history-service/      # Historial y métricas (Supabase + RLS)
+├── packages/
+│   ├── contracts/            # Schemas Zod y tipos compartidos (fuente única de verdad)
+│   ├── api-client/           # Cliente tipado del gateway (extensión y panel)
+│   ├── service-kit/          # Base común de los servicios: errores, logs, health, auth interna
+│   ├── supabase/             # Casos de uso de autenticación
+│   ├── tailwind-config/      # Tokens de diseño
+│   └── typescript-config/    # Presets de TypeScript
+├── supabase/migrations/      # Esquema SQL idempotente (tablas, RLS, triggers)
+├── docs/                     # Arquitectura y casos de uso
+├── Dockerfile                # Imagen única para los microservicios
+└── docker-compose.yml
 ```
 
-`NEXT_PUBLIC_*` no son secretos. `AI_API_KEY` y `UPSTASH_REDIS_REST_TOKEN` sí lo son.
+---
 
-### Extensión
+## Inicio rápido
 
-Copia `apps/extension-web/.env.example` a `apps/extension-web/.env`:
+**Requisitos:** [Bun](https://bun.sh) ≥ 1.2, Node.js ≥ 22 y Google Chrome.
 
-```env
-VITE_SCAN_API_URL=http://localhost:3000
-VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=tu-clave-publicable
+```bash
+bun install        # dependencias de todo el monorepo
+bun run setup      # crea los .env a partir de los .env.example
+bun run dev        # levanta gateway, análisis, historial, panel web y extensión
 ```
 
-`VITE_SCAN_API_URL` se incorpora al bundle durante el build. Después de cambiarlo debes volver a compilar la extensión.
+| Servicio         | URL                                                  |
+| ---------------- | ---------------------------------------------------- |
+| API Gateway      | http://localhost:4000 · estado en `/health/services` |
+| analysis-service | http://localhost:4001                                |
+| history-service  | http://localhost:4002                                |
+| Panel web        | http://localhost:3000                                |
 
-## Prompt para tu proveedor de IA
+> Sin configurar nada, el análisis funciona con el **motor heurístico** y en **modo invitado**.
+> Para cuentas, historial y métricas configura Supabase; para IA, agrega `TYPESAFE_API_KEY`.
 
-El backend ya envía un prompt base. Si vas a cambiarlo, conserva estas reglas:
+### Cargar la extensión en Chrome
 
-````text
-Eres un analista de seguridad de correo electrónico.
+1. `cd apps/extension-web && bun run build`
+2. Abre `chrome://extensions` y activa **Modo de desarrollador**.
+3. **Cargar descomprimida** → selecciona `apps/extension-web/dist`.
+4. Abre un correo en Gmail u Outlook, haz clic en el ícono de Mail Guard y pulsa **Escanear correo**.
 
-Analiza el snapshot recibido y detecta señales de phishing, suplantación,
-dominios sospechosos, enlaces peligrosos y patrones anómalos.
+Vuelve a compilar y recargar la extensión cada vez que cambies variables `VITE_*`.
 
-Reglas:
-1. No afirmes que SPF, DKIM o DMARC pasaron si no recibiste evidencia técnica.
-2. Distingue entre dominio con formato válido y dominio confiable.
-3. Si falta evidencia, usa "unknown".
-4. No inventes nombres, encabezados, URLs ni resultados de autenticación.
-5. Devuelve únicamente JSON válido, sin Markdown, sin ``` y sin texto adicional.
-6. trustScore debe ser un entero entre 0 y 100.
-7. verdict debe ser exactamente "safe", "suspicious", "dangerous" o "unknown".
+### Probar el API directamente
 
-Devuelve exactamente este objeto:
+```bash
+curl -s http://localhost:4000/v1/scans \
+  -H 'Content-Type: application/json' \
+  -d '{"email":{"provider":"Gmail","sender":"alertas@bancolombla-seguridad.com",
+       "senderName":"Bancolombia","subject":"URGENTE: tu cuenta será bloqueada",
+       "bodyText":"Verifica tu cuenta e ingresa tu contraseña en las próximas 24 horas.",
+       "links":["http://192.168.1.20/login"]}}'
+```
+
+Respuesta (resumida):
+
+```json
 {
-  "trustScore": 0,
-  "verdict": "unknown",
-  "summary": "Resumen breve en español.",
-  "sender": {
-    "email": "remitente@dominio.com",
-    "domain": "dominio.com",
-    "domainStatus": "unknown",
-    "displayName": "Nombre del remitente"
+  "scan": {
+    "trustScore": 0,
+    "verdict": "dangerous",
+    "summary": "Este correo presenta señales claras de phishing o fraude. Hallazgos: Imita a Bancolombia; …",
+    "signals": [
+      {
+        "key": "sender",
+        "status": "fail",
+        "value": "Imita a Bancolombia",
+        "detail": "…"
+      }
+    ],
+    "links": [
+      {
+        "url": "http://192.168.1.20/login",
+        "status": "dangerous",
+        "detail": "El enlace apunta a una IP…"
+      }
+    ],
+    "model": "mail-guard-heuristics-v1"
   },
-  "signals": [
-    {
-      "key": "sender",
-      "label": "Remitente",
-      "value": "Resultado",
-      "status": "unknown",
-      "detail": "Evidencia disponible o explicación de incertidumbre."
-    }
-  ],
-  "links": [
-    {
-      "url": "https://dominio.com",
-      "label": "Destino",
-      "status": "unknown",
-      "detail": "Resultado del análisis del enlace."
-    }
-  ],
-  "model": "nombre-del-modelo",
-  "analyzedAt": "2026-09-14T00:00:00.000Z"
+  "cached": false,
+  "saved": false,
+  "quota": { "limit": 5, "remaining": 4 }
 }
-````
+```
 
-El backend valida la respuesta con `scanAnalysisSchema`. Si el proveedor devuelve otro formato, el análisis falla de forma controlada.
-
-## Ejecutar todo en local
-
-Instala dependencias desde la raíz:
+### Con Docker
 
 ```bash
-bun install
+bun run setup                      # o crea los .env de services/* a mano
+INTERNAL_SERVICE_TOKEN=un-secreto docker compose up --build
 ```
 
-Inicia Next.js y la extensión con Turbo:
+Solo el gateway se publica (`:4000`); los servicios internos quedan en la red de Docker.
+
+---
+
+## Configuración
+
+### 1. Supabase (cuentas, historial y métricas)
+
+1. Crea un proyecto en [supabase.com](https://supabase.com).
+2. En **SQL Editor** ejecuta [`supabase/migrations/0001_mail_guard.sql`](supabase/migrations/0001_mail_guard.sql).
+   Es idempotente: crea o actualiza tablas, políticas RLS, deduplicación y triggers de métricas.
+3. En **Authentication → URL Configuration** agrega `http://localhost:3000/reset-password`
+   (y la URL de producción) a las _Redirect URLs_.
+4. Copia la URL del proyecto y la **publishable key** en los `.env`.
+
+### 2. Jev (opcional, recomendado)
+
+Solicita acceso en [typesafe.ai](https://typesafe.ai) y define `TYPESAFE_API_KEY` en
+`services/analysis-service/.env`. Con `DECISION_ENGINE=auto` se usará automáticamente.
+
+### Variables de entorno
+
+<details>
+<summary><b>services/gateway/.env</b></summary>
+
+| Variable                                              | Descripción                                                                   | Por defecto                        |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------- |
+| `PORT`                                                | Puerto                                                                        | `4000`                             |
+| `INTERNAL_SERVICE_TOKEN`                              | Secreto compartido con los servicios internos (**obligatorio en producción**) | `dev-internal-token` en desarrollo |
+| `ANALYSIS_SERVICE_URL` / `HISTORY_SERVICE_URL`        | URLs internas                                                                 | `http://localhost:4001` / `4002`   |
+| `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY`           | Para verificar el JWT del usuario                                             | — (todos anónimos)                 |
+| `CORS_ORIGINS`                                        | Orígenes permitidos, separados por coma                                       | `*`                                |
+| `SCAN_ANONYMOUS_LIMIT` / `SCAN_AUTHENTICATED_LIMIT`   | Análisis diarios                                                              | `5` / `100`                        |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Cuota distribuida                                                             | — (memoria)                        |
+
+</details>
+
+<details>
+<summary><b>services/analysis-service/.env</b></summary>
+
+| Variable                                              | Descripción                               | Por defecto       |
+| ----------------------------------------------------- | ----------------------------------------- | ----------------- |
+| `DECISION_ENGINE`                                     | `auto`, `jev`, `llm` o `heuristic`        | `auto`            |
+| `TYPESAFE_API_KEY` / `TYPESAFE_MODEL`                 | Jev (TypeSafe AI)                         | — / `jev-latest`  |
+| `AI_API_URL` / `AI_API_KEY` / `AI_MODEL`              | LLM compatible con OpenAI (p. ej. Gemini) | —                 |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Caché distribuida                         | — (memoria)       |
+| `CACHE_TTL_SECONDS`                                   | Vigencia del caché                        | `604800` (7 días) |
+
+</details>
+
+<details>
+<summary><b>services/history-service/.env</b></summary>
+
+| Variable                                    | Descripción                                                     |
+| ------------------------------------------- | --------------------------------------------------------------- |
+| `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` | Proyecto de Supabase. Sin ellas, los endpoints responden `503`. |
+
+</details>
+
+<details>
+<summary><b>apps/extension-web/.env</b> (público, se incrusta en el bundle)</summary>
+
+| Variable                                              | Descripción                                                      |
+| ----------------------------------------------------- | ---------------------------------------------------------------- |
+| `VITE_API_GATEWAY_URL`                                | URL del gateway (también se agrega a `host_permissions`)         |
+| `VITE_DASHBOARD_URL`                                  | URL del panel web (recuperación de contraseña y enlace al panel) |
+| `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase Auth                                                    |
+
+</details>
+
+<details>
+<summary><b>apps/extension-dashboard/.env.local</b></summary>
+
+| Variable                                                            | Descripción                     |
+| ------------------------------------------------------------------- | ------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase Auth                   |
+| `API_GATEWAY_URL`                                                   | URL del gateway (solo servidor) |
+
+</details>
+
+> Las variables `VITE_*` y `NEXT_PUBLIC_*` **no son secretas**. `TYPESAFE_API_KEY`, `AI_API_KEY`,
+> `UPSTASH_REDIS_REST_TOKEN` e `INTERNAL_SERVICE_TOKEN` **sí lo son**: nunca las pongas en un cliente.
+
+---
+
+## Calidad
 
 ```bash
-bun run dev
+bun run test          # 39 pruebas unitarias y de integración HTTP (bun test)
+bun run check-types   # TypeScript estricto en los 9 proyectos
+bun run build         # build de la extensión y del panel
 ```
 
-Para iniciarlos por separado:
+Las pruebas cubren las heurísticas (dominios que imitan marcas, enlaces peligrosos), la
+combinación modelo + reglas, el adaptador de Jev (con un `fetch` simulado), el respaldo ante
+fallos, la caché, la cuota, la deduplicación del historial y las rutas de cada servicio.
 
-```bash
-cd apps/extension-dashboard
-bun run dev
-```
+---
 
-```bash
-cd apps/extension-web
-bun run dev
-```
+## Despliegue
 
-El backend queda normalmente en `http://localhost:3000`. La extensión usa `VITE_SCAN_API_URL=http://localhost:3000`.
+| Componente     | Recomendación                                                                                                                                                  |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Panel web      | **Vercel** con _Root Directory_ `apps/extension-dashboard`. Variables: las de `.env.local`.                                                                    |
+| Microservicios | Cualquier plataforma de contenedores (**Render**, **Railway**, **Fly.io**) usando el `Dockerfile` con `--build-arg SERVICE=<servicio>`. Expón solo el gateway. |
+| Cuota y caché  | **Upstash Redis** cuando haya más de una instancia.                                                                                                            |
+| Extensión      | `bun run build` con las URLs de producción y sube `apps/extension-web/release/*.zip` a la Chrome Web Store.                                                    |
 
-## Cargar la extensión en Chrome
+Antes de publicar: define `CORS_ORIGINS=chrome-extension://<ID>,https://<tu-panel>` y un
+`INTERNAL_SERVICE_TOKEN` largo y aleatorio en los tres servicios.
 
-1. Ejecuta `bun run build` desde `apps/extension-web`.
-2. Abre `chrome://extensions`.
-3. Activa **Developer mode**.
-4. Pulsa **Load unpacked**.
-5. Selecciona `apps/extension-web/dist`.
-6. Recarga la extensión después de cambiar el manifest o las variables `VITE_*`.
+---
 
-Para probar el escaneo, abre un correo real en Gmail u Outlook y luego abre el popup.
+## Seguridad y privacidad
 
-## Desplegar Next.js en Vercel
+- **Datos mínimos:** solo remitente, asunto, texto visible y enlaces del correo abierto.
+- **Permisos mínimos:** `activeTab` y `scripting`; sin `<all_urls>`.
+- **Aislamiento por usuario:** el historial se consulta con el JWT del usuario y RLS de Postgres.
+- **Servicios internos protegidos** por token compartido (comparación en tiempo constante).
+- **Validación en cada frontera** con los mismos schemas Zod en clientes y servidores.
+- **Sin afirmaciones inventadas:** el sistema no declara SPF/DKIM/DMARC porque no recibe encabezados.
 
-1. Importa el repositorio en Vercel.
-2. Configura el root directory como `apps/extension-dashboard`.
-3. Mantén el framework como Next.js.
-4. Añade en Vercel las variables del backend:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-   - `AI_API_URL`
-   - `AI_API_KEY`
-   - `AI_MODEL`
-   - `SCAN_ANONYMOUS_LIMIT`
-   - `SCAN_AUTHENTICATED_LIMIT`
-   - `UPSTASH_REDIS_REST_URL`
-   - `UPSTASH_REDIS_REST_TOKEN`
-   - `EXTENSION_ORIGIN`
-5. Despliega y prueba `https://tu-app.vercel.app/api/scan`.
+## Hoja de ruta
 
-Después cambia en `apps/extension-web/.env`:
+- [ ] Leer encabezados de autenticación (SPF, DKIM, DMARC) desde la vista «mostrar original».
+- [ ] Reputación de dominios y URLs (Google Safe Browsing / VirusTotal) como nuevo adaptador.
+- [ ] Análisis automático al abrir un correo (opt-in).
+- [ ] Reporte de falsos positivos para mejorar las reglas.
 
-```env
-VITE_SCAN_API_URL=https://tu-app.vercel.app
-```
+---
 
-Vuelve a ejecutar `bun run build` en la extensión y carga de nuevo `apps/extension-web/dist` en Chrome.
+<div align="center">
 
-## CORS y manifest en producción
+Proyecto académico · **UTS**
 
-Durante desarrollo `EXTENSION_ORIGIN=*` es práctico. En producción usa el origen exacto de la extensión:
-
-```env
-EXTENSION_ORIGIN=chrome-extension://ID_DE_TU_EXTENSION
-```
-
-El `host_permissions` del manifest debe incluir el dominio de Vercel. Añade el dominio final y vuelve a compilar:
-
-```ts
-host_permissions: [
-  "https://mail.google.com/*",
-  "https://outlook.live.com/*",
-  "https://outlook.office.com/*",
-  "https://tu-app.vercel.app/*",
-];
-```
-
-No uses `<all_urls>` para esta extensión.
-
-## Cuotas
-
-- Usuario anónimo: `SCAN_ANONYMOUS_LIMIT`, por defecto 5 análisis diarios.
-- Usuario autenticado: `SCAN_AUTHENTICATED_LIMIT`, por defecto 100 análisis diarios.
-
-Upstash es necesario para que la cuota funcione correctamente en múltiples instancias serverless. Sin sus variables, el endpoint responde `503` y no consume IA.
-
-## Seguridad antes de producción
-
-- Rota inmediatamente cualquier secreto que haya sido publicado en un `.env.example`, commit, log o captura.
-- Verifica que `.env*` esté ignorado por Git, excepto los archivos `.env.example` sin secretos.
-- Limita tamaño de texto y cantidad de enlaces; el endpoint ya aplica esos límites.
-- No envíes adjuntos ni el cuerpo completo si no son necesarios.
-- Define políticas de retención y privacidad para el contenido del correo.
-- Registra métricas sin guardar el contenido sensible del email.
-- Añade autenticación de servicio, rate limiting y monitoreo antes de abrir el endpoint públicamente.
-- Configura Supabase RLS para perfiles y cualquier tabla de historial.
-- Un dominio con formato válido no equivale a un dominio confiable; SPF, DKIM, DMARC y reputación requieren evidencia.
-
-## Validación
-
-```bash
-cd apps/extension-dashboard && bun run build
-cd ../extension-web && bun run build
-```
-
-También puedes ejecutar desde la raíz:
-
-```bash
-bun run build
-```
-
-## Historial y analíticas en Supabase
-
-Los análisis anónimos no se guardan en Supabase: se mantienen temporalmente en `localStorage`. Cuando el usuario inicia sesión, la extensión intenta sincronizar hasta 25 análisis pendientes.
-
-Los usuarios autenticados guardan cada resultado en `public.mail_scans`. El `profile_id` se obtiene del token mediante `auth.uid()`, por lo que la extensión nunca puede escribir datos en el perfil de otro usuario.
-
-Ejecuta este SQL en Supabase SQL Editor:
-
-```sql
-create table if not exists public.mail_scans (
-  id uuid primary key default gen_random_uuid(),
-  profile_id uuid not null references public.profiles(id) on delete cascade default auth.uid(),
-  provider text not null,
-  subject text not null default '',
-  sender_email text not null,
-  sender_domain text not null,
-  sender_display_name text not null default '',
-  trust_score smallint not null check (trust_score between 0 and 100),
-  verdict text not null check (verdict in ('safe', 'suspicious', 'dangerous', 'unknown')),
-  summary text not null default '',
-  advice text not null default '',
-  signals jsonb not null default '[]'::jsonb,
-  links jsonb not null default '[]'::jsonb,
-  model text not null default '',
-  analyzed_at timestamptz not null,
-  created_at timestamptz not null default now()
-);
-
-create index if not exists mail_scans_profile_created_idx
-  on public.mail_scans(profile_id, created_at desc);
-
-create index if not exists mail_scans_profile_domain_idx
-  on public.mail_scans(profile_id, sender_domain);
-
-create table if not exists public.profile_analytics (
-  profile_id uuid primary key references public.profiles(id) on delete cascade,
-  total_scans integer not null default 0,
-  safe_scans integer not null default 0,
-  suspicious_scans integer not null default 0,
-  dangerous_scans integer not null default 0,
-  unknown_scans integer not null default 0,
-  links_reviewed integer not null default 0,
-  average_trust_score numeric(5,2) not null default 0,
-  last_scanned_at timestamptz,
-  updated_at timestamptz not null default now()
-);
-
-alter table public.mail_scans enable row level security;
-alter table public.profile_analytics enable row level security;
-
-create policy "Users can insert their own scans"
-  on public.mail_scans for insert to authenticated
-  with check (auth.uid() = profile_id);
-
-create policy "Users can read their own scans"
-  on public.mail_scans for select to authenticated
-  using (auth.uid() = profile_id);
-
-create policy "Users can read their own analytics"
-  on public.profile_analytics for select to authenticated
-  using (auth.uid() = profile_id);
-
-create or replace function public.refresh_profile_analytics()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  insert into public.profile_analytics (
-    profile_id, total_scans, safe_scans, suspicious_scans,
-    dangerous_scans, unknown_scans, links_reviewed,
-    average_trust_score, last_scanned_at, updated_at
-  ) values (
-    new.profile_id,
-    1,
-    case when new.verdict = 'safe' then 1 else 0 end,
-    case when new.verdict = 'suspicious' then 1 else 0 end,
-    case when new.verdict = 'dangerous' then 1 else 0 end,
-    case when new.verdict = 'unknown' then 1 else 0 end,
-    jsonb_array_length(new.links),
-    new.trust_score,
-    new.analyzed_at,
-    now()
-  )
-  on conflict (profile_id) do update set
-    total_scans = profile_analytics.total_scans + 1,
-    safe_scans = profile_analytics.safe_scans + case when new.verdict = 'safe' then 1 else 0 end,
-    suspicious_scans = profile_analytics.suspicious_scans + case when new.verdict = 'suspicious' then 1 else 0 end,
-    dangerous_scans = profile_analytics.dangerous_scans + case when new.verdict = 'dangerous' then 1 else 0 end,
-    unknown_scans = profile_analytics.unknown_scans + case when new.verdict = 'unknown' then 1 else 0 end,
-    links_reviewed = profile_analytics.links_reviewed + jsonb_array_length(new.links),
-    average_trust_score = ((profile_analytics.average_trust_score * profile_analytics.total_scans) + new.trust_score) / (profile_analytics.total_scans + 1),
-    last_scanned_at = greatest(profile_analytics.last_scanned_at, new.analyzed_at),
-    updated_at = now();
-  return new;
-end;
-$$;
-
-drop trigger if exists mail_scans_refresh_analytics on public.mail_scans;
-create trigger mail_scans_refresh_analytics
-after insert on public.mail_scans
-for each row execute function public.refresh_profile_analytics();
-```
-
-Consultas útiles para el dashboard:
-
-```sql
--- Dominios más recibidos por un perfil
-select sender_domain, count(*) as total
-from public.mail_scans
-where profile_id = auth.uid()
-group by sender_domain
-order by total desc
-limit 10;
-
--- Remitentes más frecuentes
-select sender_email, sender_display_name, count(*) as total
-from public.mail_scans
-where profile_id = auth.uid()
-group by sender_email, sender_display_name
-order by total desc
-limit 10;
-```
-
-Si ya tienes datos previos, ejecuta el SQL antes de probar la sincronización. La inserción de la extensión usa `/api/scan/history` y `/api/scan/history/sync`; ambas rutas requieren un JWT válido de Supabase.
+</div>

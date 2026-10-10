@@ -1,59 +1,40 @@
 {
   "name": "extension-dashboard",
   "type": "module",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
+  "description": "Panel web de Mail Guard (Next.js): landing, autenticación y métricas.",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "contract:emit": "prisma contract emit"
+    "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@mail-guard/auth-contract": "workspace:*",
-    "@mail-guard/scan-contract": "workspace:*",
+    "@mail-guard/api-client": "workspace:*",
+    "@mail-guard/contracts": "workspace:*",
     "@mail-guard/supabase": "workspace:*",
-    "@prisma/orm-postgres": "^8.0.0-rc.11",
-    "@repo/ui": "*",
     "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.116.0",
-    "@upstash/ratelimit": "^2.0.7",
-    "@upstash/redis": "^1.37.0",
-    "dotenv": "^17.4.2",
+    "@supabase/supabase-js": "^2.117.3",
     "lucide-react": "^1.46.0",
     "next": "16.3.5",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "recharts": "^3.10.1",
     "server-only": "^0.0.1",
-    "sonner": "^2.0.8",
-    "temporal-polyfill": "^1.0.5",
-    "zod": "^4.6.5"
+    "sonner": "^2.0.8"
   },
   "devDependencies": {
     "@repo/tailwind-config": "*",
-    "@prisma/cli-engine": "0.3.0",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/pg": "^8.23.1",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
-    "prisma": "^8.0.0-rc.14",
     "tailwindcss": "^4",
-    "tsx": "^4.23.13",
-    "typescript": "^5"
-  },
-  "packageManager": "bun@1.4.2",
-  "ignoreScripts": [
-    "sharp",
-    "unrs-resolver"
-  ],
-  "trustedDependencies": [
-    "sharp",
-    "unrs-resolver"
-  ]
+    "typescript": "^5.9.3"
+  }
 }

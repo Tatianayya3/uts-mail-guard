@@ -1,0 +1,5 @@
+{
+  "extends": "@repo/typescript-config/service.json",
+  "compilerOptions": { "lib": ["ES2022", "DOM"] },
+  "include": ["src", "test"]
+}
