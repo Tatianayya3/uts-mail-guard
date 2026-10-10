@@ -1,0 +1,70 @@
+# Blueprint de Render: despliega los 3 microservicios en el plan gratuito.
+# Render → New → Blueprint → elige este repositorio.
+#
+# Plan free: los servicios se duermen tras 15 min sin tráfico y tardan ~1 min
+# en despertar. Antes de una demo abre <gateway>/health/services para
+# despertar a los tres.
+#
+# Si Render asigna otra URL (nombre ocupado), corrige ANALYSIS_SERVICE_URL y
+# HISTORY_SERVICE_URL en el gateway con las URLs reales.
+
+envVarGroups:
+  - name: mail-guard-internal
+    envVars:
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+services:
+  - type: web
+    name: mail-guard-gateway
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: SERVICE
+        value: gateway
+      - fromGroup: mail-guard-internal
+      - key: ANALYSIS_SERVICE_URL
+        value: https://mail-guard-analysis.onrender.com
+      - key: HISTORY_SERVICE_URL
+        value: https://mail-guard-history.onrender.com
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: "*"
+
+  - type: web
+    name: mail-guard-analysis
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: SERVICE
+        value: analysis-service
+      - fromGroup: mail-guard-internal
+      - key: DECISION_ENGINE
+        value: auto
+      - key: TYPESAFE_API_KEY
+        sync: false
+
+  - type: web
+    name: mail-guard-history
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: SERVICE
+        value: history-service
+      - fromGroup: mail-guard-internal
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
