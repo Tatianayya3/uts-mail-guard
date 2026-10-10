@@ -1,3 +1,4 @@
+import Image from "next/image";
 import SignOutButton from "./SignOutButton";
 
 type DashboardTopbarProps = {
@@ -10,14 +11,10 @@ export default function DashboardTopbar({
   return (
     <header className="flex items-center justify-between gap-4 border-b border-guard-surface-raised px-6 py-5 md:px-10">
       <div className="flex items-center gap-3">
-        <img
-          src="/logo.png"
-          alt="Mailguard Logo"
-          className="size-9 object-cover"
-        />
+        <Image src="/logo.png" alt="" width={36} height={36} />
         <div>
           <p className="text-sm font-bold leading-tight text-white">
-            Mailguard
+            Mail Guard
           </p>
           <p className="text-xs leading-tight text-guard-text-muted">
             Hola, {greetingName}

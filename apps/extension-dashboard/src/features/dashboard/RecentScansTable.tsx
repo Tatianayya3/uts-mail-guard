@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { VERDICT_BADGE_CLASS, VERDICT_LABEL } from "./dashboard.constants";
 import { formatFullDate, formatRelativeTime } from "./dashboard.utils";
-import type { MailScanRecord } from "./dashboard.types";
+import type { ScanRecord as MailScanRecord } from "@mail-guard/contracts";
 import ChartCard from "./ChartCard";
 import EmptyChartState from "./EmptyChartState";
 import ScanDetailModal from "./ScanDetailModal";
