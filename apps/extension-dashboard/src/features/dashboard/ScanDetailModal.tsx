@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   Bot,
@@ -8,32 +8,22 @@ import {
   Fingerprint,
   Link2,
   Lightbulb,
-  ShieldAlert,
-  ShieldCheck,
-  ShieldQuestion,
-  ShieldX,
   X,
-  type LucideIcon,
 } from "lucide-react";
 import {
   SIGNAL_STATUS_BADGE_CLASS,
   SIGNAL_STATUS_LABEL,
   VERDICT_BADGE_CLASS,
+  VERDICT_COLOR,
+  VERDICT_ICON,
   VERDICT_LABEL,
 } from "./dashboard.constants";
 import { formatFullDate } from "./dashboard.utils";
-import type { ScanRecord as MailScanRecord } from "@mail-guard/contracts";
+import type { ScanRecord } from "@mail-guard/contracts";
 import CopyButton from "./CopyButton";
 
-const VERDICT_ICON: Record<MailScanRecord["verdict"], LucideIcon> = {
-  safe: ShieldCheck,
-  suspicious: ShieldAlert,
-  dangerous: ShieldX,
-  unknown: ShieldQuestion,
-};
-
 type ScanDetailModalProps = {
-  scan: MailScanRecord;
+  scan: ScanRecord;
   onClose: () => void;
 };
 
@@ -41,9 +31,30 @@ export default function ScanDetailModal({
   scan,
   onClose,
 }: ScanDetailModalProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
+    // Accesibilidad: el foco entra al diálogo, no puede salir con Tab y
+    // vuelve al elemento que lo abrió al cerrarse.
+    const opener = document.activeElement as HTMLElement | null;
+    closeRef.current?.focus();
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
+      if (event.key !== "Tab" || !panelRef.current) return;
+      const focusable = panelRef.current.querySelectorAll<HTMLElement>(
+        "button, [href], [tabindex]:not([tabindex='-1'])",
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
     };
     document.addEventListener("keydown", handleKeyDown);
 
@@ -55,6 +66,7 @@ export default function ScanDetailModal({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = previousOverflow;
+      opener?.focus();
     };
   }, [onClose]);
 
@@ -77,7 +89,10 @@ export default function ScanDetailModal({
         aria-hidden="true"
       />
 
-      <div className="animate-modal-panel relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-guard-surface-raised bg-guard-surface-card shadow-2xl">
+      <div
+        ref={panelRef}
+        className="animate-modal-panel relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-guard-surface-raised bg-guard-surface-card shadow-2xl"
+      >
         <div className="flex items-start justify-between gap-4 border-b border-white/5 p-5 md:p-6">
           <div className="min-w-0">
             <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -103,6 +118,7 @@ export default function ScanDetailModal({
             </p>
           </div>
           <button
+            ref={closeRef}
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
@@ -113,6 +129,18 @@ export default function ScanDetailModal({
         </div>
 
         <div className="flex-1 overflow-y-auto p-5 md:p-6">
+          <div
+            className="mb-4 h-2 overflow-hidden rounded-full bg-white/5"
+            aria-hidden="true"
+          >
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${scan.trustScore}%`,
+                backgroundColor: VERDICT_COLOR[scan.verdict],
+              }}
+            />
+          </div>
           <p className="text-sm leading-6 text-white/90">{scan.summary}</p>
 
           <div className="mt-4 flex gap-3 rounded-xl border border-guard-accent/20 bg-guard-accent/5 p-3.5">

@@ -21,17 +21,21 @@ export default function VerdictDonutChart({
   return (
     <ChartCard
       title="Distribución de veredictos"
-      subtitle="Clasificación de correos analizados"
+      subtitle="Correos del periodo por clasificación"
     >
       {!hasData ? (
         <EmptyChartState
           icon={ShieldQuestion}
-          title="Sin veredictos aún"
-          description="Tus resultados de seguridad aparecerán aquí una vez tengas correos analizados."
+          title="Sin veredictos en este periodo"
+          description="Tus resultados aparecerán aquí cuando analices correos."
         />
       ) : (
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
-          <div className="relative h-44 w-44 shrink-0">
+          <div
+            className="relative h-44 w-44 shrink-0"
+            role="img"
+            aria-label="Distribución de veredictos"
+          >
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -42,6 +46,7 @@ export default function VerdictDonutChart({
                   outerRadius={76}
                   paddingAngle={3}
                   strokeWidth={0}
+                  isAnimationActive={false}
                 >
                   {data.map((slice) => (
                     <Cell key={slice.key} fill={slice.color} />
@@ -65,14 +70,14 @@ export default function VerdictDonutChart({
                   key={slice.key}
                   className="flex items-center justify-between gap-3 text-xs"
                 >
-                  <span className="flex items-center gap-2 text-guard-text-muted">
+                  <span className="flex items-center gap-2 whitespace-nowrap text-guard-text-muted">
                     <span
                       className="h-2.5 w-2.5 rounded-full"
                       style={{ backgroundColor: slice.color }}
                     />
                     {slice.label}
                   </span>
-                  <span className="font-semibold text-white">
+                  <span className="whitespace-nowrap font-semibold text-white">
                     {slice.value}{" "}
                     <span className="font-normal text-guard-text-muted">
                       ({percentage}%)

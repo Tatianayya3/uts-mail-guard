@@ -13,7 +13,8 @@ export type DashboardData = Overview & {
   error: string | null;
 };
 
-const HISTORY_WINDOW = 60;
+// Máximo que entrega history-service por petición.
+const HISTORY_WINDOW = 100;
 
 /** UC-09: carga perfil, métricas e historial a través del API Gateway. */
 export async function loadDashboardData(
