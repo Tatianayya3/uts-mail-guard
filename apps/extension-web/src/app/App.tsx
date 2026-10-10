@@ -28,7 +28,11 @@ export default function App() {
     <div className="flex min-h-150 w-100 flex-col gap-2 overflow-hidden bg-guard-surface text-white">
       <AppHeader signedIn={Boolean(account.session)} />
       <main key={tab} className="min-h-0 flex-1 animate-fade-in px-5 pb-24">
-        {tab === "scan" ? <ScanView vm={scan} /> : <AccountView vm={account} />}
+        {tab === "scan" ? (
+          <ScanView vm={scan} dashboardUrl={account.dashboardUrl} />
+        ) : (
+          <AccountView vm={account} />
+        )}
       </main>
       <TabNavigation activeTab={tab} onChange={changeTab} />
       <Toaster

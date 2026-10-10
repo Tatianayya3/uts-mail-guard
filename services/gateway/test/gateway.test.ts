@@ -133,6 +133,38 @@ describe("gateway /v1/scans", () => {
     ).toBe(200);
   });
 
+  test("reenvía detalle, edición de perfil y borrado al historial con el JWT", async () => {
+    const { app, calls } = setup();
+    const auth = {
+      Authorization: "Bearer good",
+      "Content-Type": "application/json",
+    };
+    expect((await app.request("/v1/scans/abc", { headers: auth })).status).toBe(
+      200,
+    );
+    expect(
+      (await app.request("/v1/scans", { method: "DELETE", headers: auth }))
+        .status,
+    ).toBe(200);
+    expect(
+      (
+        await app.request("/v1/me", {
+          method: "PATCH",
+          headers: auth,
+          body: JSON.stringify({ displayName: "Ana" }),
+        })
+      ).status,
+    ).toBe(200);
+    expect(calls).toEqual([
+      "history /v1/scans/abc good",
+      "history /v1/scans good",
+      "history /v1/me good",
+    ]);
+    expect((await app.request("/v1/scans", { method: "DELETE" })).status).toBe(
+      401,
+    );
+  });
+
   test("health/services informa el estado de cada servicio", async () => {
     const { app } = setup();
     const body = await (await app.request("/health/services")).json();

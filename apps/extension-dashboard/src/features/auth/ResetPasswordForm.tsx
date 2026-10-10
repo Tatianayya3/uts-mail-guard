@@ -1,87 +1,57 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
 import {
   resetPasswordSchema,
   type ResetPasswordValues,
 } from "@mail-guard/contracts";
-import FormField from "./FormField";
-import type { ResetPasswordStatus } from "./useResetPassword";
-
-type FieldErrors = Partial<Record<keyof ResetPasswordValues, string>>;
+import { Button, TextField, useZodForm } from "@mail-guard/ui";
 
 type ResetPasswordFormProps = {
-  status: ResetPasswordStatus;
-  onSubmit: (values: ResetPasswordValues) => Promise<void>;
+  isLoading: boolean;
+  onSubmit: (values: ResetPasswordValues) => Promise<unknown>;
+  submitLabel?: string;
 };
 
-const initialValues: ResetPasswordValues = {
-  password: "",
-  confirmPassword: "",
-};
-
+/** Nueva contraseña + confirmación. Se usa en /reset-password y en Cuenta. */
 export default function ResetPasswordForm({
-  status,
+  isLoading,
   onSubmit,
+  submitLabel = "Actualizar contraseña",
 }: ResetPasswordFormProps) {
-  const [values, setValues] = useState<ResetPasswordValues>(initialValues);
-  const [errors, setErrors] = useState<FieldErrors>({});
-  const isLoading = status === "loading";
-
-  const updateValue = (field: keyof ResetPasswordValues, value: string) => {
-    setValues((current) => ({ ...current, [field]: value }));
-    setErrors((current) => ({ ...current, [field]: undefined }));
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const result = resetPasswordSchema.safeParse(values);
-    if (!result.success) {
-      const fieldErrors: FieldErrors = {};
-      for (const issue of result.error.issues) {
-        const field = issue.path[0] as keyof ResetPasswordValues;
-        if (!fieldErrors[field]) fieldErrors[field] = issue.message;
-      }
-      setErrors(fieldErrors);
-      return;
-    }
-    await onSubmit(result.data);
-  };
+  const form = useZodForm(resetPasswordSchema, {
+    password: "",
+    confirmPassword: "",
+  });
 
   return (
     <form
-      onSubmit={(event) => void handleSubmit(event)}
-      className="relative space-y-5"
+      onSubmit={form.handleSubmit(async (values) => {
+        await onSubmit(values);
+        form.reset();
+      })}
+      className="space-y-5"
+      noValidate
     >
-      <FormField
-        id="password"
+      <TextField
         label="Nueva contraseña"
         type="password"
         placeholder="••••••••"
-        value={values.password}
-        error={errors.password}
-        disabled={isLoading}
         autoComplete="new-password"
-        onChange={(value) => updateValue("password", value)}
+        hint="Mínimo 8 caracteres."
+        disabled={isLoading}
+        {...form.field("password")}
       />
-      <FormField
-        id="confirmPassword"
+      <TextField
         label="Confirmar contraseña"
         type="password"
         placeholder="••••••••"
-        value={values.confirmPassword}
-        error={errors.confirmPassword}
-        disabled={isLoading}
         autoComplete="new-password"
-        onChange={(value) => updateValue("confirmPassword", value)}
-      />
-      <button
-        type="submit"
         disabled={isLoading}
-        className="w-full mt-6 cursor-pointer bg-guard-accent hover:bg-guard-accent-bright text-guard-surface font-bold text-lg py-4 rounded-xl transition-all duration-300 shadow-[0_0_15px_rgba(200,212,0,0.15)] hover:shadow-[0_0_25px_rgba(228,241,50,0.3)] transform hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 disabled:hover:translate-y-0"
-      >
-        {isLoading ? "Actualizando..." : "Actualizar contraseña"}
-      </button>
+        {...form.field("confirmPassword")}
+      />
+      <Button type="submit" size="lg" loading={isLoading} className="w-full">
+        {isLoading ? "Guardando..." : submitLabel}
+      </Button>
     </form>
   );
 }

@@ -31,6 +31,7 @@ export default function CopyButton({
     <button
       type="button"
       onClick={() => void handleCopy()}
+      aria-label={copied ? "Copiado" : `Copiar ${value}`}
       className={`inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-guard-text-muted transition-colors hover:bg-white/5 hover:text-white ${className}`}
     >
       {copied ? (

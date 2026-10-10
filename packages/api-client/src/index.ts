@@ -1,6 +1,8 @@
 import type { z } from "zod";
 import {
+  deleteHistoryResponseSchema,
   overviewResponseSchema,
+  scanDetailResponseSchema,
   scanListResponseSchema,
   scanResponseSchema,
   syncScansResponseSchema,
@@ -9,6 +11,7 @@ import {
   type ScanRecord,
   type ScanResponse,
   type StoredScan,
+  type UpdateProfileValues,
 } from "@mail-guard/contracts";
 
 export class ApiError extends Error {
@@ -46,7 +49,7 @@ export function createMailGuardApi(options: MailGuardApiOptions) {
     path: string,
     schema: S,
     init: {
-      method?: "GET" | "POST";
+      method?: "GET" | "POST" | "PATCH" | "DELETE";
       body?: unknown;
       auth?: "optional" | "required";
     } = {},
@@ -120,6 +123,37 @@ export function createMailGuardApi(options: MailGuardApiOptions) {
         { auth: "required" },
       );
       return scans;
+    },
+    /** UC-10: detalle de un análisis propio. */
+    async getScan(id: string): Promise<ScanRecord> {
+      const { scan } = await request(
+        `/v1/scans/${encodeURIComponent(id)}`,
+        scanDetailResponseSchema,
+        {
+          auth: "required",
+        },
+      );
+      return scan;
+    },
+    /** UC-12: editar el nombre visible. Devuelve el resumen actualizado. */
+    updateProfile(changes: UpdateProfileValues): Promise<Overview> {
+      return request("/v1/me", overviewResponseSchema, {
+        method: "PATCH",
+        body: changes,
+        auth: "required",
+      });
+    },
+    /** UC-13: borrar todo el historial. Devuelve cuántos análisis se borraron. */
+    async deleteHistory(): Promise<number> {
+      const { deleted } = await request(
+        "/v1/scans",
+        deleteHistoryResponseSchema,
+        {
+          method: "DELETE",
+          auth: "required",
+        },
+      );
+      return deleted;
     },
     /** UC-09: perfil + métricas agregadas. */
     getOverview(): Promise<Overview> {

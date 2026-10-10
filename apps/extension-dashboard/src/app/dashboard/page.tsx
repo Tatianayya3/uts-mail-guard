@@ -1,28 +1,20 @@
-import { redirect } from "next/navigation";
-import { DashboardView } from "@/features/dashboard";
-import { loadDashboardData } from "@/features/dashboard/dashboard.data";
-import { getServerSession } from "@/lib/supabase/server";
+import OverviewView from "@/features/dashboard/OverviewView";
+import { loadOverview, loadScans } from "@/features/dashboard/dashboard.data";
 
-export const metadata = {
-  title: "Panel | Mail Guard",
-};
+export const metadata = { title: "Resumen | Mail Guard" };
 
 export default async function DashboardPage() {
-  const session = await getServerSession();
-  if (!session) redirect("/");
-
-  const { profile, analytics, scans, error } = await loadDashboardData(
-    session.user,
-    session.accessToken,
-  );
-
+  const [overview, history] = await Promise.all([loadOverview(), loadScans()]);
+  const displayName =
+    overview.profile.displayName?.trim() ||
+    overview.email.split("@")[0] ||
+    "Usuario";
   return (
-    <DashboardView
-      userEmail={session.user.email ?? ""}
-      profile={profile}
-      stats={analytics}
-      scans={scans}
-      error={error}
+    <OverviewView
+      displayName={displayName}
+      stats={overview.analytics}
+      scans={history.scans}
+      error={overview.error ?? history.error}
     />
   );
 }

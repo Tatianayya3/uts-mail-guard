@@ -1,19 +1,15 @@
-import { FormEvent, useState } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 import {
-  firstIssue,
   forgotPasswordSchema,
   signInSchema,
   signUpSchema,
-  type AuthValues,
   type ForgotPasswordValues,
   type SignInValues,
   type SignUpValues,
 } from "@mail-guard/contracts";
-import ShowPasswordIcon from "@/shared/icons/ShowPassword";
-import HidePasswordIcon from "@/shared/icons/HidePassword";
+import { Button, TextField, cn, useZodForm } from "@mail-guard/ui";
 
-type AuthMode = "signin" | "signup";
+type AuthMode = "signin" | "signup" | "forgot";
 
 type AuthFormProps = {
   isBusy: boolean;
@@ -22,11 +18,19 @@ type AuthFormProps = {
   onForgotPassword: (values: ForgotPasswordValues) => Promise<boolean>;
 };
 
-const initialValues: AuthValues = {
-  fullName: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
+const HEADINGS: Record<AuthMode, { title: string; subtitle: string }> = {
+  signin: {
+    title: "Qué bueno verte",
+    subtitle: "Inicia sesión para guardar tu historial.",
+  },
+  signup: {
+    title: "Crea tu cuenta",
+    subtitle: "Guarda tus análisis y consulta tus métricas.",
+  },
+  forgot: {
+    title: "Recuperar contraseña",
+    subtitle: "Te enviaremos un enlace para restablecerla.",
+  },
 };
 
 export default function AuthForm({
@@ -35,274 +39,215 @@ export default function AuthForm({
   onSignUp,
   onForgotPassword,
 }: AuthFormProps) {
-  const [mode, onModeChange] = useState<AuthMode>("signin");
-  const [values, setValues] = useState<AuthValues>(initialValues);
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [forgotEmail, setForgotEmail] = useState("");
-  const isSignUp = mode === "signup";
-
-  const updateValue = (field: keyof AuthValues, value: string) => {
-    setValues((current) => ({ ...current, [field]: value }));
-  };
-
-  const handleForgotSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const result = forgotPasswordSchema.safeParse({ email: forgotEmail });
-    if (!result.success) {
-      toast.error(firstIssue(result.error, "Revisa el correo."));
-      return;
-    }
-    const ok = await onForgotPassword(result.data);
-    if (ok) setShowForgotPassword(false);
-  };
-
-  if (showForgotPassword) {
-    return (
-      <section className="flex flex-col pt-7">
-        <div className="mb-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-guard-accent">
-            Cuenta Mail Guard
-          </p>
-          <h1 className="mt-2 text-2xl font-bold">Recuperar contraseña</h1>
-          <p className="mt-2 text-sm leading-5 text-guard-text-muted">
-            Escribe tu correo y te enviaremos un enlace para restablecerla.
-          </p>
-        </div>
-        <form
-          onSubmit={(event) => void handleForgotSubmit(event)}
-          className="flex flex-col gap-4"
-        >
-          <AuthInput
-            label="Correo electrónico"
-            type="email"
-            placeholder="tu@correo.com"
-            value={forgotEmail}
-            onChange={setForgotEmail}
-            autoComplete="email"
-            disabled={isBusy}
-          />
-          <button
-            type="submit"
-            disabled={isBusy}
-            className="mt-2 h-12 cursor-pointer rounded-xl bg-guard-accent text-sm font-bold text-guard-surface transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
-          >
-            {isBusy ? "Enviando..." : "Enviar enlace"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowForgotPassword(false)}
-            disabled={isBusy}
-            className="cursor-pointer text-center text-xs text-guard-text-muted disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Volver a iniciar sesión
-          </button>
-        </form>
-      </section>
-    );
-  }
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (isSignUp) {
-      const result = signUpSchema.safeParse(values);
-      if (!result.success) {
-        toast.error(firstIssue(result.error));
-        return;
-      }
-      await onSignUp(result.data);
-      return;
-    }
-
-    const result = signInSchema.safeParse(values);
-    if (!result.success) {
-      toast.error(firstIssue(result.error));
-      return;
-    }
-    await onSignIn(result.data);
-  };
+  const [mode, setMode] = useState<AuthMode>("signin");
+  const heading = HEADINGS[mode];
 
   return (
-    <section className="flex flex-col pt-7">
-      <div className="mb-6 grid grid-cols-2 rounded-xl bg-guard-surface-card p-1">
-        <ModeButton
-          active={!isSignUp}
-          disabled={isBusy}
-          onClick={() => onModeChange("signin")}
+    <section className="flex flex-col pt-6">
+      {mode !== "forgot" && (
+        <div
+          className="mb-6 grid grid-cols-2 rounded-xl bg-guard-surface-card p-1"
+          role="tablist"
         >
-          Iniciar sesión
-        </ModeButton>
-        <ModeButton
-          active={isSignUp}
-          disabled={isBusy}
-          onClick={() => onModeChange("signup")}
-        >
-          Crear cuenta
-        </ModeButton>
-      </div>
-      <div className="mb-7">
+          {(["signin", "signup"] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              role="tab"
+              aria-selected={mode === tab}
+              onClick={() => setMode(tab)}
+              disabled={isBusy}
+              className={cn(
+                "h-9 cursor-pointer rounded-lg text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+                mode === tab
+                  ? "bg-guard-accent text-guard-surface"
+                  : "text-guard-text-muted hover:text-white",
+              )}
+            >
+              {tab === "signin" ? "Iniciar sesión" : "Crear cuenta"}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="mb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-guard-accent">
           Cuenta Mail Guard
         </p>
-        <h1 className="mt-2 text-2xl font-bold">
-          {isSignUp ? "Crea tu cuenta" : "Qué bueno verte"}
-        </h1>
-        <p className="mt-2 text-sm leading-5 text-guard-text-muted">
-          {isSignUp
-            ? "Protege tus correos con seguridad inteligente."
-            : "Inicia sesión para gestionar tu protección."}
+        <h1 className="mt-2 text-2xl font-bold">{heading.title}</h1>
+        <p className="mt-1 text-sm leading-5 text-guard-text-muted">
+          {heading.subtitle}
         </p>
       </div>
-      <form
-        onSubmit={(event) => void handleSubmit(event)}
-        className="flex flex-col gap-4"
-      >
-        {isSignUp && (
-          <AuthInput
-            label="Nombre completo"
-            type="text"
-            placeholder="Tu nombre"
-            value={values.fullName ?? ""}
-            onChange={(value) => updateValue("fullName", value)}
-            autoComplete="name"
-            disabled={isBusy}
-          />
-        )}
-        <AuthInput
-          label="Correo electrónico"
-          type="email"
-          placeholder="tu@correo.com"
-          value={values.email}
-          onChange={(value) => updateValue("email", value)}
-          autoComplete="email"
-          disabled={isBusy}
+
+      {mode === "signin" && (
+        <SignInForm
+          isBusy={isBusy}
+          onSubmit={onSignIn}
+          onForgot={() => setMode("forgot")}
         />
-        <AuthInput
-          label="Contraseña"
-          type="password"
-          placeholder="Escribe tu contraseña"
-          value={values.password}
-          onChange={(value) => updateValue("password", value)}
-          autoComplete={isSignUp ? "new-password" : "current-password"}
-          disabled={isBusy}
+      )}
+      {mode === "signup" && <SignUpForm isBusy={isBusy} onSubmit={onSignUp} />}
+      {mode === "forgot" && (
+        <ForgotForm
+          isBusy={isBusy}
+          onSubmit={async (values) => {
+            if (await onForgotPassword(values)) setMode("signin");
+          }}
+          onBack={() => setMode("signin")}
         />
-        {isSignUp && (
-          <AuthInput
-            label="Confirmar contraseña"
-            type="password"
-            placeholder="Repite tu contraseña"
-            value={values.confirmPassword ?? ""}
-            onChange={(value) => updateValue("confirmPassword", value)}
-            autoComplete="new-password"
-            disabled={isBusy}
-          />
-        )}
-        {!isSignUp && (
-          <button
-            type="button"
-            onClick={() => setShowForgotPassword(true)}
-            disabled={isBusy}
-            className="block w-full cursor-pointer text-right text-xs text-guard-accent-bright hover:text-guard-accent disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            ¿Olvidaste tu contraseña?
-          </button>
-        )}
-        <button
-          type="submit"
-          disabled={isBusy}
-          className="mt-2 h-12 cursor-pointer rounded-xl bg-guard-accent text-sm font-bold text-guard-surface transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
-        >
-          {isBusy
-            ? "Conectando..."
-            : isSignUp
-              ? "Crear cuenta"
-              : "Iniciar sesión"}
-        </button>
-      </form>
-      <div className="mt-7 flex items-center gap-3 text-[10px] text-guard-text-muted">
-        <div className="h-px flex-1 bg-white/10" />
-        <span>CONEXIÓN SEGURA</span>
-        <div className="h-px flex-1 bg-white/10" />
-      </div>
-      <p className="mt-5 text-center text-xs text-guard-text-muted">
-        Tus datos están cifrados y protegidos.
+      )}
+
+      <p className="mt-6 text-center text-[11px] text-guard-text-muted">
+        Puedes analizar correos sin cuenta: se guardan aquí y se sincronizan al
+        iniciar sesión.
       </p>
     </section>
   );
 }
 
-function ModeButton({
-  active,
-  disabled,
-  onClick,
-  children,
+function SignInForm({
+  isBusy,
+  onSubmit,
+  onForgot,
 }: {
-  active: boolean;
-  disabled?: boolean;
-  onClick: () => void;
-  children: string;
+  isBusy: boolean;
+  onSubmit: (values: SignInValues) => Promise<unknown>;
+  onForgot: () => void;
 }) {
+  const form = useZodForm(signInSchema, { email: "", password: "" });
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`h-9 cursor-pointer rounded-lg text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${active ? "bg-guard-accent text-guard-surface" : "text-guard-text-muted"}`}
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="flex flex-col gap-4"
+      noValidate
     >
-      {children}
-    </button>
+      <TextField
+        size="sm"
+        label="Correo electrónico"
+        type="email"
+        placeholder="tu@correo.com"
+        autoComplete="email"
+        disabled={isBusy}
+        {...form.field("email")}
+      />
+      <TextField
+        size="sm"
+        label="Contraseña"
+        type="password"
+        placeholder="Tu contraseña"
+        autoComplete="current-password"
+        disabled={isBusy}
+        {...form.field("password")}
+      />
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onForgot}
+        disabled={isBusy}
+        className="self-end text-guard-accent-bright"
+      >
+        ¿Olvidaste tu contraseña?
+      </Button>
+      <Button type="submit" size="lg" loading={isBusy}>
+        {isBusy ? "Conectando..." : "Iniciar sesión"}
+      </Button>
+    </form>
   );
 }
 
-function AuthInput({
-  label,
-  type,
-  placeholder,
-  value,
-  onChange,
-  autoComplete,
-  disabled,
+function SignUpForm({
+  isBusy,
+  onSubmit,
 }: {
-  label: string;
-  type: string;
-  placeholder: string;
-  value: string;
-  onChange: (value: string) => void;
-  autoComplete?: string;
-  disabled?: boolean;
+  isBusy: boolean;
+  onSubmit: (values: SignUpValues) => Promise<unknown>;
 }) {
-  const [showPassword, setShowPassword] = useState(false);
-  const isPassword = type === "password";
-  const inputType = isPassword && showPassword ? "text" : type;
-
+  const form = useZodForm(signUpSchema, {
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   return (
-    <label className="flex flex-col gap-2 text-xs font-medium text-guard-text-muted">
-      {label}
-      <div className="relative">
-        <input
-          required
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          type={inputType}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          disabled={disabled}
-          className={`h-11 w-full rounded-xl border border-white/10 bg-guard-surface-card px-3 text-sm text-white outline-none transition-colors placeholder:text-guard-text-muted/60 focus:border-guard-accent disabled:opacity-50 ${isPassword ? "pr-10" : ""}`}
-        />
-        {isPassword && (
-          <button
-            type="button"
-            onClick={() => setShowPassword((current) => !current)}
-            disabled={disabled}
-            tabIndex={-1}
-            aria-label={
-              showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
-            }
-            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-guard-text-muted transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {showPassword ? <HidePasswordIcon /> : <ShowPasswordIcon />}
-          </button>
-        )}
-      </div>
-    </label>
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="flex flex-col gap-4"
+      noValidate
+    >
+      <TextField
+        size="sm"
+        label="Nombre completo"
+        placeholder="Tu nombre"
+        autoComplete="name"
+        disabled={isBusy}
+        {...form.field("fullName")}
+      />
+      <TextField
+        size="sm"
+        label="Correo electrónico"
+        type="email"
+        placeholder="tu@correo.com"
+        autoComplete="email"
+        disabled={isBusy}
+        {...form.field("email")}
+      />
+      <TextField
+        size="sm"
+        label="Contraseña"
+        type="password"
+        placeholder="Mínimo 8 caracteres"
+        autoComplete="new-password"
+        disabled={isBusy}
+        {...form.field("password")}
+      />
+      <TextField
+        size="sm"
+        label="Confirmar contraseña"
+        type="password"
+        placeholder="Repite tu contraseña"
+        autoComplete="new-password"
+        disabled={isBusy}
+        {...form.field("confirmPassword")}
+      />
+      <Button type="submit" size="lg" loading={isBusy}>
+        {isBusy ? "Creando cuenta..." : "Crear cuenta"}
+      </Button>
+    </form>
+  );
+}
+
+function ForgotForm({
+  isBusy,
+  onSubmit,
+  onBack,
+}: {
+  isBusy: boolean;
+  onSubmit: (values: ForgotPasswordValues) => Promise<unknown>;
+  onBack: () => void;
+}) {
+  const form = useZodForm(forgotPasswordSchema, { email: "" });
+  return (
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="flex flex-col gap-4"
+      noValidate
+    >
+      <TextField
+        size="sm"
+        label="Correo electrónico"
+        type="email"
+        placeholder="tu@correo.com"
+        autoComplete="email"
+        disabled={isBusy}
+        {...form.field("email")}
+      />
+      <Button type="submit" size="lg" loading={isBusy}>
+        {isBusy ? "Enviando..." : "Enviar enlace"}
+      </Button>
+      <Button variant="ghost" onClick={onBack} disabled={isBusy}>
+        Volver a iniciar sesión
+      </Button>
+    </form>
   );
 }

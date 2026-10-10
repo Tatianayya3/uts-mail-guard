@@ -22,12 +22,12 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // getUser() re-validates the token against Supabase Auth instead of just
-  // trusting the (possibly stale/forged) session cookie, which matters here
-  // since this result gates access to /dashboard.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims() verifica la firma del JWT (localmente con JWKS si el proyecto
+  // usa claves asimétricas; si no, consultando a Supabase Auth) y refresca la
+  // sesión si expiró. Corre en cada navegación, así que evita una llamada de
+  // red extra cuando puede. La página /dashboard vuelve a validar con getUser.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims?.sub ? { id: data.claims.sub } : null;
 
   return { response, user };
 }
