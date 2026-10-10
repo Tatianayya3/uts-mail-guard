@@ -191,7 +191,7 @@ export function heuristicSignals(evidence: Evidence): ScanSignal[] {
         "links",
         "Enlaces",
         status,
-        `${evidence.links.length} revisados · ${dangerous + suspicious} con alertas`,
+        `${evidence.links.length} ${evidence.links.length === 1 ? "revisado" : "revisados"} · ${dangerous + suspicious} con alertas`,
         dangerous
           ? `${dangerous} enlace(s) con patrones de phishing.`
           : suspicious

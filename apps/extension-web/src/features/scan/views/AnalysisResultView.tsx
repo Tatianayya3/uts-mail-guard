@@ -248,7 +248,7 @@ export default function AnalysisResultView({
 
           <p className="mx-auto rounded-full bg-guard-surface-card px-4 py-2 text-[10px] text-guard-text-muted">
             <span className="text-guard-success">●</span> {result.links.length}{" "}
-            enlaces revisados
+            {result.links.length === 1 ? "enlace revisado" : "enlaces revisados"}
             <span className="mx-2 text-guard-success">•</span>
             {dateFormat.format(new Date(result.analyzedAt))}
           </p>
