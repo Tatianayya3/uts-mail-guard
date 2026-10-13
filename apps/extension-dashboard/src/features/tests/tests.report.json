@@ -1,0 +1,1469 @@
+{
+  "generatedAt": "2026-10-13T08:02:21.361Z",
+  "commit": "efc0e46",
+  "runner": "bun 1.4.2",
+  "packages": [
+    {
+      "name": "extension-dashboard",
+      "dir": "apps/extension-dashboard",
+      "files": [
+        {
+          "path": "apps/extension-dashboard/test/dashboard.utils.test.ts",
+          "kind": "unit",
+          "tests": [
+            {
+              "name": "agrupa por día en hora de Colombia, no en UTC",
+              "suite": [
+                "dashboard utils"
+              ],
+              "line": 46,
+              "assertions": 1,
+              "timeMs": 0.04,
+              "status": "pass"
+            },
+            {
+              "name": "bucketScansByDay crea un balde por día y cuenta por veredicto",
+              "suite": [
+                "dashboard utils"
+              ],
+              "line": 51,
+              "assertions": 4,
+              "timeMs": 0.27,
+              "status": "pass"
+            },
+            {
+              "name": "scansInRange y periodDelta comparan con el periodo anterior",
+              "suite": [
+                "dashboard utils"
+              ],
+              "line": 63,
+              "assertions": 2,
+              "timeMs": 0.08,
+              "status": "pass"
+            },
+            {
+              "name": "topSenderDomains prioriza dominios con alertas",
+              "suite": [
+                "dashboard utils"
+              ],
+              "line": 73,
+              "assertions": 3,
+              "timeMs": 0.17,
+              "status": "pass"
+            },
+            {
+              "name": "filterScans busca por asunto/remitente y filtra por veredicto",
+              "suite": [
+                "dashboard utils"
+              ],
+              "line": 86,
+              "assertions": 2,
+              "timeMs": 0.08,
+              "status": "pass"
+            },
+            {
+              "name": "scansToCsv escapa comillas y usa ; para Excel en español",
+              "suite": [
+                "dashboard utils"
+              ],
+              "line": 99,
+              "assertions": 3,
+              "timeMs": 0.12,
+              "status": "pass"
+            },
+            {
+              "name": "weekdayHourMatrix ubica cada análisis por día y hora de Colombia",
+              "suite": [
+                "visualizaciones nuevas"
+              ],
+              "line": 116,
+              "assertions": 2,
+              "timeMs": 0.35,
+              "status": "pass"
+            },
+            {
+              "name": "signalBreakdown calcula la tasa de alerta por señal",
+              "suite": [
+                "visualizaciones nuevas"
+              ],
+              "line": 123,
+              "assertions": 1,
+              "timeMs": 0.14,
+              "status": "pass"
+            },
+            {
+              "name": "buildInsights destaca el dominio que concentra las alertas",
+              "suite": [
+                "visualizaciones nuevas"
+              ],
+              "line": 137,
+              "assertions": 2,
+              "timeMs": 0.22,
+              "status": "pass"
+            },
+            {
+              "name": "buildInsights no inventa nada con pocos datos",
+              "suite": [
+                "visualizaciones nuevas"
+              ],
+              "line": 149,
+              "assertions": 1,
+              "timeMs": 0.01,
+              "status": "pass"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "@mail-guard/api-client",
+      "dir": "packages/api-client",
+      "files": [
+        {
+          "path": "packages/api-client/test/api-client.test.ts",
+          "kind": "unit",
+          "tests": [
+            {
+              "name": "envía el JWT cuando hay sesión y normaliza la URL base",
+              "suite": [
+                "createMailGuardApi"
+              ],
+              "line": 25,
+              "assertions": 2,
+              "timeMs": 2.31,
+              "status": "pass"
+            },
+            {
+              "name": "propaga el mensaje de error del gateway",
+              "suite": [
+                "createMailGuardApi"
+              ],
+              "line": 59,
+              "assertions": 3,
+              "timeMs": 0.14,
+              "status": "pass"
+            },
+            {
+              "name": "rechaza respuestas que no cumplen el contrato",
+              "suite": [
+                "createMailGuardApi"
+              ],
+              "line": 70,
+              "assertions": 1,
+              "timeMs": 0.45,
+              "status": "pass"
+            },
+            {
+              "name": "las rutas privadas exigen sesión sin llamar a la red",
+              "suite": [
+                "createMailGuardApi"
+              ],
+              "line": 78,
+              "assertions": 2,
+              "timeMs": 0.13,
+              "status": "pass"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "@mail-guard/contracts",
+      "dir": "packages/contracts",
+      "files": [
+        {
+          "path": "packages/contracts/test/contracts.test.ts",
+          "kind": "unit",
+          "tests": [
+            {
+              "name": "emailSnapshotSchema valida remitente y enlaces",
+              "suite": [
+                "contracts"
+              ],
+              "line": 5,
+              "assertions": 3,
+              "timeMs": 1.71,
+              "status": "pass"
+            },
+            {
+              "name": "signUpSchema exige contraseñas iguales",
+              "suite": [
+                "contracts"
+              ],
+              "line": 23,
+              "assertions": 2,
+              "timeMs": 0.63,
+              "status": "pass"
+            },
+            {
+              "name": "trustTone clasifica el puntaje",
+              "suite": [
+                "contracts"
+              ],
+              "line": 36,
+              "assertions": 3,
+              "timeMs": 0.02,
+              "status": "pass"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "@mail-guard/ui",
+      "dir": "packages/ui",
+      "files": [
+        {
+          "path": "packages/ui/test/ui.test.ts",
+          "kind": "unit",
+          "tests": [
+            {
+              "name": "cn deja ganar la última clase en conflicto",
+              "suite": [
+                "ui"
+              ],
+              "line": 7,
+              "assertions": 1,
+              "timeMs": 3.2,
+              "status": "pass"
+            },
+            {
+              "name": "fieldErrors toma el primer mensaje por campo",
+              "suite": [
+                "ui"
+              ],
+              "line": 11,
+              "assertions": 2,
+              "timeMs": 2.57,
+              "status": "pass"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "@mail-guard/analysis-service",
+      "dir": "services/analysis-service",
+      "files": [
+        {
+          "path": "services/analysis-service/test/analyze-email.test.ts",
+          "kind": "unit",
+          "tests": [
+            {
+              "name": "devuelve un análisis válido y lo cachea",
+              "suite": [
+                "analyzeEmail"
+              ],
+              "line": 14,
+              "assertions": 5,
+              "timeMs": 3.65,
+              "status": "pass"
+            },
+            {
+              "name": "si el motor falla, responde con el respaldo heurístico",
+              "suite": [
+                "analyzeEmail"
+              ],
+              "line": 30,
+              "assertions": 2,
+              "timeMs": 0.55,
+              "status": "pass"
+            },
+            {
+              "name": "las reglas objetivas no quedan tapadas por un modelo optimista",
+              "suite": [
+                "analyzeEmail"
+              ],
+              "line": 47,
+              "assertions": 2,
+              "timeMs": 0.36,
+              "status": "pass"
+            },
+            {
+              "name": "usa la hora real del servidor",
+              "suite": [
+                "analyzeEmail"
+              ],
+              "line": 78,
+              "assertions": 1,
+              "timeMs": 0.2,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "path": "services/analysis-service/test/evidence.test.ts",
+          "kind": "unit",
+          "tests": [
+            {
+              "name": "registrableDomain maneja sufijos de segundo nivel",
+              "suite": [
+                "domains"
+              ],
+              "line": 11,
+              "assertions": 2,
+              "timeMs": 0.26,
+              "status": "pass"
+            },
+            {
+              "name": "detecta dominios parecidos a marcas",
+              "suite": [
+                "imitatedBrand"
+              ],
+              "line": 20,
+              "assertions": 3,
+              "timeMs": 1.73,
+              "status": "pass"
+            },
+            {
+              "name": "no marca dominios oficiales ni falsos positivos comunes",
+              "suite": [
+                "imitatedBrand"
+              ],
+              "line": 26,
+              "assertions": 4,
+              "timeMs": 0.32,
+              "status": "pass"
+            },
+            {
+              "name": "una IP como destino es peligrosa",
+              "suite": [
+                "inspectLink"
+              ],
+              "line": 35,
+              "assertions": 1,
+              "timeMs": 0.44,
+              "status": "pass"
+            },
+            {
+              "name": "un acortador es sospechoso",
+              "suite": [
+                "inspectLink"
+              ],
+              "line": 40,
+              "assertions": 2,
+              "timeMs": 0.16,
+              "status": "pass"
+            },
+            {
+              "name": "un enlace limpio es seguro",
+              "suite": [
+                "inspectLink"
+              ],
+              "line": 45,
+              "assertions": 1,
+              "timeMs": 0.12,
+              "status": "pass"
+            },
+            {
+              "name": "phishing reúne suplantación, urgencia y datos sensibles",
+              "suite": [
+                "collectEvidence"
+              ],
+              "line": 53,
+              "assertions": 4,
+              "timeMs": 0.74,
+              "status": "pass"
+            },
+            {
+              "name": "correo legítimo de Google no levanta alertas",
+              "suite": [
+                "collectEvidence"
+              ],
+              "line": 61,
+              "assertions": 3,
+              "timeMs": 0.12,
+              "status": "pass"
+            },
+            {
+              "name": "correo vacío no tiene contenido analizable",
+              "suite": [
+                "collectEvidence"
+              ],
+              "line": 68,
+              "assertions": 1,
+              "timeMs": 0.12,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "path": "services/analysis-service/test/jev.engine.test.ts",
+          "kind": "unit",
+          "tests": [
+            {
+              "name": "envía preguntas tipadas y traduce probabilidades a señales",
+              "suite": [
+                "Jev engine"
+              ],
+              "line": 14,
+              "assertions": 9,
+              "timeMs": 5.18,
+              "status": "pass"
+            },
+            {
+              "name": "con poca confianza, el veredicto sale del puntaje combinado",
+              "suite": [
+                "Jev engine"
+              ],
+              "line": 67,
+              "assertions": 1,
+              "timeMs": 0.76,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "path": "services/analysis-service/test/scoring.test.ts",
+          "kind": "unit",
+          "tests": [
+            {
+              "name": "phishing → peligroso con puntaje bajo",
+              "suite": [
+                "heuristicDecision"
+              ],
+              "line": 7,
+              "assertions": 3,
+              "timeMs": 0.85,
+              "status": "pass"
+            },
+            {
+              "name": "correo legítimo → seguro",
+              "suite": [
+                "heuristicDecision"
+              ],
+              "line": 14,
+              "assertions": 2,
+              "timeMs": 0.11,
+              "status": "pass"
+            },
+            {
+              "name": "sin contenido → sin determinar",
+              "suite": [
+                "heuristicDecision"
+              ],
+              "line": 20,
+              "assertions": 1,
+              "timeMs": 0.11,
+              "status": "pass"
+            },
+            {
+              "name": "conserva la señal más grave por clave",
+              "suite": [
+                "mergeSignals"
+              ],
+              "line": 28,
+              "assertions": 2,
+              "timeMs": 0.19,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "path": "services/analysis-service/test/security/internal-token.security.test.ts",
+          "kind": "security",
+          "tests": [
+            {
+              "name": "sin token interno → 401",
+              "suite": [
+                "Token interno entre microservicios"
+              ],
+              "line": 36,
+              "assertions": 2,
+              "timeMs": 2.14,
+              "status": "pass"
+            },
+            {
+              "name": "con un token incorrecto de la misma longitud → 401",
+              "suite": [
+                "Token interno entre microservicios"
+              ],
+              "line": 44,
+              "assertions": 1,
+              "timeMs": 0.13,
+              "status": "pass"
+            },
+            {
+              "name": "con un token de otra longitud → 401 (sin romper la comparación)",
+              "suite": [
+                "Token interno entre microservicios"
+              ],
+              "line": 51,
+              "assertions": 1,
+              "timeMs": 0.09,
+              "status": "pass"
+            },
+            {
+              "name": "un JWT de usuario no sirve como token interno",
+              "suite": [
+                "Token interno entre microservicios"
+              ],
+              "line": 57,
+              "assertions": 1,
+              "timeMs": 0.08,
+              "status": "pass"
+            },
+            {
+              "name": "con el token correcto → 200 y el análisis",
+              "suite": [
+                "Token interno entre microservicios"
+              ],
+              "line": 62,
+              "assertions": 2,
+              "timeMs": 0.98,
+              "status": "pass"
+            },
+            {
+              "name": "/health solo expone estado, nombre y tiempo activo",
+              "suite": [
+                "Endpoints públicos sin información sensible"
+              ],
+              "line": 70,
+              "assertions": 1,
+              "timeMs": 0.13,
+              "status": "pass"
+            },
+            {
+              "name": "/v1/engine solo dice qué motor está activo, no claves ni URLs",
+              "suite": [
+                "Endpoints públicos sin información sensible"
+              ],
+              "line": 75,
+              "assertions": 1,
+              "timeMs": 0.08,
+              "status": "pass"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "@mail-guard/gateway",
+      "dir": "services/gateway",
+      "files": [
+        {
+          "path": "services/gateway/test/acceptance/acceptance.test.ts",
+          "kind": "acceptance",
+          "tests": [
+            {
+              "name": "Un correo de phishing se marca como peligroso",
+              "suite": [
+                "Analizar un correo abierto (UC-01 y UC-11)"
+              ],
+              "line": 52,
+              "assertions": 4,
+              "timeMs": 3.95,
+              "status": "pass",
+              "source": {
+                "path": "services/gateway/test/acceptance/features/analizar-correo.feature",
+                "line": 7
+              }
+            },
+            {
+              "name": "Un correo legítimo se marca como seguro",
+              "suite": [
+                "Analizar un correo abierto (UC-01 y UC-11)"
+              ],
+              "line": 52,
+              "assertions": 2,
+              "timeMs": 2.65,
+              "status": "pass",
+              "source": {
+                "path": "services/gateway/test/acceptance/features/analizar-correo.feature",
+                "line": 14
+              }
+            },
+            {
+              "name": "El invitado agota su cuota diaria",
+              "suite": [
+                "Analizar un correo abierto (UC-01 y UC-11)"
+              ],
+              "line": 52,
+              "assertions": 3,
+              "timeMs": 5.89,
+              "status": "pass",
+              "source": {
+                "path": "services/gateway/test/acceptance/features/analizar-correo.feature",
+                "line": 20
+              }
+            },
+            {
+              "name": "El análisis se guarda en el historial",
+              "suite": [
+                "Historial de análisis (UC-07, UC-10 y UC-13)"
+              ],
+              "line": 52,
+              "assertions": 2,
+              "timeMs": 6.22,
+              "status": "pass",
+              "source": {
+                "path": "services/gateway/test/acceptance/features/historial.feature",
+                "line": 7
+              }
+            },
+            {
+              "name": "Analizar dos veces el mismo correo no lo duplica",
+              "suite": [
+                "Historial de análisis (UC-07, UC-10 y UC-13)"
+              ],
+              "line": 52,
+              "assertions": 1,
+              "timeMs": 7.21,
+              "status": "pass",
+              "source": {
+                "path": "services/gateway/test/acceptance/features/historial.feature",
+                "line": 13
+              }
+            },
+            {
+              "name": "Ver el detalle de un análisis",
+              "suite": [
+                "Historial de análisis (UC-07, UC-10 y UC-13)"
+              ],
+              "line": 52,
+              "assertions": 2,
+              "timeMs": 5.16,
+              "status": "pass",
+              "source": {
+                "path": "services/gateway/test/acceptance/features/historial.feature",
+                "line": 19
+              }
+            },
+            {
+              "name": "Borrar todo el historial",
+              "suite": [
+                "Historial de análisis (UC-07, UC-10 y UC-13)"
+              ],
+              "line": 52,
+              "assertions": 2,
+              "timeMs": 7.71,
+              "status": "pass",
+              "source": {
+                "path": "services/gateway/test/acceptance/features/historial.feature",
+                "line": 25
+              }
+            },
+            {
+              "name": "Sin sesión no se puede ver un historial",
+              "suite": [
+                "Historial de análisis (UC-07, UC-10 y UC-13)"
+              ],
+              "line": 52,
+              "assertions": 1,
+              "timeMs": 3.77,
+              "status": "pass",
+              "source": {
+                "path": "services/gateway/test/acceptance/features/historial.feature",
+                "line": 33
+              }
+            }
+          ]
+        },
+        {
+          "path": "services/gateway/test/api/scans.api.test.ts",
+          "kind": "api",
+          "tests": [
+            {
+              "name": "GET /health/services → los tres microservicios en ok",
+              "suite": [
+                "Salud de los servicios"
+              ],
+              "line": 33,
+              "assertions": 2,
+              "timeMs": 1.94,
+              "status": "pass"
+            },
+            {
+              "name": "GET /health de cada microservicio responde por separado",
+              "suite": [
+                "Salud de los servicios"
+              ],
+              "line": 44,
+              "assertions": 4,
+              "timeMs": 0.29,
+              "status": "pass"
+            },
+            {
+              "name": "cada respuesta lleva un x-request-id para rastrear la petición",
+              "suite": [
+                "Salud de los servicios"
+              ],
+              "line": 52,
+              "assertions": 1,
+              "timeMs": 0.73,
+              "status": "pass"
+            },
+            {
+              "name": "invitado + phishing → 200, veredicto peligroso y no se guarda",
+              "suite": [
+                "POST /v1/scans (análisis)"
+              ],
+              "line": 59,
+              "assertions": 6,
+              "timeMs": 6.38,
+              "status": "pass"
+            },
+            {
+              "name": "correo legítimo → veredicto seguro",
+              "suite": [
+                "POST /v1/scans (análisis)"
+              ],
+              "line": 74,
+              "assertions": 2,
+              "timeMs": 0.65,
+              "status": "pass"
+            },
+            {
+              "name": "el mismo correo otra vez sale de caché y no consume cuota",
+              "suite": [
+                "POST /v1/scans (análisis)"
+              ],
+              "line": 85,
+              "assertions": 2,
+              "timeMs": 0.5,
+              "status": "pass"
+            },
+            {
+              "name": "cuerpo inválido → 400 con mensaje de error",
+              "suite": [
+                "POST /v1/scans (análisis)"
+              ],
+              "line": 97,
+              "assertions": 2,
+              "timeMs": 0.36,
+              "status": "pass"
+            },
+            {
+              "name": "JSON mal formado → 400",
+              "suite": [
+                "POST /v1/scans (análisis)"
+              ],
+              "line": 108,
+              "assertions": 1,
+              "timeMs": 0.23,
+              "status": "pass"
+            },
+            {
+              "name": "ruta inexistente → 404 con { error }",
+              "suite": [
+                "POST /v1/scans (análisis)"
+              ],
+              "line": 116,
+              "assertions": 2,
+              "timeMs": 0.17,
+              "status": "pass"
+            },
+            {
+              "name": "con sesión el análisis se guarda en el historial",
+              "suite": [
+                "Historial con sesión (gateway → history-service)"
+              ],
+              "line": 124,
+              "assertions": 2,
+              "timeMs": 1.3,
+              "status": "pass"
+            },
+            {
+              "name": "analizar el mismo correo no lo duplica",
+              "suite": [
+                "Historial con sesión (gateway → history-service)"
+              ],
+              "line": 135,
+              "assertions": 1,
+              "timeMs": 2.17,
+              "status": "pass"
+            },
+            {
+              "name": "GET /v1/scans/:id devuelve el detalle del análisis",
+              "suite": [
+                "Historial con sesión (gateway → history-service)"
+              ],
+              "line": 147,
+              "assertions": 2,
+              "timeMs": 0.79,
+              "status": "pass"
+            },
+            {
+              "name": "GET /v1/scans/:id con un id inexistente → 404",
+              "suite": [
+                "Historial con sesión (gateway → history-service)"
+              ],
+              "line": 158,
+              "assertions": 1,
+              "timeMs": 0.28,
+              "status": "pass"
+            },
+            {
+              "name": "POST /v1/scans/sync sube análisis hechos sin conexión",
+              "suite": [
+                "Historial con sesión (gateway → history-service)"
+              ],
+              "line": 166,
+              "assertions": 1,
+              "timeMs": 2.01,
+              "status": "pass"
+            },
+            {
+              "name": "GET /v1/me devuelve perfil y métricas calculadas",
+              "suite": [
+                "Historial con sesión (gateway → history-service)"
+              ],
+              "line": 185,
+              "assertions": 3,
+              "timeMs": 1.37,
+              "status": "pass"
+            },
+            {
+              "name": "PATCH /v1/me cambia el nombre visible",
+              "suite": [
+                "Historial con sesión (gateway → history-service)"
+              ],
+              "line": 194,
+              "assertions": 2,
+              "timeMs": 0.55,
+              "status": "pass"
+            },
+            {
+              "name": "PATCH /v1/me con un nombre de 1 letra → 400",
+              "suite": [
+                "Historial con sesión (gateway → history-service)"
+              ],
+              "line": 206,
+              "assertions": 1,
+              "timeMs": 0.27,
+              "status": "pass"
+            },
+            {
+              "name": "DELETE /v1/scans borra todo el historial del usuario",
+              "suite": [
+                "Historial con sesión (gateway → history-service)"
+              ],
+              "line": 215,
+              "assertions": 2,
+              "timeMs": 0.76,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "path": "services/gateway/test/gateway.test.ts",
+          "kind": "unit",
+          "tests": [
+            {
+              "name": "anónimo: analiza, no guarda y descuenta cuota",
+              "suite": [
+                "gateway /v1/scans"
+              ],
+              "line": 82,
+              "assertions": 5,
+              "timeMs": 5.75,
+              "status": "pass"
+            },
+            {
+              "name": "autenticado: guarda en el historial con su JWT",
+              "suite": [
+                "gateway /v1/scans"
+              ],
+              "line": 97,
+              "assertions": 2,
+              "timeMs": 0.8,
+              "status": "pass"
+            },
+            {
+              "name": "al agotar la cuota responde 429",
+              "suite": [
+                "gateway /v1/scans"
+              ],
+              "line": 105,
+              "assertions": 2,
+              "timeMs": 0.89,
+              "status": "pass"
+            },
+            {
+              "name": "los resultados en caché no consumen cuota",
+              "suite": [
+                "gateway /v1/scans"
+              ],
+              "line": 111,
+              "assertions": 2,
+              "timeMs": 0.56,
+              "status": "pass"
+            },
+            {
+              "name": "valida el cuerpo antes de llamar a los servicios",
+              "suite": [
+                "gateway /v1/scans"
+              ],
+              "line": 117,
+              "assertions": 2,
+              "timeMs": 0.45,
+              "status": "pass"
+            },
+            {
+              "name": "rutas privadas exigen sesión",
+              "suite": [
+                "gateway /v1/scans"
+              ],
+              "line": 124,
+              "assertions": 2,
+              "timeMs": 0.52,
+              "status": "pass"
+            },
+            {
+              "name": "reenvía detalle, edición de perfil y borrado al historial con el JWT",
+              "suite": [
+                "gateway /v1/scans"
+              ],
+              "line": 136,
+              "assertions": 5,
+              "timeMs": 1,
+              "status": "pass"
+            },
+            {
+              "name": "health/services informa el estado de cada servicio",
+              "suite": [
+                "gateway /v1/scans"
+              ],
+              "line": 168,
+              "assertions": 1,
+              "timeMs": 0.44,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "path": "services/gateway/test/security/auth.security.test.ts",
+          "kind": "security",
+          "tests": [
+            {
+              "name": "sin token, todas las rutas privadas responden 401",
+              "suite": [
+                "Autenticación"
+              ],
+              "line": 32,
+              "assertions": 6,
+              "timeMs": 1.86,
+              "status": "pass"
+            },
+            {
+              "name": "con un JWT falso, las rutas privadas responden 401",
+              "suite": [
+                "Autenticación"
+              ],
+              "line": 39,
+              "assertions": 6,
+              "timeMs": 0.97,
+              "status": "pass"
+            },
+            {
+              "name": "un esquema distinto de Bearer (Basic) no autentica",
+              "suite": [
+                "Autenticación"
+              ],
+              "line": 50,
+              "assertions": 1,
+              "timeMs": 0.28,
+              "status": "pass"
+            },
+            {
+              "name": "el mensaje de 401 no revela detalles internos",
+              "suite": [
+                "Autenticación"
+              ],
+              "line": 57,
+              "assertions": 1,
+              "timeMs": 0.2,
+              "status": "pass"
+            },
+            {
+              "name": "con un token inválido el análisis funciona como invitado y no guarda nada",
+              "suite": [
+                "Autenticación"
+              ],
+              "line": 65,
+              "assertions": 3,
+              "timeMs": 1.12,
+              "status": "pass"
+            },
+            {
+              "name": "Luis no ve los análisis de Ana en su historial",
+              "suite": [
+                "Autorización: cada usuario solo ve sus datos"
+              ],
+              "line": 98,
+              "assertions": 2,
+              "timeMs": 0.35,
+              "status": "pass"
+            },
+            {
+              "name": "Luis no puede abrir un análisis de Ana aunque conozca su id → 404",
+              "suite": [
+                "Autorización: cada usuario solo ve sus datos"
+              ],
+              "line": 106,
+              "assertions": 1,
+              "timeMs": 0.3,
+              "status": "pass"
+            },
+            {
+              "name": "el borrado de Luis no toca el historial de Ana",
+              "suite": [
+                "Autorización: cada usuario solo ve sus datos"
+              ],
+              "line": 113,
+              "assertions": 1,
+              "timeMs": 0.43,
+              "status": "pass"
+            },
+            {
+              "name": "el usuario sale del JWT, no de parámetros que envíe el cliente",
+              "suite": [
+                "Autorización: cada usuario solo ve sus datos"
+              ],
+              "line": 124,
+              "assertions": 1,
+              "timeMs": 0.28,
+              "status": "pass"
+            },
+            {
+              "name": "la cuota diaria limita al invitado: al superarla responde 429",
+              "suite": [
+                "Protección contra abuso"
+              ],
+              "line": 134,
+              "assertions": 1,
+              "timeMs": 1.29,
+              "status": "pass"
+            },
+            {
+              "name": "el usuario con sesión tiene su propia cuota, más amplia",
+              "suite": [
+                "Protección contra abuso"
+              ],
+              "line": 147,
+              "assertions": 2,
+              "timeMs": 0.63,
+              "status": "pass"
+            },
+            {
+              "name": "un cuerpo de más de 512 KB se rechaza con 413",
+              "suite": [
+                "Protección contra abuso"
+              ],
+              "line": 158,
+              "assertions": 2,
+              "timeMs": 1.3,
+              "status": "pass"
+            },
+            {
+              "name": "las respuestas incluyen cabeceras seguras (nosniff, frame, referrer)",
+              "suite": [
+                "Cabeceras de seguridad"
+              ],
+              "line": 173,
+              "assertions": 3,
+              "timeMs": 1.98,
+              "status": "pass"
+            },
+            {
+              "name": "CORS solo permite los métodos y cabeceras que usa la app",
+              "suite": [
+                "Cabeceras de seguridad"
+              ],
+              "line": 180,
+              "assertions": 3,
+              "timeMs": 0.42,
+              "status": "pass"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "@mail-guard/history-service",
+      "dir": "services/history-service",
+      "files": [
+        {
+          "path": "services/history-service/test/security/access.security.test.ts",
+          "kind": "security",
+          "tests": [
+            {
+              "name": "con JWT válido pero sin token interno → 401 (no se puede saltar el gateway)",
+              "suite": [
+                "Doble llave: token interno + JWT"
+              ],
+              "line": 50,
+              "assertions": 1,
+              "timeMs": 0.27,
+              "status": "pass"
+            },
+            {
+              "name": "con token interno pero sin JWT → 401",
+              "suite": [
+                "Doble llave: token interno + JWT"
+              ],
+              "line": 54,
+              "assertions": 1,
+              "timeMs": 0.09,
+              "status": "pass"
+            },
+            {
+              "name": "con token interno y un JWT inválido → 401",
+              "suite": [
+                "Doble llave: token interno + JWT"
+              ],
+              "line": 58,
+              "assertions": 1,
+              "timeMs": 0.1,
+              "status": "pass"
+            },
+            {
+              "name": "con las dos llaves → 200",
+              "suite": [
+                "Doble llave: token interno + JWT"
+              ],
+              "line": 66,
+              "assertions": 2,
+              "timeMs": 0.26,
+              "status": "pass"
+            },
+            {
+              "name": "un id que no es UUID se rechaza sin consultar la base → 404",
+              "suite": [
+                "Doble llave: token interno + JWT"
+              ],
+              "line": 75,
+              "assertions": 1,
+              "timeMs": 0.22,
+              "status": "pass"
+            },
+            {
+              "name": "el historial responde 503 en lugar de fallar o exponer datos",
+              "suite": [
+                "Sin Supabase configurado"
+              ],
+              "line": 87,
+              "assertions": 1,
+              "timeMs": 0.3,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "path": "services/history-service/test/security/supabase-rls.security.test.ts",
+          "kind": "security",
+          "tests": [
+            {
+              "name": "un visitante anónimo no obtiene filas de mail_scans",
+              "suite": [
+                "RLS en Supabase (sin sesión)"
+              ],
+              "line": 21,
+              "assertions": 1,
+              "timeMs": 557.76,
+              "status": "pass"
+            },
+            {
+              "name": "un visitante anónimo no obtiene filas de profiles",
+              "suite": [
+                "RLS en Supabase (sin sesión)"
+              ],
+              "line": 21,
+              "assertions": 1,
+              "timeMs": 205.81,
+              "status": "pass"
+            },
+            {
+              "name": "un visitante anónimo no obtiene filas de profile_analytics",
+              "suite": [
+                "RLS en Supabase (sin sesión)"
+              ],
+              "line": 21,
+              "assertions": 1,
+              "timeMs": 195.68,
+              "status": "pass"
+            },
+            {
+              "name": "un visitante anónimo no puede insertar análisis",
+              "suite": [
+                "RLS en Supabase (sin sesión)"
+              ],
+              "line": 30,
+              "assertions": 1,
+              "timeMs": 206.16,
+              "status": "pass"
+            },
+            {
+              "name": "delete_my_history() sin sesión no borra nada",
+              "suite": [
+                "RLS en Supabase (sin sesión)"
+              ],
+              "line": 38,
+              "assertions": 1,
+              "timeMs": 200.84,
+              "status": "pass"
+            },
+            {
+              "name": "history-service rechaza un JWT falsificado",
+              "suite": [
+                "RLS en Supabase (sin sesión)"
+              ],
+              "line": 43,
+              "assertions": 1,
+              "timeMs": 5.31,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "path": "services/history-service/test/use-cases.test.ts",
+          "kind": "unit",
+          "tests": [
+            {
+              "name": "syncScans deduplica por huella",
+              "suite": [
+                "history use cases"
+              ],
+              "line": 104,
+              "assertions": 1,
+              "timeMs": 0.27,
+              "status": "pass"
+            },
+            {
+              "name": "listScans acota el límite",
+              "suite": [
+                "history use cases"
+              ],
+              "line": 115,
+              "assertions": 2,
+              "timeMs": 0.18,
+              "status": "pass"
+            },
+            {
+              "name": "getOverview deriva métricas si el agregado no existe",
+              "suite": [
+                "history use cases"
+              ],
+              "line": 121,
+              "assertions": 4,
+              "timeMs": 0.24,
+              "status": "pass"
+            },
+            {
+              "name": "getScan devuelve el análisis propio y 404 si no existe o el id no es válido",
+              "suite": [
+                "detalle, perfil y borrado"
+              ],
+              "line": 132,
+              "assertions": 3,
+              "timeMs": 0.22,
+              "status": "pass"
+            },
+            {
+              "name": "updateProfile cambia el nombre y devuelve el resumen",
+              "suite": [
+                "detalle, perfil y borrado"
+              ],
+              "line": 141,
+              "assertions": 1,
+              "timeMs": 0.08,
+              "status": "pass"
+            },
+            {
+              "name": "deleteHistory borra todo y lo informa",
+              "suite": [
+                "detalle, perfil y borrado"
+              ],
+              "line": 148,
+              "assertions": 2,
+              "timeMs": 0.05,
+              "status": "pass"
+            },
+            {
+              "name": "rechaza llamadas sin token interno",
+              "suite": [
+                "history routes"
+              ],
+              "line": 159,
+              "assertions": 1,
+              "timeMs": 2.9,
+              "status": "pass"
+            },
+            {
+              "name": "responde 503 si Supabase no está configurado",
+              "suite": [
+                "history routes"
+              ],
+              "line": 165,
+              "assertions": 1,
+              "timeMs": 0.63,
+              "status": "pass"
+            },
+            {
+              "name": "PATCH /v1/me valida el nombre",
+              "suite": [
+                "history routes"
+              ],
+              "line": 173,
+              "assertions": 2,
+              "timeMs": 1.94,
+              "status": "pass"
+            },
+            {
+              "name": "devuelve el resumen del usuario autenticado",
+              "suite": [
+                "history routes"
+              ],
+              "line": 198,
+              "assertions": 2,
+              "timeMs": 0.5,
+              "status": "pass"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Colección de Postman",
+      "dir": "docs/postman",
+      "files": [
+        {
+          "path": "docs/postman/mail-guard.postman_collection.json",
+          "kind": "api",
+          "tests": [
+            {
+              "name": "responde 200",
+              "suite": [
+                "Salud de los microservicios"
+              ],
+              "line": 19,
+              "assertions": 1,
+              "timeMs": 457,
+              "status": "pass"
+            },
+            {
+              "name": "gateway, analysis e history están en ok",
+              "suite": [
+                "Salud de los microservicios"
+              ],
+              "line": 20,
+              "assertions": 1,
+              "timeMs": 457,
+              "status": "pass"
+            },
+            {
+              "name": "informa el motor de decisión activo",
+              "suite": [
+                "Salud de los microservicios"
+              ],
+              "line": 26,
+              "assertions": 1,
+              "timeMs": 457,
+              "status": "pass"
+            },
+            {
+              "name": "incluye cabeceras de seguridad (nosniff)",
+              "suite": [
+                "Salud de los microservicios"
+              ],
+              "line": 27,
+              "assertions": 1,
+              "timeMs": 457,
+              "status": "pass"
+            },
+            {
+              "name": "responde 200",
+              "suite": [
+                "Analizar un correo de phishing como invitado"
+              ],
+              "line": 49,
+              "assertions": 1,
+              "timeMs": 333,
+              "status": "pass"
+            },
+            {
+              "name": "el veredicto es peligroso con puntaje bajo",
+              "suite": [
+                "Analizar un correo de phishing como invitado"
+              ],
+              "line": 50,
+              "assertions": 1,
+              "timeMs": 333,
+              "status": "pass"
+            },
+            {
+              "name": "sin sesión no se guarda en el historial",
+              "suite": [
+                "Analizar un correo de phishing como invitado"
+              ],
+              "line": 55,
+              "assertions": 1,
+              "timeMs": 333,
+              "status": "pass"
+            },
+            {
+              "name": "devuelve la cuota restante del invitado",
+              "suite": [
+                "Analizar un correo de phishing como invitado"
+              ],
+              "line": 56,
+              "assertions": 1,
+              "timeMs": 333,
+              "status": "pass"
+            },
+            {
+              "name": "responde 400",
+              "suite": [
+                "Cuerpo inválido"
+              ],
+              "line": 78,
+              "assertions": 1,
+              "timeMs": 282,
+              "status": "pass"
+            },
+            {
+              "name": "explica el error en { error }",
+              "suite": [
+                "Cuerpo inválido"
+              ],
+              "line": 79,
+              "assertions": 1,
+              "timeMs": 282,
+              "status": "pass"
+            },
+            {
+              "name": "responde 401 sin token",
+              "suite": [
+                "Historial sin sesión"
+              ],
+              "line": 93,
+              "assertions": 1,
+              "timeMs": 282,
+              "status": "pass"
+            },
+            {
+              "name": "responde 401 con un token falsificado",
+              "suite": [
+                "Perfil con un JWT falso"
+              ],
+              "line": 116,
+              "assertions": 1,
+              "timeMs": 270,
+              "status": "pass"
+            },
+            {
+              "name": "responde 404 con { error }",
+              "suite": [
+                "Ruta inexistente"
+              ],
+              "line": 130,
+              "assertions": 1,
+              "timeMs": 277,
+              "status": "pass"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
