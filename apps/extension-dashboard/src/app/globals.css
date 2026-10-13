@@ -50,3 +50,33 @@
 .animate-modal-panel {
   animation: modal-panel-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Página de pruebas: entrada del panel de cada tipo y de las filas del carrusel. */
+@keyframes test-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes test-row-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .animate-test-panel {
+    animation: test-panel-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-test-row {
+    animation: test-row-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
