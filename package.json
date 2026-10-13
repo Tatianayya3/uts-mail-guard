@@ -4,6 +4,8 @@
   "description": "Mail Guard: detección de phishing en Gmail y Outlook con arquitectura de microservicios.",
   "scripts": {
     "setup": "bun scripts/setup-env.ts",
+    "tests:report": "bun scripts/generate-test-report.ts",
+    "test:postman": "bunx newman@6.2.1 run docs/postman/mail-guard.postman_collection.json",
     "dev": "turbo run dev",
     "dev:services": "turbo run dev --filter=./services/*",
     "build": "turbo run build",

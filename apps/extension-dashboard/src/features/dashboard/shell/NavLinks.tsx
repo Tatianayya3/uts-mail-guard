@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BookOpen,
+  FlaskConical,
   History,
   LayoutDashboard,
   UserCog,
@@ -21,6 +22,7 @@ const NAV: {
   { href: "/dashboard/historial", label: "Historial", icon: History },
   { href: "/dashboard/cuenta", label: "Cuenta", icon: UserCog },
   { href: "/dashboard/guia", label: "Guía", icon: BookOpen },
+  { href: "/dashboard/tests", label: "Pruebas", icon: FlaskConical },
 ];
 
 /** Navegación del panel: columna en escritorio, pestañas desplazables en móvil. */
