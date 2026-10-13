@@ -1,4 +1,5 @@
 import { Hono, type Context, type MiddlewareHandler } from "hono";
+import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import { timingSafeEqual } from "node:crypto";
@@ -44,6 +45,15 @@ export function createServiceApp(name: string, logger: Logger) {
   app.onError((error, c) => {
     if (error instanceof AppError) {
       return c.json({ error: error.message, code: error.code }, error.status);
+    }
+    // Errores HTTP de los middlewares de Hono (p. ej. bodyLimit → 413): se
+    // respeta su código en lugar de convertirlos en 500.
+    if (error instanceof HTTPException) {
+      const message =
+        error.status === 413
+          ? "La solicitud es demasiado grande."
+          : error.message || "La solicitud no es válida.";
+      return c.json({ error: message, code: "http_error" }, error.status);
     }
     logger.error("unhandled_error", {
       requestId: c.get("requestId"),
