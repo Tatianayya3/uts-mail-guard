@@ -1,0 +1,140 @@
+{
+  "info": {
+    "name": "Mail Guard · API Gateway",
+    "description": "Pruebas de API contra el gateway desplegado. Importar en Postman o correr con: bunx newman run docs/postman/mail-guard.postman_collection.json. Cambiar la variable baseUrl para probar en local (http://localhost:4000).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://mail-guard-gateway.onrender.com" }
+  ],
+  "item": [
+    {
+      "name": "Salud de los microservicios",
+      "request": { "method": "GET", "url": "{{baseUrl}}/health/services" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"gateway, analysis e history están en ok\", () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.gateway).to.eql(\"ok\");",
+              "  pm.expect(body.analysis).to.eql(\"ok\");",
+              "  pm.expect(body.history).to.eql(\"ok\");",
+              "});",
+              "pm.test(\"informa el motor de decisión activo\", () => pm.expect(pm.response.json().engine).to.be.a(\"string\"));",
+              "pm.test(\"incluye cabeceras de seguridad (nosniff)\", () => pm.response.to.have.header(\"x-content-type-options\", \"nosniff\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analizar un correo de phishing como invitado",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/v1/scans",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": {\n    \"provider\": \"Outlook\",\n    \"sender\": \"seguridad@bancolombla-alertas.com\",\n    \"senderName\": \"Bancolombia\",\n    \"subject\": \"URGENTE: tu cuenta será bloqueada\",\n    \"bodyText\": \"Tu cuenta será bloqueada en 24 horas. Verifica tu cuenta e ingresa tu contraseña y número de tarjeta aquí de inmediato.\",\n    \"links\": [\"http://192.168.10.20/login\", \"https://bit.ly/3xYz\"]\n  }\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"el veredicto es peligroso con puntaje bajo\", () => {",
+              "  const { scan } = pm.response.json();",
+              "  pm.expect(scan.verdict).to.eql(\"dangerous\");",
+              "  pm.expect(scan.trustScore).to.be.below(40);",
+              "});",
+              "pm.test(\"sin sesión no se guarda en el historial\", () => pm.expect(pm.response.json().saved).to.eql(false));",
+              "pm.test(\"devuelve la cuota restante del invitado\", () => pm.expect(pm.response.json().quota.limit).to.be.a(\"number\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cuerpo inválido",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/v1/scans",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"email\": { \"sender\": \"sin-proveedor\" } }"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"responde 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"explica el error en { error }\", () => pm.expect(pm.response.json().error).to.be.a(\"string\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Historial sin sesión",
+      "request": { "method": "GET", "url": "{{baseUrl}}/v1/scans" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"responde 401 sin token\", () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Perfil con un JWT falso",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/v1/me",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ4In0.firma-falsa"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"responde 401 con un token falsificado\", () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ruta inexistente",
+      "request": { "method": "GET", "url": "{{baseUrl}}/v1/no-existe" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"responde 404 con { error }\", () => {",
+              "  pm.response.to.have.status(404);",
+              "  pm.expect(pm.response.json().error).to.be.a(\"string\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
