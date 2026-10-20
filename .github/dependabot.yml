@@ -12,6 +12,19 @@ updates:
     groups:
       minor-y-patch:
         update-types: [minor, patch]
+    ignore:
+      # 0.7.0 no funciona con Bun: lee la respuesta con un reader y Bun la marca
+      # como usada ("Body already used"), así que Jev cae siempre al motor
+      # heurístico. Se queda en 0.6.x hasta que salga una versión corregida.
+      - dependency-name: "@typesafe-ai/sdk"
+        versions: ["0.7.0"]
+      # eslint-config-next (Next 16.4) aún no soporta ESLint 10 ni TypeScript 7:
+      # eslint-plugin-react usa APIs que ESLint 10 quitó y typescript-eslint
+      # solo acepta TypeScript < 6.1. Se suben cuando Next los soporte.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: docker
     directory: /

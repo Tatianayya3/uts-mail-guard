@@ -13,15 +13,15 @@
   "dependencies": {
     "@mail-guard/contracts": "workspace:*",
     "@mail-guard/service-kit": "workspace:*",
-    "@supabase/supabase-js": "^2.117.3",
+    "@supabase/supabase-js": "^2.118.0",
     "@upstash/ratelimit": "^2.2.0",
     "@upstash/redis": "^1.39.0",
     "hono": "^4.13.13",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
-    "@types/bun": "^1.4.2",
+    "@types/bun": "^1.4.3",
     "typescript": "^5.9.3"
   }
 }
