@@ -102,7 +102,7 @@ jobs:
           echo "" >> release-notes.md
           echo "**Imagen Docker:** \`docker pull ghcr.io/${GITHUB_REPOSITORY,,}:$VERSION\`" >> release-notes.md
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           name: Mail Guard ${{ github.ref_name }}
           body_path: release-notes.md
