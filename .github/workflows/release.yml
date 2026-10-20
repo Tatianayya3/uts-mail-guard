@@ -41,7 +41,7 @@ jobs:
 
       # v2.1.0 → etiquetas 2.1.0, 2.1 y latest
       - id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
