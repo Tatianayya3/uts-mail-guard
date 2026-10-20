@@ -1,6 +1,13 @@
 # Levanta los 3 microservicios. Copia cada .env.example a .env antes de empezar.
 #   docker compose up --build
 # Solo el gateway se expone al host; los demás viven en la red interna.
+#
+# Operación (ver docs/RUNBOOK.md):
+#   - restart: si un contenedor muere, Docker lo vuelve a levantar.
+#   - healthcheck: Docker revisa /health cada 15 s y marca el contenedor
+#     como healthy/unhealthy (docker compose ps).
+#   - el gateway no arranca hasta que analysis e history estén healthy.
+#   - límites de CPU/memoria para que un servicio no tumbe a los demás.
 
 x-service: &service
   build:
@@ -9,6 +16,22 @@ x-service: &service
   restart: unless-stopped
   environment: &env
     INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-change-me-in-production}
+  healthcheck: &healthcheck
+    test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:$${PORT}/health || exit 1"]
+    interval: 15s
+    timeout: 3s
+    retries: 3
+    start_period: 10s
+  deploy:
+    resources:
+      limits:
+        cpus: "0.50"
+        memory: 256M
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
 
 services:
   gateway:
@@ -21,7 +44,9 @@ services:
       ANALYSIS_SERVICE_URL: http://analysis-service:4001
       HISTORY_SERVICE_URL: http://history-service:4002
     ports: ["4000:4000"]
-    depends_on: [analysis-service, history-service]
+    depends_on:
+      analysis-service: { condition: service_healthy }
+      history-service: { condition: service_healthy }
 
   analysis-service:
     <<: *service

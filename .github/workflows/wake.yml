@@ -1,0 +1,28 @@
+# Fase OPERATE: despierta y revisa los microservicios en Render.
+#
+# Uso: Actions → "Operate · Estado de producción" → Run workflow.
+# Hazlo ~2 minutos antes de una demo: los servicios free de Render se duermen
+# tras 15 min sin tráfico. El resultado queda como tabla en el resumen del run.
+name: Operate · Estado de producción
+
+on:
+  workflow_dispatch:
+  # Descomenta para revisar automáticamente (consume horas free de Render):
+  # schedule:
+  #   - cron: "*/14 12-23 * * 1-5"   # cada 14 min, lun-vie, 7 a.m.-6 p.m. Colombia
+
+permissions:
+  contents: read
+
+jobs:
+  status:
+    name: Despertar y revisar servicios
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Revisar /health de los 3 microservicios
+        run: bun scripts/ops-status.ts
