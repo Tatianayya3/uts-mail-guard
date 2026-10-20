@@ -1,6 +1,6 @@
 import report from "./tests.report.json";
 
-export const REPO_URL = "https://github.com/bgrados31/uts-mail-guard";
+export const REPO_URL = "https://github.com/Tatianayya3/uts-mail-guard";
 
 export type TestKind = "unit" | "api" | "security" | "acceptance";
 export type TestStatus = "pass" | "fail" | "skip";

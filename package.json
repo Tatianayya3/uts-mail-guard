@@ -14,7 +14,15 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "docker:up": "docker compose up --build",
-    "docker:down": "docker compose down"
+    "docker:down": "docker compose down",
+    "demo:historial": "bun microservicios-demo/historial/microservicio.ts",
+    "demo:analizador": "bun microservicios-demo/analizador/microservicio.ts",
+    "test:demo": "bun test microservicios-demo",
+    "ops:status": "bun scripts/ops-status.ts",
+    "release:version": "bun scripts/bump-version.ts",
+    "monitoring:up": "docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up --build -d",
+    "monitoring:render": "PROMETHEUS_CONFIG=prometheus.render.yml docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up --build -d",
+    "monitoring:down": "docker compose -f docker-compose.yml -f docker-compose.monitoring.yml down"
   },
   "devDependencies": {
     "prettier": "3.9.6",

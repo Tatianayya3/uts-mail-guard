@@ -9,6 +9,8 @@
 Una extensión de Chrome que analiza el correo que tienes abierto y te dice, en segundos,
 si es **seguro**, **sospechoso** o **peligroso**, y sobre todo, **por qué**.
 
+[![CI](https://github.com/Tatianayya3/uts-mail-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/Tatianayya3/uts-mail-guard/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Tatianayya3/uts-mail-guard?label=release)](https://github.com/Tatianayya3/uts-mail-guard/releases)
 ![Chrome MV3](https://img.shields.io/badge/Chrome-MV3-4285F4?logo=googlechrome&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 ![Bun](https://img.shields.io/badge/Bun-1.4-000?logo=bun)
@@ -104,14 +106,20 @@ mail-guard/
 │   ├── contracts/            # Schemas Zod y tipos compartidos (fuente única de verdad)
 │   ├── api-client/           # Cliente tipado del gateway (extensión y panel)
 │   ├── ui/                   # Componentes React compartidos (botón, campos, veredicto, anillo…)
-│   ├── service-kit/          # Base común de los servicios: errores, logs, health, auth interna
+│   ├── service-kit/          # Base común de los servicios: errores, logs, health, métricas, auth interna
 │   ├── supabase/             # Casos de uso de autenticación
 │   ├── tailwind-config/      # Tokens de diseño
 │   └── typescript-config/    # Presets de TypeScript
+├── microservicios-demo/      # 2 microservicios sin Docker: endpoint + validador + microservicio
+├── monitoring/               # Prometheus (scrape + alertas) y Grafana (dashboard)
 ├── supabase/migrations/      # Esquema SQL idempotente (tablas, RLS, triggers)
-├── docs/                     # Arquitectura y casos de uso
+├── scripts/                  # setup, reporte de pruebas, versión, estado de producción
+├── docs/                     # Arquitectura, casos de uso, DevOps y runbook
+├── .github/                  # CI/CD (Actions), Dependabot y plantillas de issues/PRs
 ├── Dockerfile                # Imagen única para los microservicios
-└── docker-compose.yml
+├── docker-compose.yml
+├── docker-compose.monitoring.yml
+└── render.yaml               # Infraestructura en Render (Blueprint)
 ```
 
 ---
@@ -283,10 +291,14 @@ Solicita acceso en [typesafe.ai](https://typesafe.ai) y define `TYPESAFE_API_KEY
 ## Calidad
 
 ```bash
-bun run test          # 56 pruebas unitarias y de integración HTTP (bun test)
-bun run check-types   # TypeScript estricto en los 10 proyectos
+bun run test          # pruebas unitarias, API, seguridad y aceptación (bun test)
+bun run test:demo     # pruebas de los microservicios demo
+bun run test:postman  # colección de Postman con Newman
+bun run check-types   # TypeScript estricto en todos los proyectos
 bun run build         # build de la extensión y del panel
 ```
+
+Todo esto corre en GitHub Actions en cada push y PR (`.github/workflows/ci.yml`).
 
 Las pruebas cubren las heurísticas (dominios que imitan marcas, enlaces peligrosos), la
 combinación modelo + reglas, el adaptador de Jev (con un `fetch` simulado), el respaldo ante
@@ -294,45 +306,34 @@ fallos, la caché, la cuota, la deduplicación del historial y las rutas de cada
 
 ---
 
-## Despliegue
+## DevOps y despliegue
 
-### Gratis, para pruebas (sin tarjeta)
+Mail Guard aplica las **8 fases del ciclo DevOps**. El detalle de cada una
+(herramienta, instalación, configuración y demo) está en
+[`docs/DEVOPS.md`](docs/DEVOPS.md), y la operación diaria en
+[`docs/RUNBOOK.md`](docs/RUNBOOK.md).
 
-| Componente           | Servicio                                        | Plan gratuito                                     |
-| -------------------- | ----------------------------------------------- | ------------------------------------------------- |
-| 3 microservicios     | **Render** (Blueprint `render.yaml`)            | Web services free; se duermen tras 15 min sin uso |
-| Panel web            | **Vercel** Hobby                                | Uso personal / no comercial                       |
-| Auth + base de datos | **Supabase** Free                               | Proyecto pausado tras 7 días sin actividad        |
-| Cuota y caché        | Memoria del servicio (Upstash Free es opcional) | —                                                 |
+| Fase    | Herramienta                           | Comando o archivo                                  |
+| ------- | ------------------------------------- | -------------------------------------------------- |
+| Plan    | GitHub Projects + Issues              | `.github/ISSUE_TEMPLATE/`                          |
+| Code    | Git + GitHub (PRs, branch protection) | `.github/pull_request_template.md`                 |
+| Build   | GitHub Actions + Turborepo + Docker   | `.github/workflows/ci.yml` · `bun run build`       |
+| Test    | bun test + Gherkin + Postman/Newman   | `ci.yml` · `bun run test`                          |
+| Release | SemVer + GitHub Releases + GHCR       | `.github/workflows/release.yml` · `git tag vX.Y.Z` |
+| Deploy  | Render (Blueprint) + Vercel           | `render.yaml` (`autoDeployTrigger: checksPass`)    |
+| Operate | Docker Compose + Render + Dependabot  | `bun run ops:status` · `docker-compose.yml`        |
+| Monitor | Prometheus + Grafana + UptimeRobot    | `bun run monitoring:up` → http://localhost:3001    |
 
-1. **Supabase:** crea el proyecto y ejecuta las migraciones `0001` y `0002` de `supabase/migrations/`.
-2. **Render:** _New → Blueprint_ → elige este repositorio. Render lee `render.yaml`, crea
-   `mail-guard-gateway`, `mail-guard-analysis` y `mail-guard-history`, genera el
-   `INTERNAL_SERVICE_TOKEN` compartido y te pide `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`
-   y (opcional) `TYPESAFE_API_KEY`. Si Render asigna URLs distintas a
-   `https://mail-guard-*.onrender.com`, corrígelas en las variables del gateway.
-3. **Vercel:** importa el repo con _Root Directory_ `apps/extension-dashboard` y define
-   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y
-   `API_GATEWAY_URL=https://mail-guard-gateway.onrender.com`.
-4. **Extensión:** en `apps/extension-web/.env` pon `VITE_API_GATEWAY_URL` (Render) y
-   `VITE_DASHBOARD_URL` (Vercel), luego `bun run build` y recarga `dist/` en Chrome.
-5. **Supabase → Authentication → URL Configuration:** agrega
-   `https://<tu-panel>.vercel.app/reset-password`.
+**Flujo:** PR → CI (build + test) → merge a `main` → Render despliega solo si el
+CI pasa → un tag `vX.Y.Z` publica la imagen en GHCR y el GitHub Release con la
+extensión.
 
-> **Antes de una demo:** abre `https://mail-guard-gateway.onrender.com/health/services`
-> y espera a que los tres digan `ok`. En el plan gratuito, el primer análisis tras un
-> rato de inactividad puede fallar mientras los servicios despiertan (~1 min).
+> **Antes de una demo:** `bun run ops:status` (o Actions → _Operate · Estado de
+> producción_) despierta los tres servicios de Render, que en el plan gratuito
+> se duermen tras 15 min sin uso.
 
-### Producción
-
-| Componente     | Recomendación                                                                                                  |
-| -------------- | -------------------------------------------------------------------------------------------------------------- |
-| Microservicios | Plan pago de Render, Railway o Fly.io con el mismo `Dockerfile` (`SERVICE=<servicio>`). Expón solo el gateway. |
-| Cuota y caché  | **Upstash Redis** cuando haya más de una instancia.                                                            |
-| Extensión      | Sube `apps/extension-web/release/*.zip` a la Chrome Web Store.                                                 |
-
-Antes de publicar: define `CORS_ORIGINS=chrome-extension://<ID>,https://<tu-panel>` y un
-`INTERNAL_SERVICE_TOKEN` largo y aleatorio en los tres servicios.
+La guía para desplegar desde cero en Render, Vercel y Supabase está en
+[`docs/DEVOPS.md` → Deploy](docs/DEVOPS.md#6-deploy).
 
 ---
 
