@@ -5,20 +5,32 @@ import type {
   StoredScan,
 } from "@mail-guard/contracts";
 import { tooManyRequests, type Logger } from "@mail-guard/service-kit";
-import type { Identity, QuotaPolicy, ServiceClient } from "./ports";
+import type {
+  Identity,
+  QuotaPolicy,
+  ScanMetrics,
+  ServiceClient,
+} from "./ports";
 
 type Deps = {
   analysis: ServiceClient;
   history: ServiceClient;
   quota: QuotaPolicy;
   logger: Logger;
+  metrics?: ScanMetrics;
 };
 
 /**
  * Orquesta UC-01 + UC-07 + UC-11: verifica cuota, pide el análisis y, si hay
  * sesión, lo guarda en el historial. Un fallo al guardar no rompe el análisis.
  */
-export function createScanEmail({ analysis, history, quota, logger }: Deps) {
+export function createScanEmail({
+  analysis,
+  history,
+  quota,
+  logger,
+  metrics,
+}: Deps) {
   return async function scanEmail(input: {
     email: EmailSnapshot;
     identity: Identity | null;
@@ -45,6 +57,8 @@ export function createScanEmail({ analysis, history, quota, logger }: Deps) {
     // Un resultado en caché no consume IA, así que tampoco consume cuota.
     if (!result.cached)
       currentQuota = await quota.consume(quotaKey, authenticated);
+
+    metrics?.recorded(result.analysis.verdict, result.cached);
 
     const scan: StoredScan = {
       ...result.analysis,

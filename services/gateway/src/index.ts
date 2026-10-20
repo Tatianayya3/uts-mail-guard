@@ -1,5 +1,5 @@
 import { Redis } from "@upstash/redis";
-import { createLogger } from "@mail-guard/service-kit";
+import { createLogger, createMetrics } from "@mail-guard/service-kit";
 import { createScanEmail } from "./application/scan-email";
 import { loadConfig } from "./config";
 import { createRoutes } from "./http/routes";
@@ -12,6 +12,12 @@ import { createServiceClient } from "./infrastructure/service-client";
 
 const env = loadConfig();
 const logger = createLogger("gateway");
+const metrics = createMetrics("gateway");
+const scansTotal = metrics.counter({
+  name: "mailguard_scans_total",
+  help: "Correos analizados, por veredicto y si vinieron de la caché.",
+  labelNames: ["verdict", "cached"],
+});
 
 const limits = {
   anonymous: env.SCAN_ANONYMOUS_LIMIT,
@@ -55,7 +61,17 @@ const app = createRoutes({
   identity,
   analysis,
   history,
-  scanEmail: createScanEmail({ analysis, history, quota, logger }),
+  metrics,
+  scanEmail: createScanEmail({
+    analysis,
+    history,
+    quota,
+    logger,
+    metrics: {
+      recorded: (verdict, cached) =>
+        scansTotal.inc({ verdict, cached: String(cached) }),
+    },
+  }),
 });
 
 logger.info("listening", {

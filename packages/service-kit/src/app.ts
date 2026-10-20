@@ -1,20 +1,40 @@
 import { Hono, type Context, type MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
+import { routePath } from "hono/route";
 import { secureHeaders } from "hono/secure-headers";
 import { timingSafeEqual } from "node:crypto";
 import type { z } from "zod";
 import { AppError, badRequest, unauthorized } from "./errors";
 import type { Logger } from "./logger";
+import { createMetrics, type Metrics } from "./metrics";
 
 export const INTERNAL_TOKEN_HEADER = "x-internal-token";
 export const REQUEST_ID_HEADER = "x-request-id";
 
+/** Rutas de infraestructura que no se registran en logs ni métricas. */
+const PROBES = new Set(["/health", "/metrics"]);
+
+type ServiceAppOptions = {
+  /** Registro de métricas; pásalo si el servicio define contadores propios. */
+  metrics?: Metrics;
+  /** Si se define, GET /metrics exige `Authorization: Bearer <token>`. */
+  metricsToken?: string;
+};
+
 /**
  * Crea la app base de un microservicio: request-id, cabeceras seguras, log de
- * acceso, manejo uniforme de errores ({ error }) y GET /health.
+ * acceso, métricas Prometheus, manejo uniforme de errores ({ error }),
+ * GET /health y GET /metrics.
  */
-export function createServiceApp(name: string, logger: Logger) {
+export function createServiceApp(
+  name: string,
+  logger: Logger,
+  {
+    metrics = createMetrics(name),
+    metricsToken = process.env.METRICS_TOKEN?.trim() || undefined,
+  }: ServiceAppOptions = {},
+) {
   const app = new Hono();
 
   app.use(requestId({ headerName: REQUEST_ID_HEADER }));
@@ -22,13 +42,17 @@ export function createServiceApp(name: string, logger: Logger) {
   app.use(async (c, next) => {
     const started = performance.now();
     await next();
-    if (c.req.path === "/health") return;
+    if (PROBES.has(c.req.path)) return;
+    const elapsed = performance.now() - started;
+    // Ruta con parámetros (/v1/scans/:id) para no crear una serie por id.
+    const route = c.res.status === 404 ? "not_found" : routePath(c, -1);
+    metrics.observeRequest(c.req.method, route, c.res.status, elapsed / 1000);
     logger.info("request", {
       requestId: c.get("requestId"),
       method: c.req.method,
       path: c.req.path,
       status: c.res.status,
-      ms: Math.round(performance.now() - started),
+      ms: Math.round(elapsed),
     });
   });
 
@@ -39,6 +63,13 @@ export function createServiceApp(name: string, logger: Logger) {
       uptime: Math.round(process.uptime()),
     }),
   );
+
+  app.get("/metrics", async (c) => {
+    if (metricsToken && bearerToken(c) !== metricsToken) throw unauthorized();
+    return c.text(await metrics.registry.metrics(), 200, {
+      "Content-Type": metrics.registry.contentType,
+    });
+  });
 
   app.notFound((c) => c.json({ error: "Ruta no encontrada." }, 404));
 

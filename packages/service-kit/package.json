@@ -1,6 +1,6 @@
 {
   "name": "@mail-guard/service-kit",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "type": "module",
   "description": "Piezas comunes de los microservicios: app Hono, errores, logs, entorno y auth interna.",
@@ -8,10 +8,12 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "bun test"
   },
   "dependencies": {
     "hono": "^4.13.13",
+    "prom-client": "^15.1.3",
     "zod": "^4.6.5"
   },
   "devDependencies": {

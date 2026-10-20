@@ -1,4 +1,4 @@
-import type { Quota } from "@mail-guard/contracts";
+import type { Quota, Verdict } from "@mail-guard/contracts";
 
 export type Identity = { userId: string; token: string };
 
@@ -11,6 +11,11 @@ export interface IdentityVerifier {
 export interface QuotaPolicy {
   peek(key: string, authenticated: boolean): Promise<Quota>;
   consume(key: string, authenticated: boolean): Promise<Quota>;
+}
+
+/** Registra cada análisis entregado (métricas de negocio para el monitoreo). */
+export interface ScanMetrics {
+  recorded(verdict: Verdict, cached: boolean): void;
 }
 
 /** Cliente hacia los microservicios internos. */

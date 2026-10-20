@@ -59,6 +59,11 @@ function setup(opts: { cached?: boolean; anonymousLimit?: number } = {}) {
     anonymous: opts.anonymousLimit ?? 2,
     authenticated: 10,
   });
+  const recorded: string[] = [];
+  const metrics = {
+    recorded: (verdict: string, cached: boolean) =>
+      recorded.push(`${verdict} cached=${cached}`),
+  };
   const app = createRoutes({
     logger,
     corsOrigins: ["*"],
@@ -67,7 +72,7 @@ function setup(opts: { cached?: boolean; anonymousLimit?: number } = {}) {
     },
     analysis,
     history,
-    scanEmail: createScanEmail({ analysis, history, quota, logger }),
+    scanEmail: createScanEmail({ analysis, history, quota, logger, metrics }),
   });
   const post = (headers: Record<string, string> = {}) =>
     app.request("/v1/scans", {
@@ -75,7 +80,7 @@ function setup(opts: { cached?: boolean; anonymousLimit?: number } = {}) {
       headers: { "Content-Type": "application/json", ...headers },
       body: JSON.stringify({ email }),
     });
-  return { app, calls, post };
+  return { app, calls, post, recorded };
 }
 
 describe("gateway /v1/scans", () => {
@@ -100,6 +105,12 @@ describe("gateway /v1/scans", () => {
     const body = (await res.json()) as { saved: boolean };
     expect(body.saved).toBe(true);
     expect(calls).toContain("history /v1/scans good");
+  });
+
+  test("registra el veredicto de cada análisis para el monitoreo", async () => {
+    const { post, recorded } = setup({ cached: true });
+    await post();
+    expect(recorded).toEqual(["safe cached=true"]);
   });
 
   test("al agotar la cuota responde 429", async () => {

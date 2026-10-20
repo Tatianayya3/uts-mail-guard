@@ -12,6 +12,7 @@ import {
   readJson,
   unauthorized,
   type Logger,
+  type Metrics,
 } from "@mail-guard/service-kit";
 import type {
   Identity,
@@ -29,6 +30,7 @@ type Deps = {
   analysis: ServiceClient;
   history: ServiceClient;
   scanEmail: ReturnType<typeof createScanEmail>;
+  metrics?: Metrics;
 };
 
 /** IP del cliente para la cuota anónima (primera de X-Forwarded-For). */
@@ -43,7 +45,9 @@ function clientKey(c: Context): string {
 }
 
 export function createRoutes(deps: Deps) {
-  const app = createServiceApp("gateway", deps.logger);
+  const app = createServiceApp("gateway", deps.logger, {
+    metrics: deps.metrics,
+  });
 
   app.use(
     "*",
