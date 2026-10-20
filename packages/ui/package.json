@@ -15,7 +15,7 @@
   "dependencies": {
     "@mail-guard/contracts": "workspace:*",
     "clsx": "^2.1.1",
-    "lucide-react": "^1.55.0",
+    "lucide-react": "^1.59.0",
     "tailwind-merge": "^3.7.0"
   },
   "peerDependencies": {
@@ -23,10 +23,10 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
-    "@types/bun": "^1.4.2",
+    "@types/bun": "^1.4.3",
     "@types/react": "^19.2.14",
-    "react": "19.2.8",
+    "react": "19.3.1",
     "typescript": "^5.9.3",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   }
 }
