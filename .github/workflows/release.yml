@@ -1,0 +1,110 @@
+# Fase RELEASE del ciclo DevOps.
+#
+# Se dispara al publicar un tag de versión (SemVer):
+#   bun run release:version 2.1.0 → actualiza la versión en todo el monorepo
+#   git commit -am "release: v2.1.0" && git tag v2.1.0 && git push --follow-tags
+#
+# 1. Vuelve a correr el CI completo (build + test) sobre el tag.
+# 2. Publica la imagen Docker en GitHub Container Registry (GHCR).
+# 3. Compila la extensión y crea el GitHub Release con el .zip y notas automáticas.
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+
+  image:
+    name: Publicar imagen en GHCR
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # v2.1.0 → etiquetas 2.1.0, 2.1 y latest
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  github-release:
+    name: Crear GitHub Release
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Verificar que el tag coincide con la versión del código
+        run: |
+          VERSION=$(node -p "require('./apps/extension-web/package.json').version")
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::El tag $GITHUB_REF_NAME no coincide con la versión $VERSION. Corre 'bun run release:version ${GITHUB_REF_NAME#v}'."
+            exit 1
+          fi
+
+      - name: Instalar dependencias
+        run: bun install --frozen-lockfile
+
+      # URLs de producción: Settings → Secrets and variables → Actions → Variables.
+      - name: Compilar la extensión para producción
+        working-directory: apps/extension-web
+        env:
+          VITE_API_GATEWAY_URL: ${{ vars.VITE_API_GATEWAY_URL || 'https://mail-guard-gateway.onrender.com' }}
+          VITE_DASHBOARD_URL: ${{ vars.VITE_DASHBOARD_URL }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: bun run build
+
+      - name: Notas de la versión desde CHANGELOG.md
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          awk -v v="$VERSION" '
+            /^## \[/ { if (found) exit; if (index($0, "[" v "]")) { found=1; next } }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          echo "" >> release-notes.md
+          echo "**Imagen Docker:** \`docker pull ghcr.io/${GITHUB_REPOSITORY,,}:$VERSION\`" >> release-notes.md
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Mail Guard ${{ github.ref_name }}
+          body_path: release-notes.md
+          generate_release_notes: true
+          files: apps/extension-web/release/*.zip
