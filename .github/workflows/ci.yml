@@ -41,7 +41,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       # Caché de Turborepo: si un paquete no cambió, su tarea se salta.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: .turbo/cache
           key: turbo-${{ runner.os }}-${{ github.sha }}
