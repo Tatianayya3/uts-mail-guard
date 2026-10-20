@@ -1,0 +1,42 @@
+# Monitoreo: Prometheus + Grafana sobre los 3 microservicios.
+# Se combina con docker-compose.yml (misma red interna):
+#   bun run monitoring:up       → solo servicios locales
+#   bun run monitoring:render   → locales + producción en Render
+#
+#   Prometheus: http://localhost:9090   (targets, alertas, consultas PromQL)
+#   Grafana:    http://localhost:3001   (admin / admin, o GRAFANA_ADMIN_PASSWORD)
+
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/${PROMETHEUS_CONFIG:-prometheus.yml}
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus:ro
+      - prometheus-data:/prometheus
+    ports: ["9090:9090"]
+    depends_on: [gateway, analysis-service, history-service]
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      # El profesor puede ver el dashboard sin iniciar sesión.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/mail-guard.json
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports: ["3001:3000"]
+    depends_on: [prometheus]
+
+volumes:
+  prometheus-data:
+  grafana-data:

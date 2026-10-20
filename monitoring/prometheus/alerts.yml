@@ -1,0 +1,40 @@
+# Reglas de alerta. Se ven en Prometheus → Alerts (http://localhost:9090/alerts)
+# y en Grafana → Alerting.
+groups:
+  - name: mail-guard
+    rules:
+      - alert: ServicioCaido
+        expr: up{job=~"mail-guard.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.instance }} no responde"
+          description: "Prometheus no puede leer /metrics de {{ $labels.instance }} hace más de 1 minuto."
+
+      - alert: ErroresAltos
+        expr: |
+          sum by (service) (rate(http_requests_total{status=~"5.."}[5m]))
+            / sum by (service) (rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.service }}: más del 5% de respuestas 5xx"
+
+      - alert: LatenciaAlta
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le, service) (rate(http_request_duration_seconds_bucket[5m]))) > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.service }}: p95 por encima de 3 s"
+
+      - alert: PicoDePhishing
+        expr: sum(increase(mailguard_scans_total{verdict="dangerous"}[15m])) > 10
+        labels:
+          severity: info
+        annotations:
+          summary: "Más de 10 correos peligrosos detectados en 15 minutos"

@@ -1,0 +1,10 @@
+# Carga los dashboards JSON de /var/lib/grafana/dashboards al arrancar.
+apiVersion: 1
+
+providers:
+  - name: mail-guard
+    folder: Mail Guard
+    type: file
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards

@@ -1,0 +1,45 @@
+# Igual que prometheus.yml, pero además monitorea producción en Render.
+#   bun run monitoring:render
+#
+# Ojo: mientras Prometheus esté encendido, los servicios free de Render no se
+# duermen (reciben tráfico cada minuto) y consumen horas gratis. Úsalo para
+# demos, no lo dejes corriendo días.
+#
+# Si en Render defines METRICS_TOKEN, ponlo en monitoring/prometheus/metrics-token
+# (archivo ignorado por git) y descomenta `authorization`.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+scrape_configs:
+  - job_name: mail-guard-local
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - gateway:4000
+          - analysis-service:4001
+          - history-service:4002
+        labels:
+          env: local
+
+  - job_name: mail-guard-render
+    scheme: https
+    metrics_path: /metrics
+    scrape_interval: 60s
+    scrape_timeout: 30s
+    # authorization:
+    #   credentials_file: /etc/prometheus/metrics-token
+    static_configs:
+      - targets:
+          - mail-guard-gateway.onrender.com
+          - mail-guard-analysis.onrender.com
+          - mail-guard-history.onrender.com
+        labels:
+          env: produccion
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
