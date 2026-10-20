@@ -63,7 +63,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
       - name: Construir la imagen de los microservicios
         uses: docker/build-push-action@v7
         with:
