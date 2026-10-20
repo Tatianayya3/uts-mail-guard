@@ -1,0 +1,150 @@
+# CI de Mail Guard: fases BUILD y TEST del ciclo DevOps.
+#
+# Corre en cada push y pull request a main (y la reutiliza release.yml).
+# Si algún job falla, el PR no se puede fusionar (branch protection) y Render
+# no despliega (autoDeployTrigger: checksPass en render.yaml).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  BUN_VERSION: 1.4.2
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  # ── BUILD ────────────────────────────────────────────────────────────────
+  build:
+    name: Build (tipos, lint y compilación)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Instalar dependencias
+        run: bun install --frozen-lockfile
+
+      # Caché de Turborepo: si un paquete no cambió, su tarea se salta.
+      - uses: actions/cache@v4
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+
+      - name: Verificar tipos, lint y compilar (Turborepo)
+        run: bunx turbo run check-types lint build
+
+      - name: Guardar la extensión compilada
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-web
+          path: apps/extension-web/release/*.zip
+          retention-days: 14
+
+  docker:
+    name: Build (imagen Docker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - name: Construir la imagen de los microservicios
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: mail-guard:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── TEST ─────────────────────────────────────────────────────────────────
+  test:
+    name: Test (unitarias, API, seguridad y aceptación)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Instalar dependencias
+        run: bun install --frozen-lockfile
+
+      - name: Pruebas de todos los workspaces (Turborepo + bun test)
+        run: bunx turbo run test
+
+      - name: Pruebas de los microservicios demo
+        run: bun test microservicios-demo
+
+      - name: Generar el reporte de pruebas
+        run: bun run tests:report
+
+      - name: Guardar el reporte de pruebas
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-report
+          path: apps/extension-dashboard/src/features/tests/tests.report.json
+          retention-days: 14
+
+  api:
+    name: Test (Postman / Newman contra los servicios reales)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Instalar dependencias
+        run: bun install --frozen-lockfile
+
+      - name: Levantar los 3 microservicios
+        run: |
+          (cd services/analysis-service && bun src/index.ts > ../../analysis.log 2>&1 &)
+          (cd services/history-service && bun src/index.ts > ../../history.log 2>&1 &)
+          (cd services/gateway && bun src/index.ts > ../../gateway.log 2>&1 &)
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4000/health/services && exit 0
+            sleep 1
+          done
+          echo "Los servicios no arrancaron" && cat *.log && exit 1
+
+      - name: Correr la colección de Postman
+        run: >
+          bunx newman@6.2.1 run docs/postman/mail-guard.postman_collection.json
+          --env-var baseUrl=http://localhost:4000
+          --reporters cli,junit
+          --reporter-junit-export newman-report.xml
+
+      - name: Métricas expuestas para Prometheus
+        run: curl -sf http://localhost:4000/metrics | grep -E "http_requests_total|mailguard_scans_total"
+
+      - name: Guardar reporte y logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-report
+          path: |
+            newman-report.xml
+            *.log
+          retention-days: 14

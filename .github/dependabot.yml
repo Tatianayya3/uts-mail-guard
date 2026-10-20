@@ -1,0 +1,26 @@
+# Fase OPERATE: mantiene las dependencias al día con PRs semanales que pasan
+# por el mismo CI que cualquier cambio.
+version: 2
+updates:
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels: [dependencias]
+    groups:
+      minor-y-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    labels: [dependencias, devops]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels: [dependencias, devops]

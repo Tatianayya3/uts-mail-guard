@@ -1,0 +1,40 @@
+name: Reporte de error
+description: Algo no funciona como debería
+labels: [bug]
+body:
+  - type: dropdown
+    id: componente
+    attributes:
+      label: Componente
+      options:
+        [
+          Extensión,
+          Panel web,
+          Gateway,
+          Analysis service,
+          History service,
+          CI/CD,
+          Monitoreo,
+        ]
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducirlo
+      placeholder: |
+        1. …
+        2. …
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Qué esperabas y qué pasó
+    validations:
+      required: true
+  - type: input
+    id: request-id
+    attributes:
+      label: x-request-id (si aplica)
+      description: Aparece en las respuestas del gateway y en los logs.

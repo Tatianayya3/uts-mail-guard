@@ -1,0 +1,27 @@
+name: Nueva función o tarea
+description: Planear una función, mejora o tarea de DevOps
+labels: [feature]
+body:
+  - type: dropdown
+    id: fase
+    attributes:
+      label: Fase DevOps
+      options: [Plan, Code, Build, Test, Release, Deploy, Operate, Monitor]
+    validations:
+      required: true
+  - type: textarea
+    id: objetivo
+    attributes:
+      label: ¿Qué se quiere lograr?
+      placeholder: Como usuario quiero… para…
+    validations:
+      required: true
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de aceptación
+      placeholder: |
+        - [ ] …
+        - [ ] Tiene pruebas
+    validations:
+      required: true

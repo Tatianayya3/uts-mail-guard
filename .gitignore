@@ -41,3 +41,6 @@ dist/
 
 # extensión empaquetada
 release/
+
+# token de /metrics para Prometheus (monitoring/prometheus/prometheus.render.yml)
+monitoring/prometheus/metrics-token

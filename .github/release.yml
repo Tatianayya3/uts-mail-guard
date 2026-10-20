@@ -1,0 +1,17 @@
+# Agrupa las notas automáticas del GitHub Release según las etiquetas de los PRs.
+changelog:
+  exclude:
+    labels: [ignorar-en-release]
+  categories:
+    - title: Nuevas funciones
+      labels: [feature]
+    - title: Correcciones
+      labels: [bug]
+    - title: Pruebas
+      labels: [tests]
+    - title: DevOps
+      labels: [devops]
+    - title: Dependencias
+      labels: [dependencias]
+    - title: Otros cambios
+      labels: ["*"]

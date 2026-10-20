@@ -1,4 +1,6 @@
 # Blueprint de Render: despliega los 3 microservicios en el plan gratuito.
+# Cada push a main dispara el CI de GitHub; si todos los checks pasan, Render
+# construye la imagen con el Dockerfile y despliega (autoDeployTrigger).
 # Render → New → Blueprint → elige este repositorio.
 #
 # Plan free: los servicios se duermen tras 15 min sin tráfico y tardan ~1 min
@@ -22,6 +24,8 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /health
+    # Deploy: Render solo despliega si el CI de GitHub (ci.yml) pasa en main.
+    autoDeployTrigger: checksPass
     envVars:
       - key: SERVICE
         value: gateway
@@ -44,6 +48,8 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /health
+    # Deploy: Render solo despliega si el CI de GitHub (ci.yml) pasa en main.
+    autoDeployTrigger: checksPass
     envVars:
       - key: SERVICE
         value: analysis-service
@@ -60,6 +66,8 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /health
+    # Deploy: Render solo despliega si el CI de GitHub (ci.yml) pasa en main.
+    autoDeployTrigger: checksPass
     envVars:
       - key: SERVICE
         value: history-service

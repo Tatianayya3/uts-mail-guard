@@ -55,6 +55,8 @@ function workspaces(): { dir: string; name: string }[] {
       }
     }
   }
+  // Los microservicios demo no son un workspace (corren sin dependencias).
+  result.push({ dir: "microservicios-demo", name: "microservicios-demo" });
   return result.sort((a, b) => a.dir.localeCompare(b.dir));
 }
 
@@ -92,7 +94,8 @@ function parseJunit(xml: string, dir: string): TestFile[] {
       continue;
     }
     if (tag === "testcase" && !closing) {
-      const path = `${dir}/${attr(attrs, "file")}`;
+      // En Windows bun escribe la ruta con "\"; se normaliza a "/".
+      const path = `${dir}/${attr(attrs, "file")?.replaceAll("\\", "/")}`;
       const file = files.get(path) ?? { path, kind: kindOf(path), tests: [] };
       files.set(path, file);
       current = {

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-13T08:15:06.239Z",
-  "commit": "d2cf585",
+  "generatedAt": "2026-10-20T16:08:53.613Z",
+  "commit": "1ec63d1",
   "runner": "bun 1.4.2",
   "packages": [
     {
@@ -18,7 +18,7 @@
               ],
               "line": 46,
               "assertions": 1,
-              "timeMs": 0.05,
+              "timeMs": 0.1,
               "status": "pass"
             },
             {
@@ -28,7 +28,7 @@
               ],
               "line": 51,
               "assertions": 4,
-              "timeMs": 0.29,
+              "timeMs": 0.36,
               "status": "pass"
             },
             {
@@ -38,7 +38,7 @@
               ],
               "line": 63,
               "assertions": 2,
-              "timeMs": 0.08,
+              "timeMs": 0.1,
               "status": "pass"
             },
             {
@@ -48,7 +48,7 @@
               ],
               "line": 73,
               "assertions": 3,
-              "timeMs": 0.18,
+              "timeMs": 0.2,
               "status": "pass"
             },
             {
@@ -58,7 +58,7 @@
               ],
               "line": 86,
               "assertions": 2,
-              "timeMs": 0.07,
+              "timeMs": 0.1,
               "status": "pass"
             },
             {
@@ -68,7 +68,7 @@
               ],
               "line": 99,
               "assertions": 3,
-              "timeMs": 0.12,
+              "timeMs": 0.45,
               "status": "pass"
             },
             {
@@ -78,7 +78,7 @@
               ],
               "line": 116,
               "assertions": 2,
-              "timeMs": 0.29,
+              "timeMs": 0.43,
               "status": "pass"
             },
             {
@@ -88,7 +88,7 @@
               ],
               "line": 123,
               "assertions": 1,
-              "timeMs": 0.13,
+              "timeMs": 0.14,
               "status": "pass"
             },
             {
@@ -98,7 +98,7 @@
               ],
               "line": 137,
               "assertions": 2,
-              "timeMs": 0.23,
+              "timeMs": 0.27,
               "status": "pass"
             },
             {
@@ -109,6 +109,88 @@
               "line": 149,
               "assertions": 1,
               "timeMs": 0.02,
+              "status": "pass"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "microservicios-demo",
+      "dir": "microservicios-demo",
+      "files": [
+        {
+          "path": "microservicios-demo/demo.test.ts",
+          "kind": "unit",
+          "tests": [
+            {
+              "name": "el analizador rechaza un correo sin remitente válido ni cuerpo",
+              "suite": [
+                "validadores"
+              ],
+              "line": 24,
+              "assertions": 2,
+              "timeMs": 0.18,
+              "status": "pass"
+            },
+            {
+              "name": "el historial rechaza un veredicto desconocido y un puntaje fuera de rango",
+              "suite": [
+                "validadores"
+              ],
+              "line": 34,
+              "assertions": 2,
+              "timeMs": 0.11,
+              "status": "pass"
+            },
+            {
+              "name": "marca como phishing un correo urgente con enlace a una IP",
+              "suite": [
+                "analizador"
+              ],
+              "line": 46,
+              "assertions": 5,
+              "timeMs": 0.92,
+              "status": "pass"
+            },
+            {
+              "name": "responde 400 con los errores del validador",
+              "suite": [
+                "analizador"
+              ],
+              "line": 62,
+              "assertions": 2,
+              "timeMs": 0.12,
+              "status": "pass"
+            },
+            {
+              "name": "entrega el análisis aunque el historial esté caído",
+              "suite": [
+                "analizador"
+              ],
+              "line": 69,
+              "assertions": 2,
+              "timeMs": 0.19,
+              "status": "pass"
+            },
+            {
+              "name": "guarda registros y devuelve el resumen por veredicto",
+              "suite": [
+                "historial"
+              ],
+              "line": 80,
+              "assertions": 2,
+              "timeMs": 0.53,
+              "status": "pass"
+            },
+            {
+              "name": "el analizador registra en el historial a través de la red",
+              "suite": [
+                "los dos microservicios conectados por HTTP"
+              ],
+              "line": 105,
+              "assertions": 2,
+              "timeMs": 7.13,
               "status": "pass"
             }
           ]
@@ -130,7 +212,7 @@
               ],
               "line": 25,
               "assertions": 2,
-              "timeMs": 2.41,
+              "timeMs": 3.57,
               "status": "pass"
             },
             {
@@ -140,7 +222,7 @@
               ],
               "line": 59,
               "assertions": 3,
-              "timeMs": 0.14,
+              "timeMs": 0.21,
               "status": "pass"
             },
             {
@@ -150,7 +232,7 @@
               ],
               "line": 70,
               "assertions": 1,
-              "timeMs": 0.44,
+              "timeMs": 0.64,
               "status": "pass"
             },
             {
@@ -160,7 +242,7 @@
               ],
               "line": 78,
               "assertions": 2,
-              "timeMs": 0.12,
+              "timeMs": 0.15,
               "status": "pass"
             }
           ]
@@ -182,7 +264,7 @@
               ],
               "line": 5,
               "assertions": 3,
-              "timeMs": 1.76,
+              "timeMs": 3.14,
               "status": "pass"
             },
             {
@@ -192,7 +274,7 @@
               ],
               "line": 23,
               "assertions": 2,
-              "timeMs": 0.64,
+              "timeMs": 0.9,
               "status": "pass"
             },
             {
@@ -202,7 +284,69 @@
               ],
               "line": 36,
               "assertions": 3,
-              "timeMs": 0.02,
+              "timeMs": 0.03,
+              "status": "pass"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "@mail-guard/service-kit",
+      "dir": "packages/service-kit",
+      "files": [
+        {
+          "path": "packages/service-kit/test/metrics.test.ts",
+          "kind": "unit",
+          "tests": [
+            {
+              "name": "expone peticiones y latencia en formato Prometheus",
+              "suite": [
+                "GET /metrics"
+              ],
+              "line": 14,
+              "assertions": 5,
+              "timeMs": 13.93,
+              "status": "pass"
+            },
+            {
+              "name": "no cuenta los sondeos de /health ni de /metrics",
+              "suite": [
+                "GET /metrics"
+              ],
+              "line": 32,
+              "assertions": 2,
+              "timeMs": 10.05,
+              "status": "pass"
+            },
+            {
+              "name": "agrupa las rutas inexistentes como not_found",
+              "suite": [
+                "GET /metrics"
+              ],
+              "line": 41,
+              "assertions": 1,
+              "timeMs": 5.08,
+              "status": "pass"
+            },
+            {
+              "name": "con METRICS_TOKEN exige el token Bearer",
+              "suite": [
+                "GET /metrics"
+              ],
+              "line": 48,
+              "assertions": 2,
+              "timeMs": 5.76,
+              "status": "pass"
+            },
+            {
+              "name": "acepta contadores propios del servicio en el mismo registro",
+              "suite": [
+                "GET /metrics"
+              ],
+              "line": 57,
+              "assertions": 1,
+              "timeMs": 5.82,
               "status": "pass"
             }
           ]
@@ -224,7 +368,7 @@
               ],
               "line": 7,
               "assertions": 1,
-              "timeMs": 3.01,
+              "timeMs": 4.82,
               "status": "pass"
             },
             {
@@ -234,7 +378,7 @@
               ],
               "line": 11,
               "assertions": 2,
-              "timeMs": 2.59,
+              "timeMs": 5.08,
               "status": "pass"
             }
           ]
@@ -256,7 +400,7 @@
               ],
               "line": 14,
               "assertions": 5,
-              "timeMs": 3.67,
+              "timeMs": 8.31,
               "status": "pass"
             },
             {
@@ -266,7 +410,7 @@
               ],
               "line": 30,
               "assertions": 2,
-              "timeMs": 0.5,
+              "timeMs": 0.74,
               "status": "pass"
             },
             {
@@ -276,7 +420,7 @@
               ],
               "line": 47,
               "assertions": 2,
-              "timeMs": 0.43,
+              "timeMs": 0.64,
               "status": "pass"
             },
             {
@@ -286,7 +430,7 @@
               ],
               "line": 78,
               "assertions": 1,
-              "timeMs": 0.2,
+              "timeMs": 0.41,
               "status": "pass"
             }
           ]
@@ -302,7 +446,7 @@
               ],
               "line": 11,
               "assertions": 2,
-              "timeMs": 0.16,
+              "timeMs": 0.05,
               "status": "pass"
             },
             {
@@ -312,7 +456,7 @@
               ],
               "line": 20,
               "assertions": 3,
-              "timeMs": 0.87,
+              "timeMs": 0.12,
               "status": "pass"
             },
             {
@@ -322,7 +466,7 @@
               ],
               "line": 26,
               "assertions": 4,
-              "timeMs": 0.23,
+              "timeMs": 0.14,
               "status": "pass"
             },
             {
@@ -332,7 +476,7 @@
               ],
               "line": 35,
               "assertions": 1,
-              "timeMs": 0.32,
+              "timeMs": 0.13,
               "status": "pass"
             },
             {
@@ -342,7 +486,7 @@
               ],
               "line": 40,
               "assertions": 2,
-              "timeMs": 0.1,
+              "timeMs": 0.13,
               "status": "pass"
             },
             {
@@ -352,7 +496,7 @@
               ],
               "line": 45,
               "assertions": 1,
-              "timeMs": 0.08,
+              "timeMs": 0.1,
               "status": "pass"
             },
             {
@@ -362,7 +506,7 @@
               ],
               "line": 53,
               "assertions": 4,
-              "timeMs": 0.49,
+              "timeMs": 0.4,
               "status": "pass"
             },
             {
@@ -372,7 +516,7 @@
               ],
               "line": 61,
               "assertions": 3,
-              "timeMs": 0.06,
+              "timeMs": 0.09,
               "status": "pass"
             },
             {
@@ -382,7 +526,7 @@
               ],
               "line": 68,
               "assertions": 1,
-              "timeMs": 0.08,
+              "timeMs": 0.1,
               "status": "pass"
             }
           ]
@@ -398,7 +542,7 @@
               ],
               "line": 14,
               "assertions": 9,
-              "timeMs": 3.06,
+              "timeMs": 4.07,
               "status": "pass"
             },
             {
@@ -408,7 +552,7 @@
               ],
               "line": 67,
               "assertions": 1,
-              "timeMs": 0.44,
+              "timeMs": 0.77,
               "status": "pass"
             }
           ]
@@ -424,7 +568,7 @@
               ],
               "line": 7,
               "assertions": 3,
-              "timeMs": 0.52,
+              "timeMs": 0.51,
               "status": "pass"
             },
             {
@@ -434,7 +578,7 @@
               ],
               "line": 14,
               "assertions": 2,
-              "timeMs": 0.06,
+              "timeMs": 0.11,
               "status": "pass"
             },
             {
@@ -444,7 +588,7 @@
               ],
               "line": 20,
               "assertions": 1,
-              "timeMs": 0.07,
+              "timeMs": 0.1,
               "status": "pass"
             },
             {
@@ -454,7 +598,7 @@
               ],
               "line": 28,
               "assertions": 2,
-              "timeMs": 0.11,
+              "timeMs": 0.06,
               "status": "pass"
             }
           ]
@@ -470,7 +614,7 @@
               ],
               "line": 36,
               "assertions": 2,
-              "timeMs": 2.08,
+              "timeMs": 4.52,
               "status": "pass"
             },
             {
@@ -480,7 +624,7 @@
               ],
               "line": 44,
               "assertions": 1,
-              "timeMs": 0.12,
+              "timeMs": 0.25,
               "status": "pass"
             },
             {
@@ -490,7 +634,7 @@
               ],
               "line": 51,
               "assertions": 1,
-              "timeMs": 0.08,
+              "timeMs": 0.2,
               "status": "pass"
             },
             {
@@ -500,7 +644,7 @@
               ],
               "line": 57,
               "assertions": 1,
-              "timeMs": 0.09,
+              "timeMs": 0.18,
               "status": "pass"
             },
             {
@@ -510,7 +654,7 @@
               ],
               "line": 62,
               "assertions": 2,
-              "timeMs": 0.99,
+              "timeMs": 1.94,
               "status": "pass"
             },
             {
@@ -520,7 +664,7 @@
               ],
               "line": 70,
               "assertions": 1,
-              "timeMs": 0.19,
+              "timeMs": 0.21,
               "status": "pass"
             },
             {
@@ -530,7 +674,7 @@
               ],
               "line": 75,
               "assertions": 1,
-              "timeMs": 0.08,
+              "timeMs": 0.15,
               "status": "pass"
             }
           ]
@@ -552,10 +696,10 @@
               ],
               "line": 52,
               "assertions": 4,
-              "timeMs": 9.78,
+              "timeMs": 28.11,
               "status": "pass",
               "source": {
-                "path": "services/gateway/test/acceptance/features/analizar-correo.feature",
+                "path": "services/gateway/test/acceptance/features\\analizar-correo.feature",
                 "line": 7
               }
             },
@@ -566,10 +710,10 @@
               ],
               "line": 52,
               "assertions": 2,
-              "timeMs": 7.35,
+              "timeMs": 18.75,
               "status": "pass",
               "source": {
-                "path": "services/gateway/test/acceptance/features/analizar-correo.feature",
+                "path": "services/gateway/test/acceptance/features\\analizar-correo.feature",
                 "line": 14
               }
             },
@@ -580,10 +724,10 @@
               ],
               "line": 52,
               "assertions": 3,
-              "timeMs": 11.56,
+              "timeMs": 21.46,
               "status": "pass",
               "source": {
-                "path": "services/gateway/test/acceptance/features/analizar-correo.feature",
+                "path": "services/gateway/test/acceptance/features\\analizar-correo.feature",
                 "line": 20
               }
             },
@@ -594,10 +738,10 @@
               ],
               "line": 52,
               "assertions": 2,
-              "timeMs": 8.93,
+              "timeMs": 25.77,
               "status": "pass",
               "source": {
-                "path": "services/gateway/test/acceptance/features/historial.feature",
+                "path": "services/gateway/test/acceptance/features\\historial.feature",
                 "line": 7
               }
             },
@@ -608,10 +752,10 @@
               ],
               "line": 52,
               "assertions": 1,
-              "timeMs": 9.63,
+              "timeMs": 19.85,
               "status": "pass",
               "source": {
-                "path": "services/gateway/test/acceptance/features/historial.feature",
+                "path": "services/gateway/test/acceptance/features\\historial.feature",
                 "line": 13
               }
             },
@@ -622,10 +766,10 @@
               ],
               "line": 52,
               "assertions": 2,
-              "timeMs": 11.08,
+              "timeMs": 18.71,
               "status": "pass",
               "source": {
-                "path": "services/gateway/test/acceptance/features/historial.feature",
+                "path": "services/gateway/test/acceptance/features\\historial.feature",
                 "line": 19
               }
             },
@@ -636,10 +780,10 @@
               ],
               "line": 52,
               "assertions": 2,
-              "timeMs": 11.34,
+              "timeMs": 20.32,
               "status": "pass",
               "source": {
-                "path": "services/gateway/test/acceptance/features/historial.feature",
+                "path": "services/gateway/test/acceptance/features\\historial.feature",
                 "line": 25
               }
             },
@@ -650,10 +794,10 @@
               ],
               "line": 52,
               "assertions": 1,
-              "timeMs": 3.04,
+              "timeMs": 26.49,
               "status": "pass",
               "source": {
-                "path": "services/gateway/test/acceptance/features/historial.feature",
+                "path": "services/gateway/test/acceptance/features\\historial.feature",
                 "line": 33
               }
             }
@@ -670,7 +814,7 @@
               ],
               "line": 33,
               "assertions": 2,
-              "timeMs": 2.94,
+              "timeMs": 3.13,
               "status": "pass"
             },
             {
@@ -680,7 +824,7 @@
               ],
               "line": 44,
               "assertions": 4,
-              "timeMs": 0.51,
+              "timeMs": 0.4,
               "status": "pass"
             },
             {
@@ -690,7 +834,7 @@
               ],
               "line": 52,
               "assertions": 1,
-              "timeMs": 0.91,
+              "timeMs": 0.44,
               "status": "pass"
             },
             {
@@ -700,7 +844,7 @@
               ],
               "line": 59,
               "assertions": 6,
-              "timeMs": 8.52,
+              "timeMs": 2.22,
               "status": "pass"
             },
             {
@@ -710,7 +854,7 @@
               ],
               "line": 74,
               "assertions": 2,
-              "timeMs": 0.89,
+              "timeMs": 0.66,
               "status": "pass"
             },
             {
@@ -720,7 +864,7 @@
               ],
               "line": 85,
               "assertions": 2,
-              "timeMs": 0.46,
+              "timeMs": 0.45,
               "status": "pass"
             },
             {
@@ -730,7 +874,7 @@
               ],
               "line": 97,
               "assertions": 2,
-              "timeMs": 0.35,
+              "timeMs": 0.39,
               "status": "pass"
             },
             {
@@ -750,7 +894,7 @@
               ],
               "line": 116,
               "assertions": 2,
-              "timeMs": 0.17,
+              "timeMs": 0.21,
               "status": "pass"
             },
             {
@@ -760,7 +904,7 @@
               ],
               "line": 124,
               "assertions": 2,
-              "timeMs": 1.39,
+              "timeMs": 0.88,
               "status": "pass"
             },
             {
@@ -770,7 +914,7 @@
               ],
               "line": 135,
               "assertions": 1,
-              "timeMs": 4.08,
+              "timeMs": 3.78,
               "status": "pass"
             },
             {
@@ -780,7 +924,7 @@
               ],
               "line": 147,
               "assertions": 2,
-              "timeMs": 1.54,
+              "timeMs": 1.91,
               "status": "pass"
             },
             {
@@ -790,7 +934,7 @@
               ],
               "line": 158,
               "assertions": 1,
-              "timeMs": 0.59,
+              "timeMs": 0.42,
               "status": "pass"
             },
             {
@@ -800,7 +944,7 @@
               ],
               "line": 166,
               "assertions": 1,
-              "timeMs": 4.74,
+              "timeMs": 3.6,
               "status": "pass"
             },
             {
@@ -810,7 +954,7 @@
               ],
               "line": 185,
               "assertions": 3,
-              "timeMs": 2.42,
+              "timeMs": 1.97,
               "status": "pass"
             },
             {
@@ -820,7 +964,7 @@
               ],
               "line": 194,
               "assertions": 2,
-              "timeMs": 1.06,
+              "timeMs": 0.87,
               "status": "pass"
             },
             {
@@ -830,7 +974,7 @@
               ],
               "line": 206,
               "assertions": 1,
-              "timeMs": 0.58,
+              "timeMs": 0.55,
               "status": "pass"
             },
             {
@@ -840,7 +984,7 @@
               ],
               "line": 215,
               "assertions": 2,
-              "timeMs": 1.95,
+              "timeMs": 1.4,
               "status": "pass"
             }
           ]
@@ -854,9 +998,9 @@
               "suite": [
                 "gateway /v1/scans"
               ],
-              "line": 82,
+              "line": 87,
               "assertions": 5,
-              "timeMs": 5.54,
+              "timeMs": 11.6,
               "status": "pass"
             },
             {
@@ -864,9 +1008,19 @@
               "suite": [
                 "gateway /v1/scans"
               ],
-              "line": 97,
+              "line": 102,
               "assertions": 2,
-              "timeMs": 0.73,
+              "timeMs": 4.9,
+              "status": "pass"
+            },
+            {
+              "name": "registra el veredicto de cada análisis para el monitoreo",
+              "suite": [
+                "gateway /v1/scans"
+              ],
+              "line": 110,
+              "assertions": 1,
+              "timeMs": 4.98,
               "status": "pass"
             },
             {
@@ -874,9 +1028,9 @@
               "suite": [
                 "gateway /v1/scans"
               ],
-              "line": 105,
+              "line": 116,
               "assertions": 2,
-              "timeMs": 0.83,
+              "timeMs": 4.5,
               "status": "pass"
             },
             {
@@ -884,9 +1038,9 @@
               "suite": [
                 "gateway /v1/scans"
               ],
-              "line": 111,
+              "line": 122,
               "assertions": 2,
-              "timeMs": 0.56,
+              "timeMs": 4.65,
               "status": "pass"
             },
             {
@@ -894,9 +1048,9 @@
               "suite": [
                 "gateway /v1/scans"
               ],
-              "line": 117,
+              "line": 128,
               "assertions": 2,
-              "timeMs": 0.43,
+              "timeMs": 4.15,
               "status": "pass"
             },
             {
@@ -904,9 +1058,9 @@
               "suite": [
                 "gateway /v1/scans"
               ],
-              "line": 124,
+              "line": 135,
               "assertions": 2,
-              "timeMs": 0.54,
+              "timeMs": 4.52,
               "status": "pass"
             },
             {
@@ -914,9 +1068,9 @@
               "suite": [
                 "gateway /v1/scans"
               ],
-              "line": 136,
+              "line": 147,
               "assertions": 5,
-              "timeMs": 1.03,
+              "timeMs": 13.04,
               "status": "pass"
             },
             {
@@ -924,9 +1078,9 @@
               "suite": [
                 "gateway /v1/scans"
               ],
-              "line": 168,
+              "line": 179,
               "assertions": 1,
-              "timeMs": 0.45,
+              "timeMs": 4.63,
               "status": "pass"
             }
           ]
@@ -942,7 +1096,7 @@
               ],
               "line": 32,
               "assertions": 6,
-              "timeMs": 1.67,
+              "timeMs": 2.91,
               "status": "pass"
             },
             {
@@ -952,7 +1106,7 @@
               ],
               "line": 39,
               "assertions": 6,
-              "timeMs": 1.19,
+              "timeMs": 1.47,
               "status": "pass"
             },
             {
@@ -962,7 +1116,7 @@
               ],
               "line": 50,
               "assertions": 1,
-              "timeMs": 0.3,
+              "timeMs": 0.27,
               "status": "pass"
             },
             {
@@ -972,7 +1126,7 @@
               ],
               "line": 57,
               "assertions": 1,
-              "timeMs": 0.29,
+              "timeMs": 0.36,
               "status": "pass"
             },
             {
@@ -982,7 +1136,7 @@
               ],
               "line": 65,
               "assertions": 3,
-              "timeMs": 1.32,
+              "timeMs": 2.23,
               "status": "pass"
             },
             {
@@ -992,7 +1146,7 @@
               ],
               "line": 98,
               "assertions": 2,
-              "timeMs": 0.42,
+              "timeMs": 1.19,
               "status": "pass"
             },
             {
@@ -1002,7 +1156,7 @@
               ],
               "line": 106,
               "assertions": 1,
-              "timeMs": 0.35,
+              "timeMs": 1.37,
               "status": "pass"
             },
             {
@@ -1012,7 +1166,7 @@
               ],
               "line": 113,
               "assertions": 1,
-              "timeMs": 0.63,
+              "timeMs": 1.21,
               "status": "pass"
             },
             {
@@ -1022,7 +1176,7 @@
               ],
               "line": 124,
               "assertions": 1,
-              "timeMs": 0.35,
+              "timeMs": 0.39,
               "status": "pass"
             },
             {
@@ -1032,7 +1186,7 @@
               ],
               "line": 134,
               "assertions": 1,
-              "timeMs": 2.03,
+              "timeMs": 2.69,
               "status": "pass"
             },
             {
@@ -1042,7 +1196,7 @@
               ],
               "line": 147,
               "assertions": 2,
-              "timeMs": 0.89,
+              "timeMs": 1.43,
               "status": "pass"
             },
             {
@@ -1052,7 +1206,7 @@
               ],
               "line": 158,
               "assertions": 2,
-              "timeMs": 1.5,
+              "timeMs": 2.98,
               "status": "pass"
             },
             {
@@ -1062,7 +1216,7 @@
               ],
               "line": 173,
               "assertions": 3,
-              "timeMs": 0.49,
+              "timeMs": 0.81,
               "status": "pass"
             },
             {
@@ -1072,7 +1226,7 @@
               ],
               "line": 180,
               "assertions": 3,
-              "timeMs": 0.25,
+              "timeMs": 0.68,
               "status": "pass"
             }
           ]
@@ -1094,7 +1248,7 @@
               ],
               "line": 50,
               "assertions": 1,
-              "timeMs": 0.32,
+              "timeMs": 0.46,
               "status": "pass"
             },
             {
@@ -1104,7 +1258,7 @@
               ],
               "line": 54,
               "assertions": 1,
-              "timeMs": 0.11,
+              "timeMs": 0.14,
               "status": "pass"
             },
             {
@@ -1114,7 +1268,7 @@
               ],
               "line": 58,
               "assertions": 1,
-              "timeMs": 0.1,
+              "timeMs": 0.14,
               "status": "pass"
             },
             {
@@ -1124,7 +1278,7 @@
               ],
               "line": 66,
               "assertions": 2,
-              "timeMs": 0.27,
+              "timeMs": 0.45,
               "status": "pass"
             },
             {
@@ -1134,7 +1288,7 @@
               ],
               "line": 75,
               "assertions": 1,
-              "timeMs": 0.21,
+              "timeMs": 0.29,
               "status": "pass"
             },
             {
@@ -1144,7 +1298,7 @@
               ],
               "line": 87,
               "assertions": 1,
-              "timeMs": 0.3,
+              "timeMs": 3.9,
               "status": "pass"
             }
           ]
@@ -1159,9 +1313,9 @@
                 "RLS en Supabase (sin sesión)"
               ],
               "line": 21,
-              "assertions": 1,
-              "timeMs": 666.85,
-              "status": "pass"
+              "assertions": 0,
+              "timeMs": 0,
+              "status": "skip"
             },
             {
               "name": "un visitante anónimo no obtiene filas de profiles",
@@ -1169,9 +1323,9 @@
                 "RLS en Supabase (sin sesión)"
               ],
               "line": 21,
-              "assertions": 1,
-              "timeMs": 226.18,
-              "status": "pass"
+              "assertions": 0,
+              "timeMs": 0,
+              "status": "skip"
             },
             {
               "name": "un visitante anónimo no obtiene filas de profile_analytics",
@@ -1179,9 +1333,9 @@
                 "RLS en Supabase (sin sesión)"
               ],
               "line": 21,
-              "assertions": 1,
-              "timeMs": 208.84,
-              "status": "pass"
+              "assertions": 0,
+              "timeMs": 0,
+              "status": "skip"
             },
             {
               "name": "un visitante anónimo no puede insertar análisis",
@@ -1189,9 +1343,9 @@
                 "RLS en Supabase (sin sesión)"
               ],
               "line": 30,
-              "assertions": 1,
-              "timeMs": 208.1,
-              "status": "pass"
+              "assertions": 0,
+              "timeMs": 0,
+              "status": "skip"
             },
             {
               "name": "delete_my_history() sin sesión no borra nada",
@@ -1199,9 +1353,9 @@
                 "RLS en Supabase (sin sesión)"
               ],
               "line": 38,
-              "assertions": 1,
-              "timeMs": 222.06,
-              "status": "pass"
+              "assertions": 0,
+              "timeMs": 0,
+              "status": "skip"
             },
             {
               "name": "history-service rechaza un JWT falsificado",
@@ -1209,9 +1363,9 @@
                 "RLS en Supabase (sin sesión)"
               ],
               "line": 43,
-              "assertions": 1,
-              "timeMs": 5.45,
-              "status": "pass"
+              "assertions": 0,
+              "timeMs": 0,
+              "status": "skip"
             }
           ]
         },
@@ -1226,7 +1380,7 @@
               ],
               "line": 104,
               "assertions": 1,
-              "timeMs": 0.28,
+              "timeMs": 0.4,
               "status": "pass"
             },
             {
@@ -1236,7 +1390,7 @@
               ],
               "line": 115,
               "assertions": 2,
-              "timeMs": 0.18,
+              "timeMs": 0.22,
               "status": "pass"
             },
             {
@@ -1246,7 +1400,7 @@
               ],
               "line": 121,
               "assertions": 4,
-              "timeMs": 0.23,
+              "timeMs": 0.26,
               "status": "pass"
             },
             {
@@ -1256,7 +1410,7 @@
               ],
               "line": 132,
               "assertions": 3,
-              "timeMs": 0.21,
+              "timeMs": 0.26,
               "status": "pass"
             },
             {
@@ -1266,7 +1420,7 @@
               ],
               "line": 141,
               "assertions": 1,
-              "timeMs": 0.08,
+              "timeMs": 0.09,
               "status": "pass"
             },
             {
@@ -1276,7 +1430,7 @@
               ],
               "line": 148,
               "assertions": 2,
-              "timeMs": 0.06,
+              "timeMs": 0.05,
               "status": "pass"
             },
             {
@@ -1286,7 +1440,7 @@
               ],
               "line": 159,
               "assertions": 1,
-              "timeMs": 2.88,
+              "timeMs": 7.67,
               "status": "pass"
             },
             {
@@ -1296,7 +1450,7 @@
               ],
               "line": 165,
               "assertions": 1,
-              "timeMs": 0.63,
+              "timeMs": 4.52,
               "status": "pass"
             },
             {
@@ -1306,7 +1460,7 @@
               ],
               "line": 173,
               "assertions": 2,
-              "timeMs": 1.96,
+              "timeMs": 6.13,
               "status": "pass"
             },
             {
@@ -1316,7 +1470,7 @@
               ],
               "line": 198,
               "assertions": 2,
-              "timeMs": 0.51,
+              "timeMs": 3.74,
               "status": "pass"
             }
           ]
