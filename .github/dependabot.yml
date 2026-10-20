@@ -12,6 +12,12 @@ updates:
     groups:
       minor-y-patch:
         update-types: [minor, patch]
+    ignore:
+      # 0.7.0 no funciona con Bun: lee la respuesta con un reader y Bun la marca
+      # como usada ("Body already used"), así que Jev cae siempre al motor
+      # heurístico. Se queda en 0.6.x hasta que salga una versión corregida.
+      - dependency-name: "@typesafe-ai/sdk"
+        versions: ["0.7.0"]
 
   - package-ecosystem: docker
     directory: /
