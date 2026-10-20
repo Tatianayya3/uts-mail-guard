@@ -1,0 +1,52 @@
+# Peticiones para la demo (VS Code REST Client, IntelliJ HTTP Client o
+# copiar a Postman). Antes, levanta los dos microservicios en dos terminales:
+#   bun microservicios-demo/historial/microservicio.ts
+#   bun microservicios-demo/analizador/microservicio.ts
+
+### 1. Estado de cada microservicio
+GET http://localhost:5001/health
+
+###
+GET http://localhost:5002/health
+
+### 2. Correo de phishing → 200, veredicto "phishing", guardado: true
+POST http://localhost:5001/analizar
+Content-Type: application/json
+
+{
+  "remitente": "soporte-banco@gmail.com",
+  "asunto": "URGENTE: tu cuenta fue suspendida",
+  "cuerpo": "Verifica tu cuenta y tu contraseña aquí: http://192.168.4.20/login"
+}
+
+### 3. Correo normal → 200, veredicto "seguro"
+POST http://localhost:5001/analizar
+Content-Type: application/json
+
+{
+  "remitente": "profesor@uts.edu.co",
+  "asunto": "Taller de DevOps",
+  "cuerpo": "Recuerden subir el taller antes del viernes."
+}
+
+### 4. El validador en acción → 400 con la lista de errores
+POST http://localhost:5001/analizar
+Content-Type: application/json
+
+{
+  "remitente": "esto-no-es-un-correo",
+  "asunto": 123
+}
+
+### 5. El historial recibió los análisis del analizador
+GET http://localhost:5002/historial
+
+### 6. Validador del historial → 400
+POST http://localhost:5002/historial
+Content-Type: application/json
+
+{
+  "remitente": "a@b.co",
+  "veredicto": "tal-vez",
+  "puntaje": 500
+}
