@@ -1,6 +1,6 @@
 {
   "name": "@mail-guard/gateway",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "type": "module",
   "description": "API Gateway: punto de entrada único (CORS, autenticación, cuotas y orquestación).",

@@ -1,6 +1,6 @@
 {
   "name": "@mail-guard/contracts",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "type": "module",
   "description": "Contratos compartidos (Zod) entre clientes y microservicios de Mail Guard.",

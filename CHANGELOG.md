@@ -5,6 +5,27 @@ Todas las versiones de Mail Guard siguen [SemVer](https://semver.org/lang/es/):
 `.github/workflows/release.yml` (imagen en GHCR + GitHub Release con la
 extensión).
 
+## [2.1.1]
+
+### Corregido
+
+- **Extensión:** el zip de 2.1.0 se compiló sin `VITE_SUPABASE_URL` y fallaba
+  al abrirse («supabaseUrl is required»). Ahora el repo tiene las variables de
+  producción y `release.yml` se detiene si falta alguna, en vez de publicar una
+  extensión rota.
+- **Motor Jev:** `@typesafe-ai/sdk` se mantiene en 0.6; la 0.7.0 no funciona
+  con Bun («Body already used») y dejaba el análisis siempre en el motor
+  heurístico.
+
+### Dependencias (Operate · Dependabot)
+
+- 13 actualizaciones menores (Next 16.4, React 19.3, Supabase, Zod, Turborepo…).
+- `@crxjs/vite-plugin` 3.0 y `@types/node` 26.
+- Acciones de GitHub: `checkout` 7, `cache` 6, `upload-artifact` 7 y las de
+  Docker (`build-push`, `login`, `metadata`, `setup-buildx`).
+- ESLint 10 y TypeScript 7 quedan fuera hasta que `eslint-config-next` los
+  soporte.
+
 ## [2.1.0]
 
 ### DevOps: las 8 fases del ciclo
