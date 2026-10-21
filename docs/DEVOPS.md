@@ -46,7 +46,7 @@ Projects GitHub    + Turborepo      Releases   Blueprint Compose +  + Grafana
 - Plantillas de issues en `.github/ISSUE_TEMPLATE/`:
   - `feature.yml`: pide la **fase DevOps**, el objetivo y los criterios de aceptación.
   - `bug.yml`: componente, pasos para reproducirlo y `x-request-id`.
-- El análisis funcional está en [`USE_CASES.md`](USE_CASES.md) (11 casos de uso)
+- El análisis funcional está en [`USE_CASES.md`](USE_CASES.md) (13 casos de uso)
   y [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
 **Cómo se aplica:** cada tarea es un issue con su fase. El PR que la resuelve

@@ -88,7 +88,7 @@ flowchart LR
 **Patrones:** arquitectura **hexagonal** + casos de uso en los servicios, **MVVM** en la
 extensión y Server Components + ViewModels en el panel. La justificación completa
 (incluida la comparación MVC / MVP / MVVM) está en
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), y los 11 casos de uso con sus flujos en
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), y los 13 casos de uso con sus flujos en
 [`docs/USE_CASES.md`](docs/USE_CASES.md).
 
 ### Estructura del repositorio
