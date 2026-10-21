@@ -1,6 +1,6 @@
 {
   "name": "@mail-guard/history-service",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "type": "module",
   "description": "Microservicio de historial: guarda análisis, perfil y métricas en Supabase (RLS).",

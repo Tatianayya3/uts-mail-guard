@@ -2,7 +2,7 @@
   "name": "extension-web",
   "displayName": "Mail Guard",
   "type": "module",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "description": "Detecta phishing en el correo que tienes abierto en Gmail y Outlook.",
   "scripts": {

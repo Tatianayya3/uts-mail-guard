@@ -1,7 +1,7 @@
 {
   "name": "extension-dashboard",
   "type": "module",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "description": "Panel web de Mail Guard (Next.js): landing, autenticación y métricas.",
   "scripts": {

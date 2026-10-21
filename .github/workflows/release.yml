@@ -90,7 +90,15 @@ jobs:
           VITE_DASHBOARD_URL: ${{ vars.VITE_DASHBOARD_URL }}
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        run: bun run build
+        # Sin estas variables la extensión compila, pero falla al abrirse.
+        run: |
+          for name in VITE_DASHBOARD_URL VITE_SUPABASE_URL VITE_SUPABASE_PUBLISHABLE_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Falta la variable $name. Créala en Settings → Secrets and variables → Actions → Variables."
+              exit 1
+            fi
+          done
+          bun run build
 
       - name: Notas de la versión desde CHANGELOG.md
         run: |
