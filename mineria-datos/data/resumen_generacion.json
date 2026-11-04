@@ -1,0 +1,18 @@
+{
+  "total": 100000,
+  "limpios": 80000,
+  "outliers": 10000,
+  "sucios": {
+    "vacios": 4000,
+    "nulos_texto_NULL": 3000,
+    "duplicados_exactos": 3000
+  },
+  "clases": {
+    "seguro": 59757,
+    "sospechoso": 24552,
+    "peligroso": 14964,
+    "NULL": 299,
+    "(vacío)": 428
+  },
+  "semilla": 20261103
+}

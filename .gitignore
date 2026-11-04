@@ -44,3 +44,6 @@ release/
 
 # token de /metrics para Prometheus (monitoring/prometheus/prometheus.render.yml)
 monitoring/prometheus/metrics-token
+
+# dataset de minería (se regenera con: bun mineria-datos/generar-dataset.ts)
+mineria-datos/data/*.csv

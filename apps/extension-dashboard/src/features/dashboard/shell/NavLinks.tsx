@@ -7,6 +7,7 @@ import {
   FlaskConical,
   History,
   LayoutDashboard,
+  Pickaxe,
   UserCog,
   type LucideIcon,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const NAV: {
   { href: "/dashboard", label: "Resumen", icon: LayoutDashboard, exact: true },
   { href: "/dashboard/historial", label: "Historial", icon: History },
   { href: "/dashboard/cuenta", label: "Cuenta", icon: UserCog },
+  { href: "/dashboard/mineria", label: "Minería", icon: Pickaxe },
   { href: "/dashboard/guia", label: "Guía", icon: BookOpen },
   { href: "/dashboard/tests", label: "Pruebas", icon: FlaskConical },
 ];

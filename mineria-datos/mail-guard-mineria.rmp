@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="12.1.001">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="12.1.001" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+
+      <operator activated="true" class="subprocess" compatibility="12.1.001" expanded="true" height="82" name="1. Extracción (Supabase)" width="90" x="45" y="85">
+        <process expanded="true">
+          <operator activated="true" class="retrieve" compatibility="12.1.001" expanded="true" height="68" name="Conexión Supabase" width="90" x="45" y="34">
+            <parameter key="repository_entry" value="//Local Repository/Connections/supabase-mineria"/>
+          </operator>
+          <operator activated="true" class="jdbc_connectors:execute_sql" compatibility="12.1.001" expanded="true" height="82" name="Limpiar resultados previos" width="90" x="179" y="34">
+            <parameter key="define_connection" value="repository"/>
+            <parameter key="database_system" value="PostgreSQL"/>
+            <parameter key="query" value="truncate public.mineria_predicciones; truncate public.mineria_metricas;"/>
+            <parameter key="prepare_statement" value="false"/>
+            <enumeration key="parameters"/>
+          </operator>
+          <operator activated="true" class="jdbc_connectors:read_database" compatibility="12.1.001" expanded="true" height="82" name="Leer 100.000 correos" width="90" x="313" y="34">
+            <parameter key="define_connection" value="repository"/>
+            <parameter key="database_system" value="PostgreSQL"/>
+            <parameter key="define_query" value="query"/>
+            <parameter key="query" value="select id_correo, fecha_analisis, proveedor, dominio_remitente, tipo_dominio,&#10;       longitud_asunto, longitud_cuerpo, num_enlaces, enlaces_acortados, enlaces_con_ip,&#10;       dominio_imita_marca, usa_punycode, palabras_urgencia, solicita_credenciales,&#10;       nombre_coincide_dominio, tiene_adjunto, antiguedad_dominio_dias, hora_envio,&#10;       porcentaje_mayusculas, veredicto&#10;from public.mineria_correos"/>
+            <parameter key="use_default_schema" value="true"/>
+            <parameter key="prepare_statement" value="false"/>
+            <enumeration key="parameters"/>
+            <parameter key="data_management" value="auto"/>
+          </operator>
+          <connect from_op="Conexión Supabase" from_port="output" to_op="Limpiar resultados previos" to_port="connection"/>
+          <connect from_op="Limpiar resultados previos" from_port="connection" to_op="Leer 100.000 correos" to_port="connection"/>
+          <connect from_op="Leer 100.000 correos" from_port="output" to_port="out 1"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+          <description align="left" color="yellow" colored="false" height="80" resized="true" width="400" x="45" y="160">Se conecta a Supabase (PostgreSQL), vacía los resultados de la ejecución anterior y lee los 100.000 correos crudos: 80 % limpios, 10 % outliers y 10 % sucios (vacíos, NULL y duplicados).</description>
+        </process>
+      </operator>
+
+      <operator activated="true" class="subprocess" compatibility="12.1.001" expanded="true" height="82" name="2. Depuración" width="90" x="246" y="85">
+        <process expanded="true">
+          <operator activated="true" class="remove_duplicates" compatibility="12.1.001" expanded="true" height="103" name="Eliminar duplicados" width="90" x="45" y="34">
+            <parameter key="attribute_filter_type" value="all"/>
+            <parameter key="attribute" value=""/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="treat_missing_values_as_duplicates" value="false"/>
+          </operator>
+          <operator activated="true" class="declare_missing_value" compatibility="12.1.001" expanded="true" height="82" name="Declarar NULL como faltante" width="90" x="179" y="34">
+            <parameter key="attribute_filter_type" value="value_type"/>
+            <parameter key="attribute" value=""/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="nominal"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="mode" value="nominal"/>
+            <parameter key="nominal_value" value="NULL"/>
+            <parameter key="expression_value" value=""/>
+          </operator>
+          <operator activated="true" class="filter_examples" compatibility="12.1.001" expanded="true" height="103" name="Filtrar vacíos y nulos" width="90" x="313" y="34">
+            <parameter key="parameter_expression" value=""/>
+            <parameter key="condition_class" value="no_missing_attributes"/>
+            <parameter key="invert_filter" value="false"/>
+            <list key="filters_list"/>
+            <parameter key="filters_logic_and" value="true"/>
+            <parameter key="filters_check_metadata" value="true"/>
+          </operator>
+          <operator activated="true" class="filter_examples" compatibility="12.1.001" expanded="true" height="103" name="Filtrar outliers" width="90" x="447" y="34">
+            <parameter key="parameter_expression" value=""/>
+            <parameter key="condition_class" value="custom_filters"/>
+            <parameter key="invert_filter" value="false"/>
+            <list key="filters_list">
+              <parameter key="filters_entry_key" value="longitud_asunto.le.150"/>
+              <parameter key="filters_entry_key" value="longitud_cuerpo.le.5000"/>
+              <parameter key="filters_entry_key" value="num_enlaces.le.25"/>
+              <parameter key="filters_entry_key" value="enlaces_acortados.le.25"/>
+              <parameter key="filters_entry_key" value="enlaces_con_ip.le.25"/>
+              <parameter key="filters_entry_key" value="palabras_urgencia.le.12"/>
+              <parameter key="filters_entry_key" value="antiguedad_dominio_dias.ge.1"/>
+              <parameter key="filters_entry_key" value="antiguedad_dominio_dias.le.9000"/>
+              <parameter key="filters_entry_key" value="porcentaje_mayusculas.le.100"/>
+            </list>
+            <parameter key="filters_logic_and" value="true"/>
+            <parameter key="filters_check_metadata" value="true"/>
+          </operator>
+          <operator activated="true" class="remove_unused_values" compatibility="12.1.001" expanded="true" height="103" name="Quitar categorías vacías" width="90" x="581" y="34">
+            <parameter key="return_preprocessing_model" value="false"/>
+            <parameter key="attribute_filter_type" value="all"/>
+            <parameter key="attribute" value=""/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="nominal"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="file_path"/>
+            <parameter key="block_type" value="single_value"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="single_value"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="sort_alphabetically" value="true"/>
+          </operator>
+          <connect from_port="in 1" to_op="Eliminar duplicados" to_port="example set input"/>
+          <connect from_op="Eliminar duplicados" from_port="example set output" to_op="Declarar NULL como faltante" to_port="example set input"/>
+          <connect from_op="Declarar NULL como faltante" from_port="example set output" to_op="Filtrar vacíos y nulos" to_port="example set input"/>
+          <connect from_op="Filtrar vacíos y nulos" from_port="example set output" to_op="Filtrar outliers" to_port="example set input"/>
+          <connect from_op="Filtrar outliers" from_port="example set output" to_op="Quitar categorías vacías" to_port="example set input"/>
+          <connect from_op="Quitar categorías vacías" from_port="example set output" to_port="out 1"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="source_in 2" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+          <description align="left" color="yellow" colored="false" height="95" resized="true" width="560" x="45" y="180">100.000 → 97.000 (sin duplicados) → 90.000 (sin vacíos ni NULL) → 80.000 (sin outliers). Los outliers se detectan con reglas de negocio: valores imposibles o extremos (p. ej. más de 100 % de mayúsculas, antigüedad de dominio negativa o cuerpos de 900.000 caracteres).</description>
+        </process>
+      </operator>
+
+      <operator activated="true" class="subprocess" compatibility="12.1.001" expanded="true" height="82" name="3. Transformación" width="90" x="447" y="85">
+        <process expanded="true">
+          <operator activated="true" class="blending:select_attributes" compatibility="12.1.001" expanded="true" height="82" name="Quitar columnas no predictivas" width="90" x="45" y="34">
+            <parameter key="type" value="exclude attributes"/>
+            <parameter key="attribute_filter_type" value="a subset"/>
+            <parameter key="select_attribute" value=""/>
+            <parameter key="select_subset" value="dominio_remitente␞fecha_analisis"/>
+            <parameter key="also_apply_to_special_attributes_(id,_label..)" value="false"/>
+          </operator>
+          <operator activated="true" class="blending:set_role" compatibility="12.1.001" expanded="true" height="82" name="Definir etiqueta e ID" width="90" x="179" y="34">
+            <list key="set_roles">
+              <parameter key="veredicto" value="label"/>
+              <parameter key="id_correo" value="id"/>
+            </list>
+          </operator>
+          <connect from_port="in 1" to_op="Quitar columnas no predictivas" to_port="example set input"/>
+          <connect from_op="Quitar columnas no predictivas" from_port="example set output" to_op="Definir etiqueta e ID" to_port="example set input"/>
+          <connect from_op="Definir etiqueta e ID" from_port="example set output" to_port="out 1"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="source_in 2" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+          <description align="left" color="yellow" colored="false" height="80" resized="true" width="360" x="45" y="160">Se quitan fecha y dominio (identifican al correo, no lo describen). La etiqueta a predecir es «veredicto» (seguro / sospechoso / peligroso); id_correo se conserva como ID.</description>
+        </process>
+      </operator>
+
+      <operator activated="true" class="subprocess" compatibility="12.1.001" expanded="true" height="124" name="4. Modelado y validación" width="90" x="648" y="85">
+        <process expanded="true">
+          <operator activated="true" class="blending:split_data" compatibility="12.1.001" expanded="true" height="103" name="División 80-20" width="90" x="45" y="34">
+            <enumeration key="partitions">
+              <parameter key="ratio" value="0.8"/>
+              <parameter key="ratio" value="0.2"/>
+            </enumeration>
+            <parameter key="sampling_type" value="stratified sampling"/>
+            <parameter key="use_local_random_seed" value="true"/>
+            <parameter key="local_random_seed" value="1992"/>
+          </operator>
+          <operator activated="true" class="concurrency:parallel_decision_tree" compatibility="12.1.001" expanded="true" height="103" name="Entrenar árbol de decisión (80 %)" width="90" x="179" y="34">
+            <parameter key="criterion" value="gain_ratio"/>
+            <parameter key="maximal_depth" value="10"/>
+            <parameter key="apply_pruning" value="true"/>
+            <parameter key="confidence" value="0.1"/>
+            <parameter key="apply_prepruning" value="true"/>
+            <parameter key="minimal_gain" value="0.01"/>
+            <parameter key="minimal_leaf_size" value="2"/>
+            <parameter key="minimal_size_for_split" value="4"/>
+            <parameter key="number_of_prepruning_alternatives" value="3"/>
+          </operator>
+          <operator activated="true" class="apply_model" compatibility="12.1.001" expanded="true" height="82" name="Predecir prueba (20 %)" width="90" x="313" y="136">
+            <list key="application_parameters"/>
+          </operator>
+          <operator activated="true" class="performance_classification" compatibility="12.1.001" expanded="true" height="82" name="Evaluar rendimiento" width="90" x="447" y="136">
+            <parameter key="main_criterion" value="first"/>
+            <parameter key="accuracy" value="true"/>
+            <parameter key="classification_error" value="true"/>
+            <parameter key="kappa" value="true"/>
+            <parameter key="weighted_mean_recall" value="true"/>
+            <parameter key="weighted_mean_precision" value="true"/>
+            <parameter key="spearman_rho" value="false"/>
+            <parameter key="kendall_tau" value="false"/>
+            <parameter key="absolute_error" value="false"/>
+            <parameter key="relative_error" value="false"/>
+            <parameter key="relative_error_lenient" value="false"/>
+            <parameter key="relative_error_strict" value="false"/>
+            <parameter key="normalized_absolute_error" value="false"/>
+            <parameter key="root_mean_squared_error" value="false"/>
+            <parameter key="root_relative_squared_error" value="false"/>
+            <parameter key="squared_error" value="false"/>
+            <parameter key="correlation" value="false"/>
+            <parameter key="squared_correlation" value="false"/>
+            <parameter key="cross-entropy" value="false"/>
+            <parameter key="margin" value="false"/>
+            <parameter key="soft_margin_loss" value="false"/>
+            <parameter key="logistic_loss" value="false"/>
+            <parameter key="skip_undefined_labels" value="true"/>
+            <parameter key="use_example_weights" value="true"/>
+            <list key="class_weights"/>
+          </operator>
+          <connect from_port="in 1" to_op="División 80-20" to_port="example set"/>
+          <connect from_op="División 80-20" from_port="partition 1" to_op="Entrenar árbol de decisión (80 %)" to_port="training set"/>
+          <connect from_op="División 80-20" from_port="partition 2" to_op="Predecir prueba (20 %)" to_port="unlabelled data"/>
+          <connect from_op="Entrenar árbol de decisión (80 %)" from_port="model" to_op="Predecir prueba (20 %)" to_port="model"/>
+          <connect from_op="Predecir prueba (20 %)" from_port="labelled data" to_op="Evaluar rendimiento" to_port="labelled data"/>
+          <connect from_op="Predecir prueba (20 %)" from_port="model" to_port="out 3"/>
+          <connect from_op="Evaluar rendimiento" from_port="performance" to_port="out 1"/>
+          <connect from_op="Evaluar rendimiento" from_port="example set" to_port="out 2"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="source_in 2" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+          <portSpacing port="sink_out 3" spacing="0"/>
+          <portSpacing port="sink_out 4" spacing="0"/>
+          <description align="left" color="yellow" colored="false" height="95" resized="true" width="400" x="45" y="250">División estratificada: 64.000 correos (80 %) entrenan el árbol de decisión y 16.000 (20 %) que el modelo nunca vio sirven para verificarlo. Salidas: 1 = métricas, 2 = predicciones, 3 = árbol.</description>
+        </process>
+      </operator>
+
+      <operator activated="true" class="subprocess" compatibility="12.1.001" expanded="true" height="103" name="5. Carga de resultados (Supabase)" width="90" x="849" y="85">
+        <process expanded="true">
+          <operator activated="true" class="multiply" compatibility="12.1.001" expanded="true" height="103" name="Duplicar rendimiento" width="90" x="45" y="34"/>
+          <operator activated="true" class="performance_to_data" compatibility="12.1.001" expanded="true" height="82" name="Rendimiento a tabla" width="90" x="179" y="85"/>
+          <operator activated="true" class="blending:rename" compatibility="12.1.001" expanded="true" height="82" name="Renombrar métricas" width="90" x="313" y="85">
+            <list key="rename attributes">
+              <parameter key="Criterion" value="criterio"/>
+              <parameter key="Value" value="valor"/>
+            </list>
+            <parameter key="from_attribute" value=""/>
+            <parameter key="to_attribute" value=""/>
+          </operator>
+          <operator activated="true" class="blending:select_attributes" compatibility="12.1.001" expanded="true" height="82" name="Seleccionar métricas" width="90" x="447" y="85">
+            <parameter key="type" value="include attributes"/>
+            <parameter key="attribute_filter_type" value="a subset"/>
+            <parameter key="select_attribute" value=""/>
+            <parameter key="select_subset" value="criterio␞valor"/>
+            <parameter key="also_apply_to_special_attributes_(id,_label..)" value="true"/>
+          </operator>
+          <operator activated="true" class="retrieve" compatibility="12.1.001" expanded="true" height="68" name="Conexión (métricas)" width="90" x="447" y="187">
+            <parameter key="repository_entry" value="//Local Repository/Connections/supabase-mineria"/>
+          </operator>
+          <operator activated="true" class="jdbc_connectors:write_database" compatibility="12.1.001" expanded="true" height="82" name="Guardar métricas" width="90" x="648" y="85">
+            <parameter key="define_connection" value="repository"/>
+            <parameter key="database_system" value="PostgreSQL"/>
+            <parameter key="use_default_schema" value="true"/>
+            <parameter key="table_name" value="mineria_metricas"/>
+            <parameter key="overwrite_mode" value="append"/>
+            <parameter key="set_default_varchar_length" value="false"/>
+            <parameter key="default_varchar_length" value="128"/>
+            <parameter key="add_generated_primary_keys" value="false"/>
+            <parameter key="db_key_attribute_name" value="generated_primary_key"/>
+            <parameter key="batch_size" value="100"/>
+          </operator>
+          <operator activated="true" class="blending:rename" compatibility="12.1.001" expanded="true" height="82" name="Renombrar predicciones" width="90" x="179" y="340">
+            <list key="rename attributes">
+              <parameter key="prediction(veredicto)" value="prediction_veredicto"/>
+              <parameter key="confidence(seguro)" value="confidence_seguro"/>
+              <parameter key="confidence(sospechoso)" value="confidence_sospechoso"/>
+              <parameter key="confidence(peligroso)" value="confidence_peligroso"/>
+            </list>
+            <parameter key="from_attribute" value=""/>
+            <parameter key="to_attribute" value=""/>
+          </operator>
+          <operator activated="true" class="blending:select_attributes" compatibility="12.1.001" expanded="true" height="82" name="Seleccionar predicciones" width="90" x="313" y="340">
+            <parameter key="type" value="include attributes"/>
+            <parameter key="attribute_filter_type" value="a subset"/>
+            <parameter key="select_attribute" value=""/>
+            <parameter key="select_subset" value="id_correo␞veredicto␞prediction_veredicto␞confidence_seguro␞confidence_sospechoso␞confidence_peligroso"/>
+            <parameter key="also_apply_to_special_attributes_(id,_label..)" value="true"/>
+          </operator>
+          <operator activated="true" class="retrieve" compatibility="12.1.001" expanded="true" height="68" name="Conexión (predicciones)" width="90" x="313" y="442">
+            <parameter key="repository_entry" value="//Local Repository/Connections/supabase-mineria"/>
+          </operator>
+          <operator activated="true" class="jdbc_connectors:write_database" compatibility="12.1.001" expanded="true" height="82" name="Guardar predicciones" width="90" x="514" y="340">
+            <parameter key="define_connection" value="repository"/>
+            <parameter key="database_system" value="PostgreSQL"/>
+            <parameter key="use_default_schema" value="true"/>
+            <parameter key="table_name" value="mineria_predicciones"/>
+            <parameter key="overwrite_mode" value="append"/>
+            <parameter key="set_default_varchar_length" value="false"/>
+            <parameter key="default_varchar_length" value="128"/>
+            <parameter key="add_generated_primary_keys" value="false"/>
+            <parameter key="db_key_attribute_name" value="generated_primary_key"/>
+            <parameter key="batch_size" value="100"/>
+          </operator>
+          <connect from_port="in 1" to_op="Duplicar rendimiento" to_port="input"/>
+          <connect from_port="in 2" to_op="Renombrar predicciones" to_port="example set input"/>
+          <connect from_op="Duplicar rendimiento" from_port="output 1" to_port="out 1"/>
+          <connect from_op="Duplicar rendimiento" from_port="output 2" to_op="Rendimiento a tabla" to_port="performance vector"/>
+          <connect from_op="Rendimiento a tabla" from_port="example set" to_op="Renombrar métricas" to_port="example set input"/>
+          <connect from_op="Renombrar métricas" from_port="example set output" to_op="Seleccionar métricas" to_port="example set input"/>
+          <connect from_op="Seleccionar métricas" from_port="example set output" to_op="Guardar métricas" to_port="input"/>
+          <connect from_op="Conexión (métricas)" from_port="output" to_op="Guardar métricas" to_port="connection"/>
+          <connect from_op="Renombrar predicciones" from_port="example set output" to_op="Seleccionar predicciones" to_port="example set input"/>
+          <connect from_op="Seleccionar predicciones" from_port="example set output" to_op="Guardar predicciones" to_port="input"/>
+          <connect from_op="Conexión (predicciones)" from_port="output" to_op="Guardar predicciones" to_port="connection"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="source_in 2" spacing="0"/>
+          <portSpacing port="source_in 3" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+          <description align="left" color="yellow" colored="false" height="80" resized="true" width="300" x="648" y="340">Las métricas van a mineria_metricas y las 16.000 predicciones a mineria_predicciones. El panel web de Mail Guard las lee para la fase de visualización.</description>
+        </process>
+      </operator>
+
+      <connect from_op="1. Extracción (Supabase)" from_port="out 1" to_op="2. Depuración" to_port="in 1"/>
+      <connect from_op="2. Depuración" from_port="out 1" to_op="3. Transformación" to_port="in 1"/>
+      <connect from_op="3. Transformación" from_port="out 1" to_op="4. Modelado y validación" to_port="in 1"/>
+      <connect from_op="4. Modelado y validación" from_port="out 1" to_op="5. Carga de resultados (Supabase)" to_port="in 1"/>
+      <connect from_op="4. Modelado y validación" from_port="out 2" to_op="5. Carga de resultados (Supabase)" to_port="in 2"/>
+      <connect from_op="4. Modelado y validación" from_port="out 3" to_port="result 2"/>
+      <connect from_op="5. Carga de resultados (Supabase)" from_port="out 1" to_port="result 1"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+      <portSpacing port="sink_result 3" spacing="0"/>
+      <description align="center" color="green" colored="true" height="105" resized="true" width="1000" x="45" y="240">MAIL GUARD · MINERÍA DE DATOS — Objetivo: predecir el veredicto de un correo (seguro / sospechoso / peligroso).&#10;1. Extracción → 2. Depuración → 3. Transformación → 4. Modelado y validación (80 / 20) → 5. Carga de resultados → Visualización en el panel web.&#10;Doble clic en cada bloque para ver su detalle.</description>
+    </process>
+  </operator>
+</process>
