@@ -13,7 +13,7 @@
     <parameter key="encoding" value="SYSTEM"/>
     <process expanded="true">
 
-      <operator activated="true" class="subprocess" compatibility="12.1.001" expanded="true" height="82" name="1. Extracción (Supabase)" width="90" x="45" y="85">
+      <operator activated="true" class="subprocess" compatibility="12.1.001" expanded="true" height="82" name="1. Extracción" width="90" x="45" y="85">
         <process expanded="true">
           <operator activated="true" class="retrieve" compatibility="12.1.001" expanded="true" height="68" name="Conexión Supabase" width="90" x="45" y="34">
             <parameter key="repository_entry" value="//Local Repository/Connections/supabase-mineria"/>
@@ -161,7 +161,7 @@
         </process>
       </operator>
 
-      <operator activated="true" class="subprocess" compatibility="12.1.001" expanded="true" height="124" name="4. Modelado y validación" width="90" x="648" y="85">
+      <operator activated="true" class="subprocess" compatibility="12.1.001" expanded="true" height="124" name="4. Modelado" width="90" x="648" y="85">
         <process expanded="true">
           <operator activated="true" class="blending:split_data" compatibility="12.1.001" expanded="true" height="103" name="División 80-20" width="90" x="45" y="34">
             <enumeration key="partitions">
@@ -227,11 +227,11 @@
           <portSpacing port="sink_out 2" spacing="0"/>
           <portSpacing port="sink_out 3" spacing="0"/>
           <portSpacing port="sink_out 4" spacing="0"/>
-          <description align="left" color="yellow" colored="false" height="95" resized="true" width="400" x="45" y="250">División estratificada: 64.000 correos (80 %) entrenan el árbol de decisión y 16.000 (20 %) que el modelo nunca vio sirven para verificarlo. Salidas: 1 = métricas, 2 = predicciones, 3 = árbol.</description>
+          <description align="left" color="yellow" colored="false" height="95" resized="true" width="400" x="45" y="250">División estratificada: 63.999 correos (80 %) entrenan el árbol de decisión y 16.001 (20 %) que el modelo nunca vio sirven para verificarlo. Salidas: 1 = métricas, 2 = predicciones, 3 = árbol.</description>
         </process>
       </operator>
 
-      <operator activated="true" class="subprocess" compatibility="12.1.001" expanded="true" height="103" name="5. Carga de resultados (Supabase)" width="90" x="849" y="85">
+      <operator activated="true" class="subprocess" compatibility="12.1.001" expanded="true" height="103" name="5. Carga" width="90" x="849" y="85">
         <process expanded="true">
           <operator activated="true" class="multiply" compatibility="12.1.001" expanded="true" height="103" name="Duplicar rendimiento" width="90" x="45" y="34"/>
           <operator activated="true" class="performance_to_data" compatibility="12.1.001" expanded="true" height="82" name="Rendimiento a tabla" width="90" x="179" y="85"/>
@@ -317,18 +317,18 @@
         </process>
       </operator>
 
-      <connect from_op="1. Extracción (Supabase)" from_port="out 1" to_op="2. Depuración" to_port="in 1"/>
+      <connect from_op="1. Extracción" from_port="out 1" to_op="2. Depuración" to_port="in 1"/>
       <connect from_op="2. Depuración" from_port="out 1" to_op="3. Transformación" to_port="in 1"/>
-      <connect from_op="3. Transformación" from_port="out 1" to_op="4. Modelado y validación" to_port="in 1"/>
-      <connect from_op="4. Modelado y validación" from_port="out 1" to_op="5. Carga de resultados (Supabase)" to_port="in 1"/>
-      <connect from_op="4. Modelado y validación" from_port="out 2" to_op="5. Carga de resultados (Supabase)" to_port="in 2"/>
-      <connect from_op="4. Modelado y validación" from_port="out 3" to_port="result 2"/>
-      <connect from_op="5. Carga de resultados (Supabase)" from_port="out 1" to_port="result 1"/>
+      <connect from_op="3. Transformación" from_port="out 1" to_op="4. Modelado" to_port="in 1"/>
+      <connect from_op="4. Modelado" from_port="out 1" to_op="5. Carga" to_port="in 1"/>
+      <connect from_op="4. Modelado" from_port="out 2" to_op="5. Carga" to_port="in 2"/>
+      <connect from_op="4. Modelado" from_port="out 3" to_port="result 2"/>
+      <connect from_op="5. Carga" from_port="out 1" to_port="result 1"/>
       <portSpacing port="source_input 1" spacing="0"/>
       <portSpacing port="sink_result 1" spacing="0"/>
       <portSpacing port="sink_result 2" spacing="0"/>
       <portSpacing port="sink_result 3" spacing="0"/>
-      <description align="center" color="green" colored="true" height="105" resized="true" width="1000" x="45" y="240">MAIL GUARD · MINERÍA DE DATOS — Objetivo: predecir el veredicto de un correo (seguro / sospechoso / peligroso).&#10;1. Extracción → 2. Depuración → 3. Transformación → 4. Modelado y validación (80 / 20) → 5. Carga de resultados → Visualización en el panel web.&#10;Doble clic en cada bloque para ver su detalle.</description>
+      <description align="center" color="green" colored="true" height="120" resized="true" width="894" x="45" y="230">MAIL GUARD · Minería de datos&#10;Objetivo: predecir el veredicto de un correo (seguro, sospechoso o peligroso).&#10;Doble clic en cada fase para ver sus bloques.</description>
     </process>
   </operator>
 </process>

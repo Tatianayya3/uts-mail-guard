@@ -46,12 +46,12 @@ const CLASE_LABEL: Record<ClaseMineria, string> = {
 };
 
 const FLUJO: { label: string; detail: string }[] = [
-  { label: "Supabase", detail: "100.000 correos crudos" },
+  { label: "Extracción", detail: "100.000 correos desde Supabase" },
   { label: "Depuración", detail: "duplicados, nulos y outliers" },
-  { label: "Split 80 / 20", detail: "estratificado" },
-  { label: "Árbol de decisión", detail: "entrenamiento" },
-  { label: "Apply Model", detail: "predicción sobre el 20 %" },
-  { label: "Supabase → panel", detail: "métricas y predicciones" },
+  { label: "Transformación", detail: "etiqueta e identificador" },
+  { label: "Modelado", detail: "árbol de decisión · 80 / 20" },
+  { label: "Carga", detail: "resultados a Supabase" },
+  { label: "Visualización", detail: "este panel" },
 ];
 
 const fmt = (n: number) => n.toLocaleString("es-CO");
@@ -136,7 +136,7 @@ export default function MineriaView({
             Predicción del veredicto de un correo con RapidMiner sobre 100.000
             registros sintéticos.{" "}
             {ejecutado
-              ? `Última ejecución del modelo: ${ejecutado}.`
+              ? `Última ejecución del modelo: ${ejecutado.replace(/\.$/, "")}.`
               : "El modelo aún no se ha ejecutado."}
           </>
         }
