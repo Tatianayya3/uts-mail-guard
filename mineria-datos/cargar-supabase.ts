@@ -78,4 +78,7 @@ for (let i = 0; i < filas.length; i += LOTE) {
 const [{ total }] =
   await sql`select count(*)::int as total from public.mineria_correos`;
 console.log(`\nListo: ${total} filas en Supabase.`);
+// Recalcula los histogramas y estadísticas que muestra el panel (migración 0005).
+await sql`select public.mineria_refrescar_graficos()`;
+console.log("Gráficas del panel actualizadas.");
 await sql.close();
