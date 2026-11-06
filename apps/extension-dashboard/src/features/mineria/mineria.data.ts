@@ -44,3 +44,42 @@ export async function loadMineria(): Promise<{
   }
   return { data: data as MineriaResumen };
 }
+
+export type HistogramaBin = {
+  variable: string;
+  desde: number;
+} & Record<ClaseMineria, number>;
+
+export type EstadisticaVariable = {
+  variable: string;
+  fase: "crudos" | "limpios";
+  n: number;
+  minimo: number;
+  maximo: number;
+  media: number;
+  mediana: number;
+  desviacion: number;
+};
+
+/**
+ * Muestra compacta de los crudos (1 de cada 50 filas):
+ * [fila, proveedor, cuerpo, asunto, enlaces, urgencia, antigüedad, mayúsculas].
+ */
+export type PuntoMuestra = [number, string, ...(number | null)[]];
+
+export type MineriaGraficos = {
+  histogramas: HistogramaBin[];
+  muestra: PuntoMuestra[];
+  estadisticas: EstadisticaVariable[];
+  proveedores: ({ proveedor: string } & Record<ClaseMineria, number>)[];
+  /** Confianza del modelo en el 20 % de prueba, en tramos de 5 puntos. */
+  confianza: { desde: number; aciertos: number; errores: number }[];
+};
+
+/** Datos de las gráficas detalladas (RPC mineria_graficos, migración 0005). */
+export async function loadMineriaGraficos(): Promise<MineriaGraficos | null> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase.rpc("mineria_graficos");
+  if (error || !data) return null;
+  return data as MineriaGraficos;
+}

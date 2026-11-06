@@ -1,78 +1,79 @@
 "use client";
 
+import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
-  ArrowRight,
+  BarChart3,
+  Brain,
   Database,
+  Filter,
   Grid3x3,
   Sparkles,
-  Target,
   TestTube2,
+  Upload,
+  Wand2,
 } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  LabelList,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import ChartCard from "@/features/dashboard/ChartCard";
-import ChartTooltip from "@/features/dashboard/ChartTooltip";
 import EmptyChartState from "@/features/dashboard/EmptyChartState";
 import ErrorBanner from "@/features/dashboard/ErrorBanner";
 import PageHeader from "@/features/dashboard/PageHeader";
-import StatCard from "@/features/dashboard/StatCard";
 import {
-  ACCENT_HEX,
-  AXIS_COLOR,
-  GRID_COLOR,
-  VERDICT_COLOR,
-} from "@/features/dashboard/dashboard.constants";
-import type { ClaseMineria, MineriaResumen } from "./mineria.data";
+  BarrasHorizontales,
+  Confianza,
+  DispersionCrudos,
+  DistribucionClases,
+  Embudo,
+  HistogramaClases,
+  MatrizConfusion,
+  MetricasPorClase,
+  PerfilClases,
+  TablaEstadisticas,
+  etiquetaColumna,
+  fmt,
+} from "./MineriaGraficos";
+import type { MineriaGraficos, MineriaResumen } from "./mineria.data";
 
-const CLASES: ClaseMineria[] = ["seguro", "sospechoso", "peligroso"];
-const CLASE_COLOR: Record<ClaseMineria, string> = {
-  seguro: VERDICT_COLOR.safe,
-  sospechoso: VERDICT_COLOR.suspicious,
-  peligroso: VERDICT_COLOR.dangerous,
-};
-const CLASE_LABEL: Record<ClaseMineria, string> = {
-  seguro: "Seguro",
-  sospechoso: "Sospechoso",
-  peligroso: "Peligroso",
-};
-
-const FLUJO: { label: string; detail: string }[] = [
-  { label: "Extracción", detail: "100.000 correos desde Supabase" },
-  { label: "Depuración", detail: "duplicados, nulos y outliers" },
-  { label: "Transformación", detail: "etiqueta e identificador" },
-  { label: "Modelado", detail: "árbol de decisión · 80 / 20" },
-  { label: "Carga", detail: "resultados a Supabase" },
-  { label: "Visualización", detail: "este panel" },
+const FLUJO = [
+  { label: "Extracción", detail: "Read Database", icon: Database },
+  { label: "Depuración", detail: "duplicados, nulos, outliers", icon: Filter },
+  { label: "Transformación", detail: "etiqueta e ID", icon: Wand2 },
+  { label: "Modelado", detail: "árbol · 80 / 20", icon: Brain },
+  { label: "Carga", detail: "Write Database", icon: Upload },
+  { label: "Visualización", detail: "este panel", icon: BarChart3 },
 ];
 
-const fmt = (n: number) => n.toLocaleString("es-CO");
-const etiqueta = (columna: string) => columna.replaceAll("_", " ");
+const SECCIONES = [
+  { id: "datos", label: "Datos crudos" },
+  { id: "depuracion", label: "Depuración" },
+  { id: "exploracion", label: "Exploración" },
+  { id: "modelo", label: "Modelo" },
+];
+
+const METRICA_LABEL: Record<string, string> = {
+  accuracy: "Exactitud",
+  kappa: "Kappa",
+  classification_error: "Error de clasificación",
+  weighted_mean_recall: "Recall ponderado",
+  weighted_mean_precision: "Precisión ponderada",
+};
+
+const clave = (k: string) => k.toLowerCase().replace(/\s+/g, "_");
 
 /** Busca una métrica de RapidMiner tolerando mayúsculas y espacios en el nombre. */
 function metrica(metricas: Record<string, number>, nombre: string) {
-  const entrada = Object.entries(metricas).find(
-    ([k]) => k.toLowerCase().replace(/\s+/g, "_") === nombre,
-  );
-  return entrada?.[1];
+  return Object.entries(metricas).find(([k]) => clave(k) === nombre)?.[1];
 }
-const pct = (v: number | undefined) =>
-  v === undefined ? "—" : `${(v <= 1 ? v * 100 : v).toFixed(1)} %`;
+const pct = (v: number | undefined, dec = 1) =>
+  v === undefined ? "—" : `${fmt(v <= 1 ? v * 100 : v, dec)} %`;
 
 export default function MineriaView({
   data,
   error,
+  graficos,
 }: {
   data: MineriaResumen | null;
   error?: string;
+  graficos?: MineriaGraficos | null;
 }) {
   if (!data) {
     return (
@@ -95,37 +96,14 @@ export default function MineriaView({
       }).format(new Date(data.ejecutado_en))
     : null;
 
-  const fases = [
-    { fase: "Datos crudos", filas: embudo.crudos, quitadas: 0 },
-    {
-      fase: "Sin duplicados",
-      filas: embudo.sin_duplicados,
-      quitadas: embudo.crudos - embudo.sin_duplicados,
-    },
-    {
-      fase: "Sin vacíos / nulos",
-      filas: embudo.sin_faltantes,
-      quitadas: embudo.sin_duplicados - embudo.sin_faltantes,
-    },
-    {
-      fase: "Sin outliers",
-      filas: embudo.limpios,
-      quitadas: embudo.sin_faltantes - embudo.limpios,
-    },
-  ];
-
   const faltantes = Object.entries(data.faltantes)
-    .map(([columna, n]) => ({ columna: etiqueta(columna), n }))
+    .map(([columna, n]) => ({ nombre: etiquetaColumna(columna), n }))
     .filter((d) => d.n > 0)
     .sort((a, b) => b.n - a.n);
   const outliers = Object.entries(data.outliers)
-    .map(([columna, n]) => ({ columna: etiqueta(columna), n }))
+    .map(([columna, n]) => ({ nombre: etiquetaColumna(columna), n }))
     .sort((a, b) => b.n - a.n);
-  const clases = CLASES.map((c) => ({
-    clase: CLASE_LABEL[c],
-    key: c,
-    n: data.clases[c] ?? 0,
-  }));
+  const eliminados = embudo.crudos - embudo.limpios;
 
   return (
     <div className="max-w-6xl">
@@ -133,391 +111,348 @@ export default function MineriaView({
         title="Minería de datos"
         description={
           <>
-            Predicción del veredicto de un correo con RapidMiner sobre 100.000
-            registros sintéticos.{" "}
-            {ejecutado
-              ? `Última ejecución del modelo: ${ejecutado.replace(/\.$/, "")}.`
-              : "El modelo aún no se ha ejecutado."}
+            Predicción del veredicto de un correo (seguro, sospechoso o
+            peligroso) con RapidMiner sobre 100.000 registros sintéticos.
+            {ejecutado && ` Última ejecución: ${ejecutado.replace(/\.$/, "")}.`}
           </>
         }
       />
 
       {error && <ErrorBanner message={error} />}
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          icon={Database}
-          label="Registros crudos"
-          value={fmt(embudo.crudos)}
-          helper="80 % limpios · 10 % outliers · 10 % sucios"
-        />
-        <StatCard
-          icon={Sparkles}
-          label="Registros limpios"
-          value={fmt(embudo.limpios)}
-          helper={`${fmt(embudo.crudos - embudo.limpios)} eliminados en la depuración`}
-          tone="success"
-        />
-        <StatCard
-          icon={Target}
-          label="Exactitud del modelo"
-          value={pct(exactitud)}
-          helper={
-            kappa !== undefined
-              ? `Kappa ${kappa.toFixed(3)}`
-              : "Pendiente de ejecutar en RapidMiner"
-          }
-          tone="accent"
-        />
-        <StatCard
-          icon={TestTube2}
-          label="Registros de prueba"
-          value={fmt(data.prueba)}
-          helper="20 % reservado para validar"
-        />
-      </div>
-
-      <Flujo />
-
-      <div className="mb-6 grid gap-4 lg:grid-cols-2">
-        <ChartCard
-          title="Embudo de depuración"
-          subtitle="Filas que sobreviven a cada fase de limpieza"
+      {/* ── Resumen ─────────────────────────────────────────────────────── */}
+      <section
+        aria-label="Resumen del proceso"
+        className="mb-6 overflow-hidden rounded-2xl border border-guard-surface-raised bg-guard-surface-card/60"
+      >
+        <div className="grid gap-px bg-guard-surface-raised lg:grid-cols-[1.1fr_2fr]">
+          <div className="relative bg-guard-surface-card/80 p-6">
+            <div
+              className="pointer-events-none absolute -top-16 -left-16 h-48 w-48 rounded-full bg-guard-accent/10 blur-3xl"
+              aria-hidden="true"
+            />
+            <p className="text-xs font-medium tracking-wide text-guard-accent uppercase">
+              Resultado del modelo
+            </p>
+            <p className="mt-2 text-5xl font-bold tracking-tight text-white tabular-nums">
+              {hayModelo ? pct(exactitud) : "—"}
+            </p>
+            <p className="mt-1 text-sm text-guard-text-muted">
+              {hayModelo
+                ? "de exactitud del árbol de decisión sobre el 20 % de prueba"
+                : "El modelo aún no se ha ejecutado en RapidMiner."}
+            </p>
+            {kappa !== undefined && (
+              <p className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white/5 px-3 py-1.5 text-xs text-guard-text-muted">
+                Kappa{" "}
+                <strong className="text-white tabular-nums">
+                  {kappa.toFixed(3)}
+                </strong>
+                · acuerdo casi perfecto
+              </p>
+            )}
+          </div>
+          <dl className="grid grid-cols-2 gap-px bg-guard-surface-raised sm:grid-cols-4">
+            <Kpi
+              icon={Database}
+              label="Registros crudos"
+              value={fmt(embudo.crudos)}
+              helper="80 % limpios · 10 % outliers · 10 % sucios"
+            />
+            <Kpi
+              icon={Filter}
+              label="Eliminados"
+              value={fmt(eliminados)}
+              helper={`${fmt((eliminados / (embudo.crudos || 1)) * 100, 0)} % en la depuración`}
+              tone="text-red-300"
+            />
+            <Kpi
+              icon={Sparkles}
+              label="Registros limpios"
+              value={fmt(embudo.limpios)}
+              helper="80 % entrenamiento"
+              tone="text-guard-success"
+            />
+            <Kpi
+              icon={TestTube2}
+              label="Registros de prueba"
+              value={fmt(data.prueba)}
+              helper="20 % para validar"
+            />
+          </dl>
+        </div>
+        <ol
+          aria-label="Flujo del proceso en RapidMiner"
+          className="grid grid-cols-2 gap-px border-t border-guard-surface-raised bg-guard-surface-raised sm:grid-cols-3 lg:grid-cols-6"
         >
-          <BarrasHorizontales
-            data={fases.map((f) => ({
-              nombre: f.fase,
-              n: f.filas,
-              nota: f.quitadas ? `−${fmt(f.quitadas)}` : "",
-            }))}
-            ancho={130}
-            serie="Filas"
-          />
-        </ChartCard>
+          {FLUJO.map((paso, i) => (
+            <li
+              key={paso.label}
+              className="flex items-center gap-3 bg-guard-surface-card/80 px-4 py-3"
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-guard-accent/10 text-guard-accent">
+                <paso.icon className="h-4 w-4" aria-hidden="true" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-xs font-semibold text-white">
+                  <span className="text-guard-text-muted">{i + 1}.</span>{" "}
+                  {paso.label}
+                </span>
+                <span className="block truncate text-[11px] text-guard-text-muted">
+                  {paso.detail}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
 
-        <ChartCard
-          title="Distribución de la etiqueta"
-          subtitle="Veredicto en el dataset limpio (clase a predecir)"
-        >
-          <BarrasHorizontales
-            data={clases.map((c) => ({
-              nombre: c.clase,
-              n: c.n,
-              color: CLASE_COLOR[c.key],
-              nota: embudo.limpios
-                ? `${((c.n / embudo.limpios) * 100).toFixed(1)} %`
-                : "",
-            }))}
-            ancho={90}
-            serie="Correos"
-          />
-        </ChartCard>
+      {/* ── Navegación por secciones ────────────────────────────────────── */}
+      <nav
+        aria-label="Secciones de la página"
+        className="z-20 mb-8 lg:sticky lg:top-[61px]"
+      >
+        <ul className="flex flex-wrap gap-1 rounded-xl border border-guard-surface-raised bg-guard-surface/90 p-1 backdrop-blur-xl lg:inline-flex">
+          {SECCIONES.map((s, i) => (
+            <li key={s.id}>
+              <a
+                href={`#${s.id}`}
+                className="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold text-guard-text-muted transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-guard-accent"
+              >
+                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-white/5 text-[10px] text-guard-accent">
+                  {i + 1}
+                </span>
+                {s.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
-        <ChartCard
-          title="Valores faltantes por columna"
-          subtitle="Celdas vacías o con el texto «NULL» en los datos crudos"
-        >
-          <BarrasHorizontales
-            data={faltantes.map((f) => ({ nombre: f.columna, n: f.n }))}
-            ancho={170}
-            serie="Faltantes"
-            alto={Math.max(220, faltantes.length * 24)}
-          />
-        </ChartCard>
+      {/* ── 1. Datos crudos ─────────────────────────────────────────────── */}
+      <Seccion
+        id="datos"
+        n={1}
+        titulo="Datos crudos"
+        descripcion="Lo que lee RapidMiner desde Supabase antes de limpiar: valores extremos, celdas vacías y textos «NULL»."
+      >
+        {graficos && (
+          <ChartCard
+            title="Dispersión y outliers"
+            subtitle="Muestra sistemática de 1 de cada 50 filas, coloreada por proveedor. La franja lima es el rango válido: todo lo que queda fuera es un outlier."
+          >
+            <DispersionCrudos muestra={graficos.muestra} />
+          </ChartCard>
+        )}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <ChartCard
+            title="Valores faltantes por columna"
+            subtitle="Celdas vacías o con el texto «NULL»"
+          >
+            <BarrasHorizontales
+              data={faltantes}
+              ancho={180}
+              serie="Faltantes"
+              color="#f472b6"
+            />
+          </ChartCard>
+          <ChartCard
+            title="Outliers por variable"
+            subtitle="Valores fuera del rango de negocio"
+          >
+            <BarrasHorizontales
+              data={outliers}
+              ancho={180}
+              serie="Outliers"
+              color="#ff8a5c"
+            />
+          </ChartCard>
+        </div>
+      </Seccion>
 
-        <ChartCard
-          title="Outliers por variable"
-          subtitle="Valores fuera del rango de negocio en los datos crudos"
-        >
-          <BarrasHorizontales
-            data={outliers.map((o) => ({ nombre: o.columna, n: o.n }))}
-            ancho={170}
-            serie="Outliers"
-          />
-        </ChartCard>
-      </div>
+      {/* ── 2. Depuración ───────────────────────────────────────────────── */}
+      <Seccion
+        id="depuracion"
+        n={2}
+        titulo="Depuración"
+        descripcion={`Tres filtros en cadena dejan ${fmt(embudo.limpios)} registros limpios. Las estadísticas muestran cuánto distorsionaban los datos sucios.`}
+      >
+        <div className="grid gap-4 lg:grid-cols-3">
+          <ChartCard
+            title="Embudo de limpieza"
+            subtitle="Filas que sobreviven a cada fase"
+          >
+            <Embudo embudo={embudo} />
+          </ChartCard>
+          {graficos && (
+            <ChartCard
+              title="Estadísticas antes y después"
+              subtitle="Como la pestaña Statistics de RapidMiner"
+              className="lg:col-span-2"
+            >
+              <TablaEstadisticas estadisticas={graficos.estadisticas} />
+            </ChartCard>
+          )}
+        </div>
+      </Seccion>
 
-      <div className="mb-10 grid gap-4 lg:grid-cols-2">
-        <ChartCard
-          title="Matriz de confusión"
-          subtitle="Filas: veredicto real · columnas: veredicto predicho (20 % de prueba)"
-        >
-          {hayModelo ? (
-            <MatrizConfusion confusion={data.confusion} />
-          ) : (
+      {/* ── 3. Exploración ──────────────────────────────────────────────── */}
+      <Seccion
+        id="exploracion"
+        n={3}
+        titulo="Exploración"
+        descripcion="Cómo se reparte la etiqueta y qué variables separan un correo seguro de uno peligroso en el dataset limpio."
+      >
+        {graficos && (
+          <ChartCard
+            title="Histograma por clase"
+            subtitle="Frecuencia de cada variable apilada por veredicto: donde los colores se separan, el modelo encuentra señal."
+          >
+            <HistogramaClases histogramas={graficos.histogramas} />
+          </ChartCard>
+        )}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <ChartCard
+            title="Distribución de la etiqueta"
+            subtitle="Veredicto a predecir, en total y por proveedor"
+          >
+            <DistribucionClases
+              clases={data.clases}
+              proveedores={graficos?.proveedores ?? []}
+            />
+          </ChartCard>
+          <ChartCard
+            title="Perfil de cada clase"
+            subtitle="Promedios por veredicto: lo que aprende el árbol"
+          >
+            <PerfilClases perfil={data.perfil} />
+          </ChartCard>
+        </div>
+      </Seccion>
+
+      {/* ── 4. Modelo ───────────────────────────────────────────────────── */}
+      <Seccion
+        id="modelo"
+        n={4}
+        titulo="Modelo"
+        descripcion="Árbol de decisión entrenado con el 80 % y validado con el 20 % restante (Performance (Classification))."
+      >
+        {hayModelo ? (
+          <>
+            {Object.keys(data.metricas).length > 0 && (
+              <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                {Object.entries(data.metricas).map(([criterio, valor]) => (
+                  <div
+                    key={criterio}
+                    className="rounded-2xl border border-guard-surface-raised bg-guard-surface-card/60 px-4 py-3"
+                  >
+                    <dt className="text-xs text-guard-text-muted">
+                      {METRICA_LABEL[clave(criterio)] ?? criterio}
+                    </dt>
+                    <dd className="mt-1 text-2xl font-bold text-white tabular-nums">
+                      {clave(criterio) === "kappa"
+                        ? valor.toFixed(3)
+                        : pct(valor)}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+            <div className="grid gap-4 lg:grid-cols-2">
+              <ChartCard
+                title="Matriz de confusión"
+                subtitle="Filas: veredicto real · columnas: veredicto predicho"
+              >
+                <MatrizConfusion confusion={data.confusion} />
+              </ChartCard>
+              <ChartCard
+                title="Precisión, recall y F1 por clase"
+                subtitle="Calculadas de la matriz de confusión"
+              >
+                <MetricasPorClase confusion={data.confusion} />
+              </ChartCard>
+            </div>
+            {graficos && graficos.confianza.length > 0 && (
+              <ChartCard
+                title="Confianza del modelo"
+                subtitle="Predicciones por nivel de confianza: cuanto más seguro está el árbol, menos se equivoca."
+              >
+                <Confianza confianza={graficos.confianza} />
+              </ChartCard>
+            )}
+          </>
+        ) : (
+          <ChartCard title="Sin predicciones todavía">
             <EmptyChartState
               icon={Grid3x3}
-              title="Sin predicciones todavía"
+              title="El modelo aún no se ha ejecutado"
               description="Ejecuta el proceso completo en RapidMiner (pasos 5 y 6 de la guía)."
             />
-          )}
-        </ChartCard>
-
-        <ChartCard
-          title="Perfil de cada clase"
-          subtitle="Promedios en el dataset limpio: lo que aprende el modelo"
-        >
-          <PerfilClases perfil={data.perfil} />
-        </ChartCard>
-      </div>
-
-      {hayModelo && Object.keys(data.metricas).length > 0 && (
-        <ChartCard
-          title="Métricas de RapidMiner"
-          subtitle="Salida de Performance (Classification) sobre el 20 % de prueba"
-          className="mb-10"
-        >
-          <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            {Object.entries(data.metricas).map(([criterio, valor]) => (
-              <div key={criterio} className="rounded-xl bg-white/5 px-4 py-3">
-                <dt className="text-xs text-guard-text-muted">
-                  {etiqueta(criterio)}
-                </dt>
-                <dd className="mt-1 text-xl font-semibold text-white tabular-nums">
-                  {criterio.toLowerCase() === "kappa"
-                    ? valor.toFixed(3)
-                    : pct(valor)}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </ChartCard>
-      )}
+          </ChartCard>
+        )}
+      </Seccion>
     </div>
   );
 }
 
-function Flujo() {
+function Kpi({
+  icon: Icon,
+  label,
+  value,
+  helper,
+  tone = "text-white",
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  helper: string;
+  tone?: string;
+}) {
+  return (
+    <div className="bg-guard-surface-card/80 p-5">
+      <dt className="flex items-center gap-2 text-xs text-guard-text-muted">
+        <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+        {label}
+      </dt>
+      <dd className={`mt-2 text-2xl font-bold tabular-nums ${tone}`}>
+        {value}
+      </dd>
+      <dd className="mt-1 text-[11px] text-guard-text-muted">{helper}</dd>
+    </div>
+  );
+}
+
+function Seccion({
+  id,
+  n,
+  titulo,
+  descripcion,
+  children,
+}: {
+  id: string;
+  n: number;
+  titulo: string;
+  descripcion: string;
+  children: ReactNode;
+}) {
   return (
     <section
-      aria-label="Flujo del proceso de minería"
-      className="mb-6 rounded-2xl border border-guard-surface-raised bg-guard-surface-card/60 p-5"
+      id={id}
+      aria-labelledby={`${id}-titulo`}
+      className="mb-12 scroll-mt-32"
     >
-      <h3 className="mb-4 text-sm font-semibold text-white">
-        Flujo del proceso en RapidMiner
-      </h3>
-      <ol className="flex flex-wrap items-center gap-2">
-        {FLUJO.map((paso, i) => (
-          <li key={paso.label} className="flex items-center gap-2">
-            <div className="rounded-xl border border-guard-accent/20 bg-guard-accent/5 px-3 py-2">
-              <p className="text-xs font-semibold text-guard-accent">
-                {i + 1}. {paso.label}
-              </p>
-              <p className="text-[11px] text-guard-text-muted">{paso.detail}</p>
-            </div>
-            {i < FLUJO.length - 1 && (
-              <ArrowRight
-                className="h-4 w-4 shrink-0 text-guard-text-muted"
-                aria-hidden="true"
-              />
-            )}
-          </li>
-        ))}
-      </ol>
+      <header className="mb-4 flex items-start gap-3">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-guard-accent text-sm font-black text-guard-surface">
+          {n}
+        </span>
+        <div>
+          <h2 id={`${id}-titulo`} className="text-lg font-bold text-white">
+            {titulo}
+          </h2>
+          <p className="text-sm text-guard-text-muted">{descripcion}</p>
+        </div>
+      </header>
+      <div className="flex flex-col gap-4">{children}</div>
     </section>
-  );
-}
-
-type Barra = { nombre: string; n: number; color?: string; nota?: string };
-
-function BarrasHorizontales({
-  data,
-  ancho,
-  serie,
-  alto = 220,
-}: {
-  data: Barra[];
-  ancho: number;
-  serie: string;
-  alto?: number;
-}) {
-  return (
-    <div
-      className="w-full"
-      style={{ height: alto }}
-      role="img"
-      aria-label={data.map((d) => `${d.nombre}: ${fmt(d.n)}`).join(", ")}
-    >
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          layout="vertical"
-          margin={{ top: 0, right: 64, left: 0, bottom: 0 }}
-          barCategoryGap={4}
-        >
-          <CartesianGrid stroke={GRID_COLOR} horizontal={false} />
-          <XAxis
-            type="number"
-            stroke={AXIS_COLOR}
-            tick={{ fontSize: 11 }}
-            tickLine={false}
-            axisLine={false}
-            tickFormatter={(v: number) => fmt(v)}
-          />
-          <YAxis
-            type="category"
-            dataKey="nombre"
-            stroke={AXIS_COLOR}
-            tick={{ fontSize: 11 }}
-            tickLine={false}
-            axisLine={false}
-            width={ancho}
-          />
-          <Tooltip
-            cursor={{ fill: "rgba(255,255,255,0.04)" }}
-            content={<ChartTooltip />}
-          />
-          <Bar
-            dataKey="n"
-            name={serie}
-            fill={ACCENT_HEX}
-            radius={[0, 4, 4, 0]}
-            maxBarSize={22}
-          >
-            {data.map((d) => (
-              <Cell key={d.nombre} fill={d.color ?? ACCENT_HEX} />
-            ))}
-            <LabelList
-              dataKey={(d: Barra) => d.nota || fmt(d.n)}
-              position="right"
-              className="fill-guard-text-muted text-[11px]"
-            />
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
-function MatrizConfusion({
-  confusion,
-}: {
-  confusion: MineriaResumen["confusion"];
-}) {
-  const celda = (real: string, predicho: string) =>
-    confusion.find((c) => c.real === real && c.predicho === predicho)?.n ?? 0;
-  const totalFila = (real: string) =>
-    CLASES.reduce((acc, p) => acc + celda(real, p), 0);
-  const total = confusion.reduce((acc, c) => acc + c.n, 0);
-  const aciertos = CLASES.reduce((acc, c) => acc + celda(c, c), 0);
-
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-separate border-spacing-0.5 text-center text-xs">
-        <thead>
-          <tr>
-            <th className="p-2 text-left font-medium text-guard-text-muted">
-              Real ↓ / Predicho →
-            </th>
-            {CLASES.map((p) => (
-              <th key={p} className="p-2 font-medium text-guard-text-muted">
-                {CLASE_LABEL[p]}
-              </th>
-            ))}
-            <th className="p-2 font-medium text-guard-text-muted">Recall</th>
-          </tr>
-        </thead>
-        <tbody>
-          {CLASES.map((r) => {
-            const fila = totalFila(r);
-            return (
-              <tr key={r}>
-                <th className="p-2 text-left font-medium text-white">
-                  <span className="inline-flex items-center gap-2">
-                    <span
-                      className="h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: CLASE_COLOR[r] }}
-                      aria-hidden="true"
-                    />
-                    {CLASE_LABEL[r]}
-                  </span>
-                </th>
-                {CLASES.map((p) => {
-                  const n = celda(r, p);
-                  const share = fila ? n / fila : 0;
-                  return (
-                    <td
-                      key={p}
-                      title={`Real ${CLASE_LABEL[r]}, predicho ${CLASE_LABEL[p]}: ${fmt(n)} (${(share * 100).toFixed(1)} % de la fila)`}
-                      className="rounded-md p-3 font-semibold text-white tabular-nums"
-                      style={{
-                        backgroundColor: `rgba(200, 212, 0, ${0.06 + share * 0.5})`,
-                        outline:
-                          r === p ? "1px solid rgba(200,212,0,0.6)" : undefined,
-                      }}
-                    >
-                      {fmt(n)}
-                    </td>
-                  );
-                })}
-                <td className="p-2 text-guard-text-muted tabular-nums">
-                  {fila ? `${((celda(r, r) / fila) * 100).toFixed(1)} %` : "—"}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <p className="mt-3 text-xs text-guard-text-muted">
-        Diagonal = aciertos: {fmt(aciertos)} de {fmt(total)} (
-        {total ? ((aciertos / total) * 100).toFixed(1) : 0} %).
-      </p>
-    </div>
-  );
-}
-
-const PERFIL_COLUMNAS: { key: string; label: string; unidad?: string }[] = [
-  { key: "dominio_imita_marca", label: "Imita una marca", unidad: "%" },
-  { key: "solicita_credenciales", label: "Pide credenciales", unidad: "%" },
-  { key: "enlaces_acortados", label: "Enlaces acortados" },
-  { key: "palabras_urgencia", label: "Palabras de urgencia" },
-  { key: "porcentaje_mayusculas", label: "Mayúsculas", unidad: "%" },
-  { key: "antiguedad_dominio_dias", label: "Antigüedad del dominio (días)" },
-];
-
-function PerfilClases({ perfil }: { perfil: MineriaResumen["perfil"] }) {
-  const porClase = (c: ClaseMineria) => perfil.find((p) => p.veredicto === c);
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-xs">
-        <thead>
-          <tr className="text-guard-text-muted">
-            <th className="p-2 text-left font-medium">Variable (promedio)</th>
-            {CLASES.map((c) => (
-              <th key={c} className="p-2 text-right font-medium">
-                <span className="inline-flex items-center gap-1.5">
-                  <span
-                    className="h-2 w-2 rounded-full"
-                    style={{ backgroundColor: CLASE_COLOR[c] }}
-                    aria-hidden="true"
-                  />
-                  {CLASE_LABEL[c]}
-                </span>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {PERFIL_COLUMNAS.map(({ key, label, unidad }) => (
-            <tr key={key} className="border-t border-white/5">
-              <td className="p-2 text-guard-text-muted">{label}</td>
-              {CLASES.map((c) => {
-                const v = porClase(c)?.[key];
-                return (
-                  <td
-                    key={c}
-                    className="p-2 text-right font-semibold text-white tabular-nums"
-                  >
-                    {v === undefined
-                      ? "—"
-                      : `${fmt(Number(v))}${unidad ? ` ${unidad}` : ""}`}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   );
 }
