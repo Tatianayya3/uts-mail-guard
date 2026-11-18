@@ -6,12 +6,12 @@ Supabase) y en local (Docker Compose). Fase **Operate** de
 
 ## Servicios
 
-| Servicio         | Producción                               | Local (Docker)   | Salud                         |
-| ---------------- | ---------------------------------------- | ---------------- | ----------------------------- |
-| gateway          | https://mail-guard-gateway.onrender.com  | `localhost:4000` | `/health`, `/health/services` |
-| analysis-service | https://mail-guard-analysis.onrender.com | red interna      | `/health`                     |
-| history-service  | https://mail-guard-history.onrender.com  | red interna      | `/health`                     |
-| Panel web        | Vercel                                   | `localhost:3000` | —                             |
+| Servicio         | Producción                                    | Local (Docker)   | Salud                         |
+| ---------------- | --------------------------------------------- | ---------------- | ----------------------------- |
+| gateway          | https://mail-guard-gateway-zvze.onrender.com  | `localhost:4000` | `/health`, `/health/services` |
+| analysis-service | https://mail-guard-analysis-96pk.onrender.com | red interna      | `/health`                     |
+| history-service  | https://mail-guard-history-bwiv.onrender.com  | red interna      | `/health`                     |
+| Panel web        | Vercel                                        | `localhost:3000` | —                             |
 
 Todos exponen `/metrics` (Prometheus) y escriben logs JSON de una línea con
 `requestId`, `method`, `path`, `status` y `ms`.

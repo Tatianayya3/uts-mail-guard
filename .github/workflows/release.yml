@@ -86,7 +86,7 @@ jobs:
       - name: Compilar la extensión para producción
         working-directory: apps/extension-web
         env:
-          VITE_API_GATEWAY_URL: ${{ vars.VITE_API_GATEWAY_URL || 'https://mail-guard-gateway.onrender.com' }}
+          VITE_API_GATEWAY_URL: ${{ vars.VITE_API_GATEWAY_URL || 'https://mail-guard-gateway-zvze.onrender.com' }}
           VITE_DASHBOARD_URL: ${{ vars.VITE_DASHBOARD_URL }}
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}

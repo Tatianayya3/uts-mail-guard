@@ -20,11 +20,11 @@ const services = local
     }
   : {
       gateway:
-        process.env.GATEWAY_URL ?? "https://mail-guard-gateway.onrender.com",
+        process.env.GATEWAY_URL ?? "https://mail-guard-gateway-zvze.onrender.com",
       analysis:
-        process.env.ANALYSIS_URL ?? "https://mail-guard-analysis.onrender.com",
+        process.env.ANALYSIS_URL ?? "https://mail-guard-analysis-96pk.onrender.com",
       history:
-        process.env.HISTORY_URL ?? "https://mail-guard-history.onrender.com",
+        process.env.HISTORY_URL ?? "https://mail-guard-history-bwiv.onrender.com",
     };
 
 const TIMEOUT_MS = local ? 5_000 : 120_000;
