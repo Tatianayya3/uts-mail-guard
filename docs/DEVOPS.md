@@ -216,7 +216,7 @@ como código), Vercel (panel web), Supabase (base de datos).
    `https://mail-guard-*.onrender.com`, corrígelas en las variables del gateway.
 3. **Vercel:** importa el repo con _Root Directory_ `apps/extension-dashboard` y define
    `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y
-   `API_GATEWAY_URL=https://mail-guard-gateway.onrender.com`.
+   `API_GATEWAY_URL=https://mail-guard-gateway-zvze.onrender.com`.
 4. **Extensión:** en `apps/extension-web/.env` pon `VITE_API_GATEWAY_URL` (Render) y
    `VITE_DASHBOARD_URL` (Vercel), luego `bun run build` y recarga `dist/` en Chrome.
    (O descarga el `.zip` del último GitHub Release.)
@@ -248,7 +248,7 @@ Antes de publicar: define `CORS_ORIGINS=chrome-extension://<ID>,https://<tu-pane
 
 **Demo:** merge de un PR → CI verde → Render Dashboard → _Events_ muestra el
 deploy disparado por el commit → abrir
-`https://mail-guard-gateway.onrender.com/health/services`.
+`https://mail-guard-gateway-zvze.onrender.com/health/services`.
 
 ---
 
@@ -329,7 +329,7 @@ bun run monitoring:down
    3 microservicios de Render respondan, y avisa por correo si alguno cae.
    Configuración (plan gratuito, en [uptimerobot.com](https://uptimerobot.com)):
    1. _Add New Monitor_ → tipo **Keyword**, nombre `Mail Guard · producción`.
-   2. URL: `https://mail-guard-gateway.onrender.com/health/services`.
+   2. URL: `https://mail-guard-gateway-zvze.onrender.com/health/services`.
    3. Keyword `"down"` con **Alert when: keyword exists**: el gateway responde
       `{"analysis":"down"}` si un servicio interno no contesta, así la alerta
       cubre los 3 servicios con un solo monitor.

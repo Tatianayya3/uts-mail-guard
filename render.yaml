@@ -31,9 +31,9 @@ services:
         value: gateway
       - fromGroup: mail-guard-internal
       - key: ANALYSIS_SERVICE_URL
-        value: https://mail-guard-analysis.onrender.com
+        value: https://mail-guard-analysis-96pk.onrender.com
       - key: HISTORY_SERVICE_URL
-        value: https://mail-guard-history.onrender.com
+        value: https://mail-guard-history-bwiv.onrender.com
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_PUBLISHABLE_KEY

@@ -34,9 +34,9 @@ scrape_configs:
     #   credentials_file: /etc/prometheus/metrics-token
     static_configs:
       - targets:
-          - mail-guard-gateway.onrender.com
-          - mail-guard-analysis.onrender.com
-          - mail-guard-history.onrender.com
+          - mail-guard-gateway-zvze.onrender.com
+          - mail-guard-analysis-96pk.onrender.com
+          - mail-guard-history-bwiv.onrender.com
         labels:
           env: produccion
 

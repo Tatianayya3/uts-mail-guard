@@ -5,6 +5,24 @@ Todas las versiones de Mail Guard siguen [SemVer](https://semver.org/lang/es/):
 `.github/workflows/release.yml` (imagen en GHCR + GitHub Release con la
 extensión).
 
+## [2.1.2]
+
+### Corregido
+
+- **Despliegue:** Render asignó nuevas URLs a los Blueprints. El repo, la
+  extensión y la documentación apuntan ahora a:
+  - gateway: `https://mail-guard-gateway-zvze.onrender.com`
+  - analysis: `https://mail-guard-analysis-96pk.onrender.com`
+  - history: `https://mail-guard-history-bwiv.onrender.com`
+
+  Se actualizaron `render.yaml`, `release.yml`, `scripts/ops-status.ts`,
+  Prometheus, la colección de Postman, `RUNBOOK.md` y `DEVOPS.md`.
+
+### Nuevo
+
+- **Minería de datos:** página de minería con RapidMiner y Supabase, y su
+  presentación.
+
 ## [2.1.1]
 
 ### Corregido
