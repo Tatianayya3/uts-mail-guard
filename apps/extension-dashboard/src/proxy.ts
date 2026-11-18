@@ -4,10 +4,14 @@ import { updateSession } from "./lib/supabase/middleware";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const { response, user } = await updateSession(request);
-
   const isDashboardRoute = pathname.startsWith("/dashboard");
   const isHomeRoute = pathname === "/";
+
+  // En "/" el proxy decide si mandar al panel; ahí se confirma la sesión con
+  // Supabase Auth, igual que hace /dashboard, para que nunca discrepen.
+  const { response, user } = await updateSession(request, {
+    verifyWithAuth: isHomeRoute,
+  });
 
   if (!user && isDashboardRoute) {
     const redirectUrl = new URL("/", request.url);
