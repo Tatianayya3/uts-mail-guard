@@ -5,6 +5,25 @@ Todas las versiones de Mail Guard siguen [SemVer](https://semver.org/lang/es/):
 `.github/workflows/release.yml` (imagen en GHCR + GitHub Release con la
 extensión).
 
+## [2.3.0]
+
+### Nuevo
+
+- **Despertar servicios:** indicador de estado en el panel (barra lateral; puntos
+  en móvil) con botón «Despertar servicios». Reintenta hasta que gateway, análisis
+  e historial respondan. Usa la nueva ruta `GET /api/status` del panel.
+- **Despertar automático:** la portada despierta los servicios mientras la persona
+  inicia sesión, y la extensión lo hace al abrir el popup.
+- **Panel reorganizado:** navegación agrupada en _Protección_, _Proyecto de clase_
+  y _Ayuda_. Nueva página **Entregables**, que reúne cada tema de la materia
+  (agentes, minería, IA, pruebas, DevOps) con la lista de verificación de la
+  entrega de agentes y los pasos para la demo.
+
+### Corregido
+
+- **CI:** el build del panel espera a `check-types` (`apps/extension-dashboard/turbo.json`).
+  En paralelo, los dos escribían `.next/types` y el job fallaba a veces.
+
 ## [2.2.1]
 
 ### Corregido
