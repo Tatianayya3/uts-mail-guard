@@ -101,7 +101,7 @@ export function applyThreatIntel(
       value: "Reportado por el agente Centinela",
       detail:
         `${senderHit.domain} está en la base de conocimiento del Centinela: ` +
-        `${senderHit.reports} reporte(s) de otros usuarios en una campaña ` +
+        `${senderHit.reports} reporte(s) de la comunidad de Mail Guard en una campaña ` +
         `${senderHit.level === "dangerous" ? "peligrosa" : "sospechosa"} activa.`,
     };
     const current = signals.find((s) => s.key === "sender");
@@ -140,7 +140,7 @@ export function applyThreatIntel(
 
   const intro = `Agente Centinela: ${worst.domain} forma parte de una campaña ${
     worst.level === "dangerous" ? "peligrosa" : "sospechosa"
-  } reportada por otros usuarios. `;
+  } reportada por la comunidad de Mail Guard. `;
   const base = changed ? buildSummary(verdict, signals) : analysis.summary;
 
   return {

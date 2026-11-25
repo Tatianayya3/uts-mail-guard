@@ -7,8 +7,11 @@ import {
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import type { ServiceClient } from "../application/ports";
 
-/** Códigos que devuelve el proxy de la plataforma mientras el servicio despierta. */
-const TRANSIENT_STATUS = new Set([502, 503, 504]);
+/**
+ * Códigos que devuelve el proxy de la plataforma (sin nuestro JSON) mientras el
+ * servicio despierta. Render también responde 429 durante el arranque en frío.
+ */
+const TRANSIENT_STATUS = new Set([429, 502, 503, 504]);
 
 type RetryOptions = {
   /** Intentos totales (1 = sin reintentos). */
@@ -22,7 +25,7 @@ type RetryOptions = {
  * propaga el request-id y el JWT, y traduce los errores a AppError.
  *
  * En el plan free de Render cada servicio se duerme por separado: el gateway
- * puede despertar antes que history/analysis y recibir un 502/503 del proxy
+ * puede despertar antes que history/analysis y recibir un 429/502/503 del proxy
  * (sin el JSON de nuestros servicios) o un fallo de conexión. Esos casos se
  * reintentan; los errores reales de la aplicación (con JSON) y los timeouts no.
  */

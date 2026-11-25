@@ -46,6 +46,25 @@ describe("service-client · arranque en frío", () => {
     expect(state.calls).toBe(3);
   });
 
+  test("reintenta el 429 del proxy de Render (sin JSON)", async () => {
+    const { client, state } = serve([
+      () => new Response("Too Many Requests", { status: 429 }),
+      ok,
+    ]);
+    expect(await client.request("/v1/scans")).toEqual({ items: [] });
+    expect(state.calls).toBe(2);
+  });
+
+  test("un 429 de la aplicación (con JSON) no se reintenta", async () => {
+    const { client, state } = serve([
+      () => Response.json({ error: "Límite diario." }, { status: 429 }),
+    ]);
+    const error = await client.request("/v1/scans").catch((e: unknown) => e);
+    expect((error as AppError).status).toBe(429);
+    expect((error as AppError).message).toBe("Límite diario.");
+    expect(state.calls).toBe(1);
+  });
+
   test("no reintenta los errores de la aplicación (con JSON)", async () => {
     const { client, state } = serve([
       () => Response.json({ error: "Falla real." }, { status: 500 }),

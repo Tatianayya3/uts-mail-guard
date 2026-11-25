@@ -5,6 +5,17 @@ Todas las versiones de Mail Guard siguen [SemVer](https://semver.org/lang/es/):
 `.github/workflows/release.yml` (imagen en GHCR + GitHub Release con la
 extensión).
 
+## [2.2.1]
+
+### Corregido
+
+- **Gateway:** durante el arranque en frío, Render también responde `429` (sin el
+  JSON de la app) mientras despierta un servicio. El panel mostraba «El servicio
+  history falló». Ahora ese 429 del proxy se reintenta igual que los 502/503/504;
+  un 429 real de la aplicación (cuota diaria) se sigue propagando.
+- **Analista:** el texto de la señal del Centinela habla de «la comunidad de Mail
+  Guard» en lugar de «otros usuarios», porque los reportes pueden ser propios.
+
 ## [2.2.0]
 
 ### Nuevo
