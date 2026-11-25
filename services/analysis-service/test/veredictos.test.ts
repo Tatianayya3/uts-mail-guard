@@ -192,3 +192,33 @@ describe("Coherencia del veredicto", () => {
     expect(analysis.trustScore).toBeGreaterThanOrEqual(70);
   });
 });
+
+describe("Dominios propios de la marca (supabase.help)", () => {
+  test("un enlace con el nombre de la marca, desde su dominio oficial, no es alerta", async () => {
+    const email: EmailSnapshot = {
+      ...supabaseNotice,
+      links: [...supabaseNotice.links, "https://supabase.help/"],
+    };
+    const engine = jevLike({
+      verdict: choiceAnswer("safe", 0.7),
+      trust: {
+        type: "score",
+        score: 3,
+        confidence: 0.7,
+        legend: {},
+        probabilities: {},
+      },
+      category: choiceAnswer("notice", 0.8),
+      impersonation: { type: "noul", noul: 0.1 },
+      pressure: { type: "noul", noul: 0.6 },
+      sensitiveRequest: { type: "noul", noul: 0.1 },
+      // Jev duda del dominio .help, pero no con confianza alta.
+      link_5: choiceAnswer("dangerous", 0.6),
+    });
+    const { analysis } = await analyze(engine, email);
+    expect(analysis.verdict).toBe("safe");
+    const help = analysis.links.find((l) => l.url === "https://supabase.help/");
+    expect(help?.status).toBe("safe");
+    expect(help?.detail).toContain("del mismo remitente");
+  });
+});

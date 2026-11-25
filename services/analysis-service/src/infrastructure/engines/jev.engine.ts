@@ -29,6 +29,8 @@ const MIN_VERDICT_CONFIDENCE = 0.5;
 const MODEL_WEIGHT = 0.7;
 /** Confianza mínima para que Jev marque un enlace (evita alertas al 19 %). */
 const MIN_LINK_CONFIDENCE = { suspicious: 0.6, dangerous: 0.5 } as const;
+/** Para un enlace de la misma organización del remitente oficial se exige más. */
+const MIN_SAME_ORG_DANGER = 0.85;
 /** Probabilidad desde la que un «sí/no» de Jev cuenta como afirmativo. */
 const YES = 0.5;
 
@@ -147,7 +149,8 @@ function linkVerdict(
   const place = host || "un sitio desconocido";
   if (
     answer.choice === "dangerous" &&
-    answer.confidence >= MIN_LINK_CONFIDENCE.dangerous
+    answer.confidence >=
+      (sameOrg ? MIN_SAME_ORG_DANGER : MIN_LINK_CONFIDENCE.dangerous)
   )
     return {
       status: "dangerous",

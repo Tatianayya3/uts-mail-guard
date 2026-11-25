@@ -57,7 +57,13 @@ export const BRANDS: Record<string, { name: string; domains: string[] }> = {
   // marcaría como imitación a cualquier dominio que la contenga.
   supabase: {
     name: "Supabase",
-    domains: ["supabase.com", "supabase.io", "supabase.link", "supabase.co"],
+    domains: [
+      "supabase.com",
+      "supabase.io",
+      "supabase.link",
+      "supabase.co",
+      "supabase.help",
+    ],
   },
   github: {
     name: "GitHub",

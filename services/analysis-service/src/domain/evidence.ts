@@ -151,14 +151,33 @@ export function inspectLink(url: string, senderDomain: string): LinkEvidence {
 
 /**
  * Dos hosts son de la misma organización si comparten dominio registrable
- * (mail.x.com ↔ x.com) o si ambos son dominios oficiales de la misma marca
- * (supabase.com ↔ supabase.link).
+ * (mail.x.com ↔ x.com), si ambos son dominios oficiales de la misma marca
+ * (supabase.com ↔ supabase.link), o si el correo viene del dominio oficial
+ * de una marca y el enlace lleva exactamente su nombre (supabase.help).
  */
 export function sameOrganization(host: string, senderDomain: string): boolean {
   if (!host || !senderDomain) return false;
   if (registrableDomain(host) === registrableDomain(senderDomain)) return true;
-  const brand = officialBrandOf(host);
-  return Boolean(brand) && brand === officialBrandOf(senderDomain);
+  const senderBrand = officialBrandOf(senderDomain);
+  if (!senderBrand) return false;
+  if (officialBrandOf(host) === senderBrand) return true;
+  // Desde un correo gratuito (gmail.com, outlook.com…) escribe cualquiera: ahí
+  // un enlace «google-verificacion.xyz» NO es de Google.
+  if (FREE_MAIL_DOMAINS.has(registrableDomain(senderDomain))) return false;
+  return carriesBrandName(host, senderBrand);
+}
+
+/**
+ * ¿El host lleva EXACTAMENTE el nombre de la marca como palabra?
+ * («supabase.help», «status-supabase.com»). Las empresas usan muchos dominios
+ * con su nombre; si el correo ya viene del dominio OFICIAL de esa marca, un
+ * enlace así es casi seguro suyo. Solo nombre exacto: «supabace.help» (una
+ * letra distinta) sigue siendo imitación.
+ */
+function carriesBrandName(host: string, brandName: string): boolean {
+  const key = Object.entries(BRANDS).find(([, b]) => b.name === brandName)?.[0];
+  if (!key) return false;
+  return host.toLowerCase().split(/[.-]/).includes(key);
 }
 
 /** Extrae evidencias objetivas del correo. Función pura y determinista. */
