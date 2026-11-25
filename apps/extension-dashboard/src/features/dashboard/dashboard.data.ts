@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { ApiError } from "@mail-guard/api-client";
 import {
   EMPTY_ANALYTICS,
+  isAdmin,
+  type AdminUser,
   type AgentsOverview,
   type Analytics,
   type Profile,
@@ -91,6 +93,35 @@ export const loadAgents = cache(
       return {
         agents: null,
         error: message(reason, "No pudimos cargar el estado de los agentes."),
+      };
+    }
+  },
+);
+
+/** ¿La persona en sesión es administradora? (según profiles.role) */
+export const loadIsAdmin = cache(async (): Promise<boolean> => {
+  const { profile } = await loadOverview();
+  return isAdmin(profile);
+});
+
+/**
+ * Protege una página de administración: a quien no es admin le responde 404,
+ * como si la página no existiera. Los servicios vuelven a validar el rol.
+ */
+export async function requireAdmin(): Promise<void> {
+  if (!(await loadIsAdmin())) notFound();
+}
+
+/** Admin: todas las personas registradas con su rol. */
+export const loadUsers = cache(
+  async (): Promise<{ users: AdminUser[]; error: string | null }> => {
+    const { accessToken } = await requireSession();
+    try {
+      return { users: await apiFor(accessToken).listUsers(), error: null };
+    } catch (reason) {
+      return {
+        users: [],
+        error: message(reason, "No pudimos cargar la lista de usuarios."),
       };
     }
   },

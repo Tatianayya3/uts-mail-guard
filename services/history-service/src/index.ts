@@ -3,6 +3,7 @@ import { startSentinelScheduler } from "./agents/sentinel/scheduler";
 import { createSentinel } from "./agents/sentinel/sentinel";
 import { loadConfig } from "./config";
 import { createRoutes } from "./http/routes";
+import { createSupabaseAdminRepository } from "./infrastructure/supabase.admin";
 import { createSupabaseSentinelRepository } from "./infrastructure/supabase.agents";
 import { createSupabaseUserContext } from "./infrastructure/supabase.repository";
 
@@ -43,6 +44,15 @@ if (!sentinel)
     effect: "agente Centinela desactivado (falta SUPABASE_SECRET_KEY)",
   });
 
+// Administración de usuarios: misma clave secreta que el Centinela.
+const admin =
+  env.SUPABASE_URL && env.SUPABASE_SECRET_KEY
+    ? createSupabaseAdminRepository(
+        { url: env.SUPABASE_URL, secretKey: env.SUPABASE_SECRET_KEY },
+        logger,
+      )
+    : null;
+
 const app = createRoutes({
   logger,
   internalToken: env.INTERNAL_SERVICE_TOKEN,
@@ -52,6 +62,7 @@ const app = createRoutes({
     repo: sentinelRepo,
     intervalMinutes: env.SENTINEL_INTERVAL_MINUTES,
   },
+  admin,
   onScansSaved: (verdicts) => scheduler?.notifyScans(verdicts),
 });
 logger.info("listening", { port: env.PORT });

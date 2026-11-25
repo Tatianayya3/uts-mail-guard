@@ -1,7 +1,12 @@
 "use server";
 
 import { refresh } from "next/cache";
-import { firstIssue, updateProfileRequestSchema } from "@mail-guard/contracts";
+import {
+  firstIssue,
+  ROLE_LABEL,
+  roleSchema,
+  updateProfileRequestSchema,
+} from "@mail-guard/contracts";
 import { apiFor } from "@/lib/api.server";
 import { getServerSession } from "@/lib/supabase/server";
 
@@ -81,5 +86,30 @@ export async function markAlertsReadAction(): Promise<ActionResult> {
     return { ok: true, message: `Marcamos ${updated} alerta(s) como leídas.` };
   } catch (reason) {
     return failure(reason, "No pudimos marcar las alertas.");
+  }
+}
+
+/** Admin: cambia el rol de una persona. El history-service valida el permiso. */
+export async function setUserRoleAction(
+  userId: string,
+  role: unknown,
+): Promise<ActionResult> {
+  const session = await getServerSession();
+  if (!session)
+    return { ok: false, message: "Tu sesión expiró. Vuelve a iniciar sesión." };
+  const parsed = roleSchema.safeParse(role);
+  if (!parsed.success) return { ok: false, message: "El rol no es válido." };
+  try {
+    const user = await apiFor(session.accessToken).setUserRole(
+      userId,
+      parsed.data,
+    );
+    refresh();
+    return {
+      ok: true,
+      message: `${user.email ?? "La persona"} ahora es ${ROLE_LABEL[user.role].toLowerCase()}.`,
+    };
+  } catch (reason) {
+    return failure(reason, "No pudimos cambiar el rol.");
   }
 }

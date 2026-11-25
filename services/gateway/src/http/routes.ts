@@ -5,6 +5,7 @@ import {
   scanRequestSchema,
   syncScansRequestSchema,
   updateProfileRequestSchema,
+  updateUserRoleRequestSchema,
 } from "@mail-guard/contracts";
 import {
   bearerToken,
@@ -184,6 +185,27 @@ export function createRoutes(deps: Deps) {
       }),
     ),
   );
+
+  // ── Administración (history-service exige rol admin) ────────────────────
+  v1.get("/admin/users", requireUser, async (c) =>
+    c.json(await toHistory(c, "/v1/admin/users", "GET")),
+  );
+
+  v1.patch("/admin/users/:id", requireUser, async (c) => {
+    const body = await readJson(
+      c,
+      updateUserRoleRequestSchema,
+      "El rol no es válido.",
+    );
+    return c.json(
+      await toHistory(
+        c,
+        `/v1/admin/users/${encodeURIComponent(c.req.param("id"))}`,
+        "PATCH",
+        body,
+      ),
+    );
+  });
 
   // ── Agentes inteligentes ──────────────────────────────────────────────
   v1.get("/agents", requireUser, async (c) =>

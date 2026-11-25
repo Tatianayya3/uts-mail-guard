@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/features/dashboard/dashboard.data";
 import MineriaView from "@/features/mineria/MineriaView";
 import {
   loadMineria,
@@ -7,6 +8,7 @@ import {
 export const metadata = { title: "Minería de datos | Mail Guard" };
 
 export default async function MineriaPage() {
+  await requireAdmin();
   const [{ data, error }, graficos] = await Promise.all([
     loadMineria(),
     loadMineriaGraficos(),

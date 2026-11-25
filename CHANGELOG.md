@@ -5,6 +5,31 @@ Todas las versiones de Mail Guard siguen [SemVer](https://semver.org/lang/es/):
 `.github/workflows/release.yml` (imagen en GHCR + GitHub Release con la
 extensión).
 
+## [2.4.0]
+
+### Nuevo
+
+- **Roles (`user` / `admin`)** sobre `profiles.role`
+  ([`0007_roles.sql`](supabase/migrations/0007_roles.sql)):
+  - **Para todos:** Resumen, Historial, Agentes IA (amenazas y alertas propias),
+    Guía y Cuenta.
+  - **Solo admins:** Usuarios, Entregables, Minería, Pruebas, el estado de
+    servicios, y el ciclo, la bitácora y el botón del Centinela. Las páginas
+    responden 404 a quien no es admin; los servicios responden 403.
+- **Página Usuarios:** todas las personas registradas, con correo, rol,
+  análisis, registro y último acceso. Tiene búsqueda, filtro por rol y botón
+  «Hacer admin» / «Quitar admin». Nadie se puede quitar su propio rol.
+- API: `GET /v1/admin/users` y `PATCH /v1/admin/users/:id`.
+
+### Seguridad
+
+- La política de `profiles` permitía que cada usuario actualizara su fila
+  completa, incluido `role`: cualquiera podía volverse admin con la clave
+  publicable. Ahora el rol `authenticated` solo puede escribir `display_name` y
+  `avatar_url`; el rol lo cambia el history-service con la clave secreta,
+  después de verificar que quien lo pide es admin.
+- La bitácora del Centinela (`agent_runs`) solo la leen los admins.
+
 ## [2.3.0]
 
 ### Nuevo

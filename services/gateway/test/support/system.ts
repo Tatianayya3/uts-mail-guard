@@ -107,12 +107,13 @@ function createMemoryStore() {
       },
       listRecent: async (limit) => mine().slice(0, limit),
       getAnalytics: async (): Promise<Analytics | null> => null,
+      // Ana es admin; Luis, usuario. Sin perfil guardado, Luis no tiene fila.
       getProfile: async () =>
-        names.has(userId)
+        names.has(userId) || userId === USERS.ana.id
           ? {
               id: userId,
               displayName: names.get(userId) ?? null,
-              role: null,
+              role: userId === USERS.ana.id ? "admin" : "user",
               avatarUrl: null,
               createdAt: null,
             }

@@ -1,3 +1,4 @@
+import { isAdmin } from "@mail-guard/contracts";
 import DashboardShell from "@/features/dashboard/shell/DashboardShell";
 import { loadOverview } from "@/features/dashboard/dashboard.data";
 
@@ -12,6 +13,7 @@ export default async function DashboardLayout({
       displayName={displayName}
       email={email}
       avatarUrl={profile.avatarUrl}
+      isAdmin={isAdmin(profile)}
     >
       {children}
     </DashboardShell>

@@ -9,6 +9,7 @@ import PageHeader from "@/features/dashboard/PageHeader";
 import StatCard from "@/features/dashboard/StatCard";
 import CopyButton from "@/features/dashboard/CopyButton";
 import TestSlider from "@/features/tests/TestSlider";
+import { requireAdmin } from "@/features/dashboard/dashboard.data";
 import { REPO_URL, summarize, testReport } from "@/features/tests/tests.data";
 
 export const metadata = { title: "Pruebas | Mail Guard" };
@@ -35,7 +36,8 @@ const COMMANDS = [
 /** Microservicios primero, luego paquetes compartidos y aplicaciones. */
 const DIR_ORDER = ["services/", "docs/", "packages/", "apps/"];
 
-export default function TestsPage() {
+export default async function TestsPage() {
+  await requireAdmin();
   const files = [...testReport.packages]
     .sort(
       (a, b) =>

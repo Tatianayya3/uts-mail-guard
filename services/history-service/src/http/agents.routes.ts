@@ -3,6 +3,7 @@ import type { AgentsOverview } from "@mail-guard/contracts";
 import { unavailable } from "@mail-guard/service-kit";
 import type { SentinelRepository } from "../agents/sentinel/ports";
 import type { Sentinel } from "../agents/sentinel/sentinel";
+import { requireAdmin, roleOf } from "./roles";
 import type { HistoryEnv } from "./routes";
 
 export type AgentDeps = {
@@ -23,8 +24,9 @@ const notConfigured = () =>
 /**
  * Rutas de los agentes. Todas viven bajo /v1 (token interno obligatorio).
  * - GET  /agents/threats       → feed de amenazas para el Analista (solo interno).
- * - GET  /agents               → estado, amenazas, alertas propias y bitácora.
- * - POST /agents/sentinel/run  → ejecución semiautomática del Centinela.
+ * - GET  /agents               → estado, amenazas y alertas propias; la bitácora
+ *                                y el último ciclo, solo para admins.
+ * - POST /agents/sentinel/run  → ejecución semiautomática del Centinela (admins).
  * - POST /agents/alerts/read   → marca las alertas propias como leídas.
  */
 export function registerAgentRoutes(
@@ -51,19 +53,20 @@ export function registerAgentRoutes(
     const alerts = c.var.alerts
       ? await c.var.alerts.list(ALERTS_IN_PANEL).catch(() => [])
       : [];
+    const admin = (await roleOf(c)) === "admin";
     const [threats, runs] = deps.repo
       ? await Promise.all([
           deps.repo
             .listThreats({ activeOnly: true, limit: THREATS_IN_PANEL })
             .catch(() => []),
-          deps.repo.listRuns(RUNS_IN_PANEL).catch(() => []),
+          admin ? deps.repo.listRuns(RUNS_IN_PANEL).catch(() => []) : [],
         ])
       : [[], []];
     const overview: AgentsOverview = {
       sentinel: {
         enabled: Boolean(deps.sentinel),
         intervalMinutes: deps.intervalMinutes,
-        lastRun: deps.sentinel?.lastRun ?? runs[0] ?? null,
+        lastRun: admin ? (deps.sentinel?.lastRun ?? runs[0] ?? null) : null,
       },
       threats,
       alerts,
@@ -72,7 +75,7 @@ export function registerAgentRoutes(
     return c.json(overview);
   });
 
-  v1.post("/agents/sentinel/run", authenticate, async (c) => {
+  v1.post("/agents/sentinel/run", authenticate, requireAdmin, async (c) => {
     if (!deps.sentinel) throw notConfigured();
     return c.json({ run: await deps.sentinel.run("manual") });
   });

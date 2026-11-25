@@ -52,3 +52,40 @@ export const deleteHistoryResponseSchema = z.object({
 });
 
 export type UpdateProfileValues = z.infer<typeof updateProfileRequestSchema>;
+
+// ── Roles y administración ──────────────────────────────────────────────
+export const ROLES = ["user", "admin"] as const;
+export const roleSchema = z.enum(ROLES);
+export type Role = z.infer<typeof roleSchema>;
+
+export const ROLE_LABEL: Record<Role, string> = {
+  user: "Usuario",
+  admin: "Administrador",
+};
+
+/** El perfil es admin solo si su rol lo dice explícitamente. */
+export const isAdmin = (profile: { role: string | null } | null | undefined) =>
+  profile?.role === "admin";
+
+/** Una persona registrada, vista por un administrador. */
+export const adminUserSchema = z.object({
+  id: z.string(),
+  email: z.string().nullable(),
+  displayName: z.string().nullable(),
+  role: roleSchema,
+  createdAt: z.string().nullable(),
+  lastSignInAt: z.string().nullable(),
+  totalScans: z.number().int(),
+});
+
+export const adminUsersResponseSchema = z.object({
+  users: z.array(adminUserSchema),
+});
+
+export const updateUserRoleRequestSchema = z.object({ role: roleSchema });
+
+export const updateUserRoleResponseSchema = z.object({
+  user: adminUserSchema,
+});
+
+export type AdminUser = z.infer<typeof adminUserSchema>;

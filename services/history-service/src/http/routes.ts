@@ -13,10 +13,12 @@ import {
   unavailable,
   type Logger,
 } from "@mail-guard/service-kit";
-import type { Verdict } from "@mail-guard/contracts";
+import type { Role, Verdict } from "@mail-guard/contracts";
 import type { AlertRepository } from "../agents/sentinel/ports";
+import { registerAdminRoutes } from "./admin.routes";
 import { registerAgentRoutes, type AgentDeps } from "./agents.routes";
 import type {
+  AdminRepository,
   AuthenticatedUser,
   ScanRepository,
   UserContextFactory,
@@ -36,6 +38,7 @@ export type HistoryEnv = {
     user: AuthenticatedUser;
     scans: ScanRepository;
     alerts?: AlertRepository;
+    role?: Role;
   };
 };
 type Env = HistoryEnv;
@@ -46,6 +49,8 @@ export function createRoutes(deps: {
   users: UserContextFactory | null;
   /** Agentes (opcional): sin ellos /v1/agents responde vacío o 503. */
   agents?: AgentDeps;
+  /** Administración de usuarios (opcional: requiere la clave secreta). */
+  admin?: AdminRepository | null;
   /** Se llama tras guardar análisis (dispara al Centinela por eventos). */
   onScansSaved?: (verdicts: Verdict[]) => void;
 }) {
@@ -114,6 +119,7 @@ export function createRoutes(deps: {
     c.json(await getOverview(c.var.scans, c.var.user)),
   );
 
+  registerAdminRoutes(v1, authenticate, deps.admin ?? null);
   registerAgentRoutes(v1, authenticate, {
     sentinel: deps.agents?.sentinel ?? null,
     repo: deps.agents?.repo ?? null,

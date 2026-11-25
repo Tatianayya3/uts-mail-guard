@@ -416,11 +416,16 @@ function RunsCard({ runs }: { runs: AgentRun[] }) {
   );
 }
 
-/** Página de agentes: quiénes son, qué percibieron, qué decidieron y qué hicieron. */
+/**
+ * Página de agentes. Todos ven quiénes son, la base de conocimiento y sus
+ * alertas; los admins además ven el ciclo, la bitácora y la configuración.
+ */
 export default function AgentsView({
   agents,
+  isAdmin,
 }: {
   agents: AgentsOverview | null;
+  isAdmin: boolean;
 }) {
   const sentinel = agents?.sentinel;
   const [analyst, sentinelProfile] = AGENTS as [AgentProfile, AgentProfile];
@@ -445,7 +450,7 @@ export default function AgentsView({
         />
       </div>
 
-      {sentinel && !sentinel.enabled && (
+      {isAdmin && sentinel && !sentinel.enabled && (
         <p className="rounded-xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm text-amber-100">
           El Centinela está desactivado: agrega <code>SUPABASE_SECRET_KEY</code>{" "}
           al history-service y ejecuta la migración{" "}
@@ -453,14 +458,14 @@ export default function AgentsView({
         </p>
       )}
 
-      <LastCycle run={sentinel?.lastRun ?? null} />
+      {isAdmin && <LastCycle run={sentinel?.lastRun ?? null} />}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <ThreatsCard threats={agents?.threats ?? []} />
         <AlertsCard alerts={agents?.alerts ?? []} />
       </div>
 
-      <RunsCard runs={agents?.runs ?? []} />
+      {isAdmin && <RunsCard runs={agents?.runs ?? []} />}
     </div>
   );
 }
