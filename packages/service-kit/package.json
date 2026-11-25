@@ -1,6 +1,6 @@
 {
   "name": "@mail-guard/service-kit",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "private": true,
   "type": "module",
   "description": "Piezas comunes de los microservicios: app Hono, errores, logs, entorno y auth interna.",

@@ -5,6 +5,17 @@ Todas las versiones de Mail Guard siguen [SemVer](https://semver.org/lang/es/):
 `.github/workflows/release.yml` (imagen en GHCR + GitHub Release con la
 extensión).
 
+## [2.1.3]
+
+### Corregido
+
+- **Gateway:** al abrir el panel con los servicios dormidos en Render aparecía
+  «El servicio history falló». El proxy de Render responde 502/503 mientras
+  cada servicio despierta, y el gateway no lo reintentaba. Ahora reintenta
+  hasta 3 veces los 502/503/504 del proxy y los fallos de conexión; los errores
+  reales de la aplicación, los 4xx y los timeouts se siguen propagando igual.
+  Si el servicio sigue despertando, el mensaje es «se está iniciando».
+
 ## [2.1.2]
 
 ### Corregido
