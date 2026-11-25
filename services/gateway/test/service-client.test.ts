@@ -65,6 +65,29 @@ describe("service-client · arranque en frío", () => {
     expect(state.calls).toBe(1);
   });
 
+  test("respeta el plazo total aunque queden intentos", async () => {
+    let calls = 0;
+    server = Bun.serve({
+      port: 0,
+      fetch() {
+        calls++;
+        return new Response("Bad Gateway", { status: 502 });
+      },
+    });
+    const client = createServiceClient("history", server.url.href, "t", 2_000, {
+      attempts: 50,
+      delayMs: 40,
+      maxDelayMs: 40,
+      budgetMs: 150,
+    });
+    const started = Date.now();
+    const error = await client.request("/v1/scans").catch((e: unknown) => e);
+    expect((error as AppError).status).toBe(503);
+    expect(Date.now() - started).toBeLessThan(1_000);
+    expect(calls).toBeGreaterThan(1);
+    expect(calls).toBeLessThan(10);
+  });
+
   test("no reintenta los errores de la aplicación (con JSON)", async () => {
     const { client, state } = serve([
       () => Response.json({ error: "Falla real." }, { status: 500 }),

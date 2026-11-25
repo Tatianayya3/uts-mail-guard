@@ -10,5 +10,6 @@ export const apiFor = (accessToken: string) =>
   createMailGuardApi({
     baseUrl: gatewayUrl,
     getAccessToken: async () => accessToken,
-    timeoutMs: 15_000,
+    // Margen para que el gateway espere a que Render despierte un servicio.
+    timeoutMs: 30_000,
   });

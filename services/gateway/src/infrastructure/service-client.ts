@@ -16,8 +16,11 @@ const TRANSIENT_STATUS = new Set([429, 502, 503, 504]);
 type RetryOptions = {
   /** Intentos totales (1 = sin reintentos). */
   attempts?: number;
-  /** Espera base entre intentos; crece de forma lineal (1×, 2×…). */
+  /** Espera base entre intentos; crece de forma lineal (1×, 2×…) hasta `maxDelayMs`. */
   delayMs?: number;
+  maxDelayMs?: number;
+  /** Tiempo total máximo sumando todos los intentos y esperas. */
+  budgetMs?: number;
 };
 
 /**
@@ -34,13 +37,25 @@ export function createServiceClient(
   baseUrl: string,
   internalToken: string,
   timeoutMs = 25_000,
-  { attempts = 3, delayMs = 1_500 }: RetryOptions = {},
+  // Render tarda ~20 s en despertar un servicio y mientras tanto responde
+  // errores rápidos: se reintenta hasta 7 veces (esperas 1.5, 3, 4, 4… s) sin
+  // pasar de ~22 s en total, por debajo de los 30 s que esperan los clientes.
+  {
+    attempts = 7,
+    delayMs = 1_500,
+    maxDelayMs = 4_000,
+    budgetMs = 22_000,
+  }: RetryOptions = {},
 ): ServiceClient {
   const root = baseUrl.replace(/\/+$/, "");
   return {
     async request(path, init = {}) {
+      const deadline = Date.now() + budgetMs;
       for (let attempt = 1; ; attempt++) {
-        const isLast = attempt >= attempts;
+        const pause = Math.min(delayMs * attempt, maxDelayMs);
+        // Último intento si ya no quedan intentos o la próxima espera no cabe.
+        const isLast = attempt >= attempts || Date.now() + pause >= deadline;
+        const remaining = Math.max(1_000, deadline - Date.now());
         let response: Response;
         try {
           response = await fetch(`${root}${path}`, {
@@ -57,13 +72,13 @@ export function createServiceClient(
             },
             body:
               init.body !== undefined ? JSON.stringify(init.body) : undefined,
-            signal: AbortSignal.timeout(timeoutMs),
+            signal: AbortSignal.timeout(Math.min(timeoutMs, remaining)),
           });
         } catch (error) {
           const timedOut =
             error instanceof DOMException && error.name === "TimeoutError";
           if (!isLast && !timedOut) {
-            await wait(delayMs * attempt);
+            await wait(pause);
             continue;
           }
           throw unavailable(
@@ -82,7 +97,7 @@ export function createServiceClient(
         // Respuesta del proxy (sin JSON nuestro) mientras el servicio despierta.
         if (!appError && TRANSIENT_STATUS.has(response.status)) {
           if (!isLast) {
-            await wait(delayMs * attempt);
+            await wait(pause);
             continue;
           }
           throw unavailable(
