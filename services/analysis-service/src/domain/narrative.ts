@@ -123,6 +123,16 @@ function reassurance(input: NarrativeInput): string {
     coherent ? `${from}, y sus enlaces llevan al mismo sitio.` : `${from}.`,
   );
 
+  // Si el contenido tiene una advertencia leve, el resumen no puede decir
+  // «no te pide nada»: lo menciona con calma.
+  const content = input.signals.find((s) => s.key === "content");
+  if (content && isAlert(content)) {
+    parts.push(
+      "Menciona datos personales o pagos, así que revísalo con calma antes de responder o pagar.",
+    );
+    return parts.join(" ");
+  }
+
   const pressure = notes?.pressure ?? evidence.urgency.length > 0;
   parts.push(
     pressure

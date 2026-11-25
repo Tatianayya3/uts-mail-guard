@@ -8,8 +8,9 @@ import type { AnalysisCache } from "../../application/ports";
  * guardados con la versión anterior dejan de servirse (la huella no cambia,
  * así el historial sigue sin duplicados).
  * v2: veredictos coherentes y textos en lenguaje natural.
+ * v3: palabras clave como palabras completas.
  */
-const PREFIX = "mail-guard:analysis:v2:";
+const PREFIX = "mail-guard:analysis:v3:";
 
 /** Caché en memoria con TTL y tamaño máximo (desarrollo / una sola instancia). */
 export function createMemoryCache(

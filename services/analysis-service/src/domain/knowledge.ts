@@ -134,7 +134,11 @@ export const RISKY_TLDS = new Set([
   "buzz",
 ]);
 
-/** Palabras clave (sin tildes, minúsculas). */
+/**
+ * Palabras clave (sin tildes, minúsculas). Coinciden como palabras completas
+ * (acepta plural); un «*» final marca una raíz que puede continuar
+ * («sera bloquead*» → bloqueada, bloqueado).
+ */
 export const KEYWORDS = {
   urgency: [
     "urgente",
@@ -144,8 +148,8 @@ export const KEYWORDS = {
     "ultima advertencia",
     "24 horas",
     "48 horas",
-    "sera suspendid",
-    "sera bloquead",
+    "sera suspendid*",
+    "sera bloquead*",
     "cuenta bloqueada",
     "cuenta suspendida",
     "expira hoy",

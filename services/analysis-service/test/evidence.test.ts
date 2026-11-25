@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   collectEvidence,
+  containsKeyword,
   imitatedBrand,
   inspectLink,
 } from "../src/domain/evidence";
@@ -67,5 +68,24 @@ describe("collectEvidence", () => {
 
   test("correo vacío no tiene contenido analizable", () => {
     expect(collectEvidence(emptyEmail).hasContent).toBe(false);
+  });
+});
+
+describe("palabras clave completas", () => {
+  test("«you won» no coincide dentro de «you won't»", () => {
+    expect(containsKeyword("you won't be able to unpause", "you won")).toBe(
+      false,
+    );
+    expect(containsKeyword("congratulations, you won a prize", "you won")).toBe(
+      true,
+    );
+  });
+
+  test("acepta plural y raíces marcadas con *", () => {
+    expect(containsKeyword("ingresa tus claves", "clave")).toBe(true);
+    expect(containsKeyword("lavado en autoclave", "clave")).toBe(false);
+    expect(containsKeyword("tu cuenta sera bloqueada", "sera bloquead*")).toBe(
+      true,
+    );
   });
 });
