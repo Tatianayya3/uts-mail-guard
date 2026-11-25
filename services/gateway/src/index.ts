@@ -9,6 +9,7 @@ import {
 } from "./infrastructure/identity";
 import { createMemoryQuota, createUpstashQuota } from "./infrastructure/quota";
 import { createServiceClient } from "./infrastructure/service-client";
+import { keepServicesWarm } from "./infrastructure/keep-warm";
 import { createThreatFeed } from "./infrastructure/threat-feed";
 
 const env = loadConfig();
@@ -63,6 +64,16 @@ const threats = createThreatFeed(
     3_000,
     { attempts: 1 },
   ),
+  logger,
+);
+
+// Despierta a analysis e history al arrancar y los mantiene despiertos
+// mientras el gateway esté en uso (Render los duerme por separado).
+keepServicesWarm(
+  {
+    analysis: env.ANALYSIS_SERVICE_URL,
+    history: env.HISTORY_SERVICE_URL,
+  },
   logger,
 );
 

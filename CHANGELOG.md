@@ -5,6 +5,20 @@ Todas las versiones de Mail Guard siguen [SemVer](https://semver.org/lang/es/):
 `.github/workflows/release.yml` (imagen en GHCR + GitHub Release con la
 extensión).
 
+## [2.4.2]
+
+### Corregido
+
+- **«El servicio analysis se está iniciando» con los servicios encendidos.**
+  Mientras Render despierta un servicio, responde errores rápidos en lugar de
+  esperar. El gateway solo reintentaba unos 4,5 s, y despertar toma unos 20 s.
+  - Ahora reintenta hasta ~22 s (7 intentos, esperas de 1,5 a 4 s), por debajo
+    de los 30 s que esperan la extensión y el panel. El timeout del panel pasa
+    de 15 a 30 s.
+  - El gateway despierta a analysis e history al arrancar y los mantiene
+    despiertos (`/health` cada 10 min) mientras está en uso. Así los tres duermen
+    y despiertan juntos.
+
 ## [2.4.1]
 
 ### Corregido
