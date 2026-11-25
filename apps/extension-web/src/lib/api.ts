@@ -13,8 +13,13 @@ export const api = createMailGuardApi({
  * popup, para que al pulsar «Escanear» ya estén activos. No bloquea nada.
  */
 export function wakeServices(): void {
-  if (!env.apiGatewayUrl) return;
-  void fetch(`${env.apiGatewayUrl}/health/services`, {
-    signal: AbortSignal.timeout(90_000),
-  }).catch(() => {});
+  const wake = (url: string, init?: RequestInit) =>
+    void fetch(url, { ...init, signal: AbortSignal.timeout(90_000) }).catch(
+      () => {},
+    );
+  if (env.apiGatewayUrl) wake(`${env.apiGatewayUrl}/health/services`);
+  // El panel despierta además cada servicio por su URL directa (más rápido
+  // que pasar por el gateway). no-cors: solo importa que la petición llegue.
+  if (env.dashboardUrl)
+    wake(`${env.dashboardUrl}/api/status`, { mode: "no-cors" });
 }
