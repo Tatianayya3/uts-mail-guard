@@ -2,6 +2,7 @@ import {
   scanAnalysisSchema,
   type EmailSnapshot,
   type ScanAnalysis,
+  type ThreatIntel,
 } from "@mail-guard/contracts";
 import type { Logger } from "@mail-guard/service-kit";
 import { collectEvidence, type Evidence } from "../domain/evidence";
@@ -14,6 +15,7 @@ import {
   mergeSignals,
   type Decision,
 } from "../domain/scoring";
+import { applyThreatIntel, matchThreats } from "../domain/threat-intel";
 import { computeEmailHash } from "./email-hash";
 import type { AnalysisCache, DecisionEngine } from "./ports";
 
@@ -31,6 +33,8 @@ type Dependencies = {
  * 1. Busca en caché por huella. 2. Extrae evidencias objetivas.
  * 3. Pide la decisión al motor (con respaldo heurístico si falla).
  * 4. Combina modelo + reglas, valida el contrato y lo guarda en caché.
+ * 5. Consulta la base de conocimiento del agente Centinela (también sobre un
+ *    resultado en caché, porque una campaña puede detectarse después).
  */
 export function createAnalyzeEmail({
   engine,
@@ -40,11 +44,15 @@ export function createAnalyzeEmail({
 }: Dependencies) {
   return async function analyzeEmail(
     email: EmailSnapshot,
+    threats: ThreatIntel[] = [],
   ): Promise<AnalyzeEmailResult> {
     const emailHash = computeEmailHash(email);
+    const withIntel = (analysis: ScanAnalysis) =>
+      applyThreatIntel(analysis, matchThreats(analysis, threats));
 
     const cached = await cache.get(emailHash);
-    if (cached) return { analysis: { ...cached, emailHash }, cached: true };
+    if (cached)
+      return { analysis: withIntel({ ...cached, emailHash }), cached: true };
 
     const evidence = collectEvidence(email);
     const baseline = heuristicDecision(evidence);
@@ -71,8 +79,9 @@ export function createAnalyzeEmail({
       throw new Error("El análisis no cumple el contrato esperado.");
     }
 
+    // En caché va el análisis propio; el conocimiento del Centinela se aplica al salir.
     await cache.set(emailHash, parsed.data);
-    return { analysis: parsed.data, cached: false };
+    return { analysis: withIntel(parsed.data), cached: false };
   };
 }
 

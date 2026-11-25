@@ -57,6 +57,20 @@ extensión o en el **panel web**.
 
 ---
 
+## Agentes inteligentes
+
+Mail Guard funciona como un **sistema de dos agentes conectados**:
+
+| Agente           | Clasificación                                 | Modo                                          | Tarea                                                                                  |
+| ---------------- | --------------------------------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 🔎 **Analista**  | Reactivo basado en modelo                     | Semiautomático (el usuario pulsa «Escanear»)  | Percibe el correo abierto y actúa con un veredicto, señales y consejo.                 |
+| 🛰️ **Centinela** | Deliberativo basado en objetivos (+ utilidad) | Automático (periódico y por eventos) y manual | Detecta campañas en los análisis de la comunidad, las publica y avisa a los expuestos. |
+
+El Centinela publica lo que aprende en una base de conocimiento que el Analista consulta en
+cada análisis: un correo «inofensivo» de un dominio en campaña activa sale como peligroso.
+Ver [`docs/AGENTES.md`](docs/AGENTES.md) (tablas PEAS, ciclo y guion de demo) y la página
+**Agentes** del panel.
+
 ## Arquitectura
 
 Mail Guard es un monorepo con **2 clientes**, **3 microservicios** y **4 paquetes compartidos**.
@@ -218,7 +232,16 @@ Solo el gateway se publica (`:4000`); los servicios internos quedan en la red de
    (y la URL de producción) a las _Redirect URLs_.
 4. Copia la URL del proyecto y la **publishable key** en los `.env`.
 
-### 2. Jev (opcional, recomendado)
+### 2. Agente Centinela (opcional)
+
+1. En **SQL Editor** ejecuta [`0006_agentes.sql`](supabase/migrations/0006_agentes.sql).
+2. En Supabase → **Settings → API Keys** copia la **secret key** y defínela como
+   `SUPABASE_SECRET_KEY` **solo** en `services/history-service/.env` (o en Render).
+
+Sin la clave, el Centinela queda desactivado y todo lo demás funciona igual.
+Detalles en [`docs/AGENTES.md`](docs/AGENTES.md).
+
+### 3. Jev (opcional, recomendado)
 
 Solicita acceso en [typesafe.ai](https://typesafe.ai) y define `TYPESAFE_API_KEY` en
 `services/analysis-service/.env`. Con `DECISION_ENGINE=auto` se usará automáticamente.
@@ -259,6 +282,8 @@ Solicita acceso en [typesafe.ai](https://typesafe.ai) y define `TYPESAFE_API_KEY
 | Variable                                    | Descripción                                                     |
 | ------------------------------------------- | --------------------------------------------------------------- |
 | `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` | Proyecto de Supabase. Sin ellas, los endpoints responden `503`. |
+| `SUPABASE_SECRET_KEY`                       | Clave secreta para el agente Centinela. Sin ella, se desactiva. |
+| `SENTINEL_INTERVAL_MINUTES`                 | Minutos entre ciclos automáticos del Centinela (`30`).          |
 
 </details>
 
@@ -284,7 +309,7 @@ Solicita acceso en [typesafe.ai](https://typesafe.ai) y define `TYPESAFE_API_KEY
 </details>
 
 > Las variables `VITE_*` y `NEXT_PUBLIC_*` **no son secretas**. `TYPESAFE_API_KEY`, `AI_API_KEY`,
-> `UPSTASH_REDIS_REST_TOKEN` e `INTERNAL_SERVICE_TOKEN` **sí lo son**: nunca las pongas en un cliente.
+> `UPSTASH_REDIS_REST_TOKEN`, `SUPABASE_SECRET_KEY` e `INTERNAL_SERVICE_TOKEN` **sí lo son**: nunca las pongas en un cliente.
 
 ---
 

@@ -1,4 +1,4 @@
-import { scanRequestSchema } from "@mail-guard/contracts";
+import { analyzeRequestSchema } from "@mail-guard/contracts";
 import {
   createServiceApp,
   readJson,
@@ -26,12 +26,12 @@ export function createRoutes({
   app.get("/v1/engine", (c) => c.json({ engine: engineName }));
 
   app.post("/v1/analyze", requireInternalToken(internalToken), async (c) => {
-    const { email } = await readJson(
+    const { email, threats } = await readJson(
       c,
-      scanRequestSchema,
+      analyzeRequestSchema,
       "La información del correo no es válida.",
     );
-    return c.json(await analyzeEmail(email));
+    return c.json(await analyzeEmail(email, threats));
   });
 
   return app;

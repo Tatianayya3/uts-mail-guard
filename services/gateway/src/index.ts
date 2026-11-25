@@ -9,6 +9,7 @@ import {
 } from "./infrastructure/identity";
 import { createMemoryQuota, createUpstashQuota } from "./infrastructure/quota";
 import { createServiceClient } from "./infrastructure/service-client";
+import { createThreatFeed } from "./infrastructure/threat-feed";
 
 const env = loadConfig();
 const logger = createLogger("gateway");
@@ -53,6 +54,18 @@ const history = createServiceClient(
   env.INTERNAL_SERVICE_TOKEN,
 );
 
+// Cliente rápido (sin reintentos) para el feed del Centinela: nunca debe frenar un análisis.
+const threats = createThreatFeed(
+  createServiceClient(
+    "history",
+    env.HISTORY_SERVICE_URL,
+    env.INTERNAL_SERVICE_TOKEN,
+    3_000,
+    { attempts: 1 },
+  ),
+  logger,
+);
+
 const app = createRoutes({
   logger,
   corsOrigins: env.CORS_ORIGINS.split(",")
@@ -61,12 +74,14 @@ const app = createRoutes({
   identity,
   analysis,
   history,
+  threats,
   metrics,
   scanEmail: createScanEmail({
     analysis,
     history,
     quota,
     logger,
+    threats,
     metrics: {
       recorded: (verdict, cached) =>
         scansTotal.inc({ verdict, cached: String(cached) }),

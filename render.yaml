@@ -76,3 +76,9 @@ services:
         sync: false
       - key: SUPABASE_PUBLISHABLE_KEY
         sync: false
+      # Agente Centinela: clave SECRETA de Supabase (service_role). Sin ella el
+      # Centinela queda desactivado y el resto del servicio funciona igual.
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: SENTINEL_INTERVAL_MINUTES
+        value: "30"

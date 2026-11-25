@@ -1,11 +1,16 @@
 import type { z } from "zod";
 import {
+  agentsOverviewResponseSchema,
   deleteHistoryResponseSchema,
+  markAlertsReadResponseSchema,
+  sentinelRunResponseSchema,
   overviewResponseSchema,
   scanDetailResponseSchema,
   scanListResponseSchema,
   scanResponseSchema,
   syncScansResponseSchema,
+  type AgentRun,
+  type AgentsOverview,
   type EmailSnapshot,
   type Overview,
   type ScanRecord,
@@ -158,6 +163,30 @@ export function createMailGuardApi(options: MailGuardApiOptions) {
     /** UC-09: perfil + métricas agregadas. */
     getOverview(): Promise<Overview> {
       return request("/v1/me", overviewResponseSchema, { auth: "required" });
+    },
+    /** Agentes: estado del Centinela, amenazas, alertas propias y bitácora. */
+    getAgents(): Promise<AgentsOverview> {
+      return request("/v1/agents", agentsOverviewResponseSchema, {
+        auth: "required",
+      });
+    },
+    /** Agentes: ejecución semiautomática de un ciclo del Centinela. */
+    async runSentinel(): Promise<AgentRun> {
+      const { run } = await request(
+        "/v1/agents/sentinel/run",
+        sentinelRunResponseSchema,
+        { method: "POST", auth: "required" },
+      );
+      return run;
+    },
+    /** Agentes: marca como leídas las alertas del usuario. */
+    async markAlertsRead(): Promise<number> {
+      const { updated } = await request(
+        "/v1/agents/alerts/read",
+        markAlertsReadResponseSchema,
+        { method: "POST", auth: "required" },
+      );
+      return updated;
     },
   };
 }

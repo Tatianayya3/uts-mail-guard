@@ -10,6 +10,7 @@ import type {
   QuotaPolicy,
   ScanMetrics,
   ServiceClient,
+  ThreatFeed,
 } from "./ports";
 
 type Deps = {
@@ -18,6 +19,7 @@ type Deps = {
   quota: QuotaPolicy;
   logger: Logger;
   metrics?: ScanMetrics;
+  threats?: ThreatFeed;
 };
 
 /**
@@ -30,6 +32,7 @@ export function createScanEmail({
   quota,
   logger,
   metrics,
+  threats,
 }: Deps) {
   return async function scanEmail(input: {
     email: EmailSnapshot;
@@ -50,10 +53,16 @@ export function createScanEmail({
       );
     }
 
+    // Multiagente: el Analista recibe lo que ya sabe el Centinela.
+    const known = (await threats?.get()) ?? [];
     const result = await analysis.request<{
       analysis: ScanAnalysis;
       cached: boolean;
-    }>("/v1/analyze", { method: "POST", body: { email }, requestId });
+    }>("/v1/analyze", {
+      method: "POST",
+      body: known.length ? { email, threats: known } : { email },
+      requestId,
+    });
     // Un resultado en caché no consume IA, así que tampoco consume cuota.
     if (!result.cached)
       currentQuota = await quota.consume(quotaKey, authenticated);

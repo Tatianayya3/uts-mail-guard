@@ -5,6 +5,30 @@ Todas las versiones de Mail Guard siguen [SemVer](https://semver.org/lang/es/):
 `.github/workflows/release.yml` (imagen en GHCR + GitHub Release con la
 extensión).
 
+## [2.2.0]
+
+### Nuevo
+
+- **Agentes inteligentes** ([`docs/AGENTES.md`](docs/AGENTES.md)):
+  - **Agente Analista** (reactivo basado en modelo, semiautomático): el análisis de
+    siempre, que ahora consulta la base de conocimiento del Centinela. Un correo de
+    un dominio en campaña activa muestra «Reportado por el agente Centinela».
+  - **Agente Centinela** (deliberativo basado en objetivos, automático): en el
+    history-service, corre cada 30 min, al arrancar y cuando llegan análisis
+    riesgosos. Percibe conteos agregados por dominio, decide publicar, escalar,
+    refrescar, retirar o descartar (con prioridad por utilidad), y avisa a los
+    usuarios expuestos.
+  - Página **Agentes** en el panel: tablas PEAS, último ciclo (percepción →
+    deliberación → acción), base de conocimiento, alertas propias, bitácora y
+    botón «Ejecutar Centinela».
+  - API: `GET /v1/agents`, `POST /v1/agents/sentinel/run` y
+    `POST /v1/agents/alerts/read`.
+- **Migración** [`0006_agentes.sql`](supabase/migrations/0006_agentes.sql):
+  tablas `threat_domains`, `agent_runs` y `agent_alerts`, con RLS, y funciones del
+  sensor y del actuador, solo para `service_role`.
+- **Configuración:** `SUPABASE_SECRET_KEY` y `SENTINEL_INTERVAL_MINUTES` en el
+  history-service. Son opcionales: sin la clave, el Centinela queda desactivado.
+
 ## [2.1.3]
 
 ### Corregido

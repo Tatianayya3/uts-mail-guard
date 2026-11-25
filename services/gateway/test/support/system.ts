@@ -8,8 +8,11 @@
  * - Motor de IA → reglas locales (deterministas).
  */
 import type {
+  AgentAlert,
+  AgentRun,
   Analytics,
   EmailSnapshot,
+  ThreatDomain,
   ScanRecord,
   StoredScan,
 } from "@mail-guard/contracts";
@@ -24,10 +27,13 @@ import type {
   UserContextFactory,
 } from "../../../history-service/src/application/ports";
 import { createRoutes as createHistoryRoutes } from "../../../history-service/src/http/routes";
+import type { SentinelRepository } from "../../../history-service/src/agents/sentinel/ports";
+import { createSentinel } from "../../../history-service/src/agents/sentinel/sentinel";
 import { createScanEmail } from "../../src/application/scan-email";
 import { createRoutes as createGatewayRoutes } from "../../src/http/routes";
 import { createMemoryQuota } from "../../src/infrastructure/quota";
 import { createServiceClient } from "../../src/infrastructure/service-client";
+import { createThreatFeed } from "../../src/infrastructure/threat-feed";
 
 export const INTERNAL_TOKEN = "token-interno-de-prueba";
 
@@ -41,6 +47,7 @@ const silent: Logger = createLogger("test");
 silent.info = () => {};
 silent.warn = () => {};
 silent.debug = () => {};
+silent.error = () => {};
 
 export const phishingEmail: EmailSnapshot = {
   provider: "Outlook",
@@ -133,11 +140,86 @@ function createMemoryStore() {
         avatarUrl: null,
         createdAt: null,
       };
-      return { user, scans: repoFor(match.id) };
+      return {
+        user,
+        scans: repoFor(match.id),
+        alerts: {
+          list: async (limit) =>
+            alerts.filter((a) => a.profileId === match.id).slice(0, limit),
+          markAllRead: async () => 0,
+        },
+      };
     },
   };
 
-  return { users, rows };
+  // Centinela sobre la misma "base de datos": ve los análisis de todos.
+  const threats = new Map<string, ThreatDomain>();
+  const runs: AgentRun[] = [];
+  const alerts: Array<AgentAlert & { profileId: string }> = [];
+  const sentinelRepo: SentinelRepository = {
+    async observe() {
+      const byDomain = new Map<
+        string,
+        { d: number; s: number; ok: number; users: Set<string>; last: string }
+      >();
+      for (const [userId, list] of rows) {
+        for (const r of list) {
+          const o = byDomain.get(r.sender.domain) ?? {
+            d: 0,
+            s: 0,
+            ok: 0,
+            users: new Set<string>(),
+            last: r.analyzedAt,
+          };
+          if (r.verdict === "dangerous") o.d++;
+          if (r.verdict === "suspicious") o.s++;
+          if (r.verdict === "safe") o.ok++;
+          o.users.add(userId);
+          byDomain.set(r.sender.domain, o);
+        }
+      }
+      return [...byDomain].map(([domain, o]) => ({
+        domain,
+        dangerousReports: o.d,
+        suspiciousReports: o.s,
+        safeReports: o.ok,
+        affectedUsers: o.users.size,
+        lastSeenAt: o.last,
+      }));
+    },
+    listThreats: async ({ activeOnly } = {}) =>
+      [...threats.values()].filter((t) => !activeOnly || t.active),
+    upsertThreat: async (t) => void threats.set(t.domain, t),
+    retireThreat: async (d) =>
+      void threats.set(d, { ...threats.get(d)!, active: false }),
+    async alertExposedUsers({ domain, level, title, message }) {
+      let created = 0;
+      for (const [userId, list] of rows) {
+        if (!list.some((r) => r.sender.domain === domain)) continue;
+        alerts.push({
+          id: String(alerts.length + 1),
+          profileId: userId,
+          domain,
+          level,
+          title,
+          message,
+          createdAt: new Date().toISOString(),
+          readAt: null,
+        });
+        created++;
+      }
+      return created;
+    },
+    saveRun: async (run) => void runs.unshift(run),
+    listRuns: async (limit) => runs.slice(0, limit),
+  };
+  const sentinel = createSentinel({
+    repo: sentinelRepo,
+    logger: silent,
+    manualCooldownMs: 0,
+  });
+
+  return { users, rows, sentinel, sentinelRepo, threats };
 }
 
 export type System = Awaited<ReturnType<typeof startSystem>>;
@@ -161,6 +243,11 @@ export function startSystem(
     logger: silent,
     internalToken: INTERNAL_TOKEN,
     users: options.withHistory === false ? null : store.users,
+    agents: {
+      sentinel: store.sentinel,
+      repo: store.sentinelRepo,
+      intervalMinutes: 30,
+    },
   });
 
   const analysisServer = Bun.serve({ port: 0, fetch: analysisApp.fetch });
@@ -176,6 +263,7 @@ export function startSystem(
     historyServer.url.href,
     INTERNAL_TOKEN,
   );
+  const threats = createThreatFeed(history, silent, { ttlMs: 0 });
   const quota = createMemoryQuota({
     anonymous: options.anonymousLimit ?? 5,
     authenticated: 100,
@@ -191,7 +279,14 @@ export function startSystem(
     },
     analysis,
     history,
-    scanEmail: createScanEmail({ analysis, history, quota, logger: silent }),
+    threats,
+    scanEmail: createScanEmail({
+      analysis,
+      history,
+      quota,
+      logger: silent,
+      threats,
+    }),
   });
   const gatewayServer = Bun.serve({ port: 0, fetch: gatewayApp.fetch });
 
@@ -229,6 +324,7 @@ export function startSystem(
     analysisUrl: analysisServer.url.href.replace(/\/$/, ""),
     historyUrl: historyServer.url.href.replace(/\/$/, ""),
     rows: store.rows,
+    threats: store.threats,
     call,
     stop() {
       gatewayServer.stop(true);
