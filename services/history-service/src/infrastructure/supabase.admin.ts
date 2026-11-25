@@ -78,15 +78,25 @@ export function createSupabaseAdminRepository(
         await db.auth.admin.getUserById(userId);
       if (findError || !found.user) return null;
 
-      // upsert: un usuario antiguo podría no tener fila en profiles.
-      const { data, error } = await db
+      // Primero update (solo toca role); si la persona no tiene fila en
+      // profiles (usuario antiguo), se crea con lo mínimo.
+      const columns = "id, role, display_name";
+      let { data, error } = await db
         .from("profiles")
-        .upsert({ id: userId, role }, { onConflict: "id" })
-        .select("id, role, display_name")
-        .single();
-      if (error) {
+        .update({ role })
+        .eq("id", userId)
+        .select(columns)
+        .maybeSingle();
+      if (!error && !data) {
+        ({ data, error } = await db
+          .from("profiles")
+          .insert({ id: userId, role })
+          .select(columns)
+          .single());
+      }
+      if (error || !data) {
         logger.error("admin_set_role_failed", {
-          message: error.message,
+          message: error?.message ?? "sin fila",
           hint: HINT,
         });
         throw new Error("No se pudo cambiar el rol.");
