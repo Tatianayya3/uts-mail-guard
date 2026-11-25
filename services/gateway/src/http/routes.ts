@@ -18,6 +18,7 @@ import type {
   Identity,
   IdentityVerifier,
   ServiceClient,
+  ThreatFeed,
 } from "../application/ports";
 import type { createScanEmail } from "../application/scan-email";
 
@@ -29,6 +30,7 @@ type Deps = {
   identity: IdentityVerifier;
   analysis: ServiceClient;
   history: ServiceClient;
+  threats?: ThreatFeed;
   scanEmail: ReturnType<typeof createScanEmail>;
   metrics?: Metrics;
 };
@@ -177,6 +179,37 @@ export function createRoutes(deps: Deps) {
   v1.get("/me", requireUser, async (c) =>
     c.json(
       await deps.history.request("/v1/me", {
+        token: c.var.identity!.token,
+        requestId: c.var.requestId,
+      }),
+    ),
+  );
+
+  // ── Agentes inteligentes ──────────────────────────────────────────────
+  v1.get("/agents", requireUser, async (c) =>
+    c.json(
+      await deps.history.request("/v1/agents", {
+        token: c.var.identity!.token,
+        requestId: c.var.requestId,
+      }),
+    ),
+  );
+
+  // Semiautomático: el usuario le pide al Centinela un ciclo ahora mismo.
+  v1.post("/agents/sentinel/run", requireUser, async (c) => {
+    const result = await deps.history.request("/v1/agents/sentinel/run", {
+      method: "POST",
+      token: c.var.identity!.token,
+      requestId: c.var.requestId,
+    });
+    deps.threats?.invalidate();
+    return c.json(result);
+  });
+
+  v1.post("/agents/alerts/read", requireUser, async (c) =>
+    c.json(
+      await deps.history.request("/v1/agents/alerts/read", {
+        method: "POST",
         token: c.var.identity!.token,
         requestId: c.var.requestId,
       }),

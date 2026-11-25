@@ -13,6 +13,9 @@ import {
   unavailable,
   type Logger,
 } from "@mail-guard/service-kit";
+import type { Verdict } from "@mail-guard/contracts";
+import type { AlertRepository } from "../agents/sentinel/ports";
+import { registerAgentRoutes, type AgentDeps } from "./agents.routes";
 import type {
   AuthenticatedUser,
   ScanRepository,
@@ -28,12 +31,23 @@ import {
   updateProfile,
 } from "../application/use-cases";
 
-type Env = { Variables: { user: AuthenticatedUser; scans: ScanRepository } };
+export type HistoryEnv = {
+  Variables: {
+    user: AuthenticatedUser;
+    scans: ScanRepository;
+    alerts?: AlertRepository;
+  };
+};
+type Env = HistoryEnv;
 
 export function createRoutes(deps: {
   logger: Logger;
   internalToken: string;
   users: UserContextFactory | null;
+  /** Agentes (opcional): sin ellos /v1/agents responde vacío o 503. */
+  agents?: AgentDeps;
+  /** Se llama tras guardar análisis (dispara al Centinela por eventos). */
+  onScansSaved?: (verdicts: Verdict[]) => void;
 }) {
   const app = createServiceApp("history-service", deps.logger);
 
@@ -45,6 +59,7 @@ export function createRoutes(deps: {
     if (!context) throw unauthorized();
     c.set("user", context.user);
     c.set("scans", context.scans);
+    if (context.alerts) c.set("alerts", context.alerts);
     await next();
   };
 
@@ -57,7 +72,9 @@ export function createRoutes(deps: {
       saveScanRequestSchema,
       "El análisis no es válido.",
     );
-    return c.json({ saved: await saveScan(c.var.scans, scan) });
+    const saved = await saveScan(c.var.scans, scan);
+    deps.onScansSaved?.([scan.verdict]);
+    return c.json({ saved });
   });
 
   v1.post("/scans/sync", authenticate, async (c) => {
@@ -66,7 +83,9 @@ export function createRoutes(deps: {
       syncScansRequestSchema,
       "Los análisis no son válidos.",
     );
-    return c.json({ saved: await syncScans(c.var.scans, scans) });
+    const saved = await syncScans(c.var.scans, scans);
+    if (saved > 0) deps.onScansSaved?.(scans.map((s) => s.verdict));
+    return c.json({ saved });
   });
 
   v1.get("/scans", authenticate, async (c) => {
@@ -94,6 +113,12 @@ export function createRoutes(deps: {
   v1.get("/me", authenticate, async (c) =>
     c.json(await getOverview(c.var.scans, c.var.user)),
   );
+
+  registerAgentRoutes(v1, authenticate, {
+    sentinel: deps.agents?.sentinel ?? null,
+    repo: deps.agents?.repo ?? null,
+    intervalMinutes: deps.agents?.intervalMinutes ?? 30,
+  });
 
   return app;
 }

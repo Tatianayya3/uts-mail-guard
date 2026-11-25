@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ApiError } from "@mail-guard/api-client";
 import {
   EMPTY_ANALYTICS,
+  type AgentsOverview,
   type Analytics,
   type Profile,
   type ScanRecord,
@@ -76,3 +77,21 @@ export const loadScan = cache(async (id: string): Promise<ScanRecord> => {
     throw reason;
   }
 });
+
+/** Agentes: estado del Centinela, amenazas, alertas propias y bitácora. */
+export const loadAgents = cache(
+  async (): Promise<{
+    agents: AgentsOverview | null;
+    error: string | null;
+  }> => {
+    const { accessToken } = await requireSession();
+    try {
+      return { agents: await apiFor(accessToken).getAgents(), error: null };
+    } catch (reason) {
+      return {
+        agents: null,
+        error: message(reason, "No pudimos cargar el estado de los agentes."),
+      };
+    }
+  },
+);

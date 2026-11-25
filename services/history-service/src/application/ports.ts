@@ -4,6 +4,7 @@ import type {
   ScanRecord,
   StoredScan,
 } from "@mail-guard/contracts";
+import type { AlertRepository } from "../agents/sentinel/ports";
 
 export type AuthenticatedUser = {
   id: string;
@@ -28,7 +29,10 @@ export interface ScanRepository {
 
 export interface UserContextFactory {
   /** Verifica el JWT y devuelve el usuario con su repositorio, o null si no es válido. */
-  fromToken(
-    token: string,
-  ): Promise<{ user: AuthenticatedUser; scans: ScanRepository } | null>;
+  fromToken(token: string): Promise<{
+    user: AuthenticatedUser;
+    scans: ScanRepository;
+    /** Alertas del Centinela para este usuario (sin la migración 0006 no hay). */
+    alerts?: AlertRepository;
+  } | null>;
 }

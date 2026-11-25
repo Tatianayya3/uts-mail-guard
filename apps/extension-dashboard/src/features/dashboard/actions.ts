@@ -54,3 +54,32 @@ export async function deleteHistoryAction(
     return failure(reason, "No pudimos borrar tu historial.");
   }
 }
+
+/** Agentes: el usuario le pide al Centinela un ciclo ahora (semiautomático). */
+export async function runSentinelAction(): Promise<ActionResult> {
+  const session = await getServerSession();
+  if (!session)
+    return { ok: false, message: "Tu sesión expiró. Vuelve a iniciar sesión." };
+  try {
+    const run = await apiFor(session.accessToken).runSentinel();
+    refresh();
+    return run.status === "completed"
+      ? { ok: true, message: run.summary }
+      : { ok: false, message: run.summary };
+  } catch (reason) {
+    return failure(reason, "No pudimos ejecutar al Centinela.");
+  }
+}
+
+export async function markAlertsReadAction(): Promise<ActionResult> {
+  const session = await getServerSession();
+  if (!session)
+    return { ok: false, message: "Tu sesión expiró. Vuelve a iniciar sesión." };
+  try {
+    const updated = await apiFor(session.accessToken).markAlertsRead();
+    refresh();
+    return { ok: true, message: `Marcamos ${updated} alerta(s) como leídas.` };
+  } catch (reason) {
+    return failure(reason, "No pudimos marcar las alertas.");
+  }
+}

@@ -11,6 +11,7 @@ import type {
   ScanRepository,
   UserContextFactory,
 } from "../application/ports";
+import { createSupabaseAlertRepository } from "./supabase.agents";
 
 const SCAN_COLUMNS =
   "id, provider, subject, sender_email, sender_domain, sender_display_name, trust_score, verdict, summary, advice, signals, links, model, analyzed_at, created_at, email_hash";
@@ -206,7 +207,11 @@ export function createSupabaseUserContext(
           typeof metadata.avatar_url === "string" ? metadata.avatar_url : null,
         createdAt: null,
       };
-      return { user, scans: new SupabaseScanRepository(db, user.id, logger) };
+      return {
+        user,
+        scans: new SupabaseScanRepository(db, user.id, logger),
+        alerts: createSupabaseAlertRepository(db, user.id),
+      };
     },
   };
 }
