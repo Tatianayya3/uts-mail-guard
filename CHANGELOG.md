@@ -5,6 +5,23 @@ Todas las versiones de Mail Guard siguen [SemVer](https://semver.org/lang/es/):
 `.github/workflows/release.yml` (imagen en GHCR + GitHub Release con la
 extensión).
 
+## [2.5.2]
+
+### Corregido
+
+- **Dominios propios de una marca.** Un correo real de Supabase salía
+  «Sospechoso» porque su enlace `supabase.help` se marcaba como «imita la
+  dirección de una marca». Ahora, si el correo viene del dominio **oficial** de
+  una marca, un enlace con exactamente su nombre (`supabase.help`,
+  `status-supabase.com`) cuenta como de la misma organización.
+  - Una variante con una letra distinta (`supabace.help`) sigue siendo
+    imitación.
+  - Desde un correo gratuito (gmail.com, outlook.com…) la regla no aplica: un
+    enlace `google-verificacion.net` NO es de Google.
+  - Jev necesita al menos 85 % de confianza para marcar como peligroso un enlace
+    de la misma organización.
+- `supabase.help` agregado a los dominios de Supabase. Caché `v4`.
+
 ## [2.5.1]
 
 ### Corregido

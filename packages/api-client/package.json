@@ -1,6 +1,6 @@
 {
   "name": "@mail-guard/api-client",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "private": true,
   "type": "module",
   "description": "Cliente HTTP tipado para el API Gateway de Mail Guard.",

@@ -9,8 +9,9 @@ import type { AnalysisCache } from "../../application/ports";
  * así el historial sigue sin duplicados).
  * v2: veredictos coherentes y textos en lenguaje natural.
  * v3: palabras clave como palabras completas.
+ * v4: dominios propios de una marca (supabase.help).
  */
-const PREFIX = "mail-guard:analysis:v3:";
+const PREFIX = "mail-guard:analysis:v4:";
 
 /** Caché en memoria con TTL y tamaño máximo (desarrollo / una sola instancia). */
 export function createMemoryCache(

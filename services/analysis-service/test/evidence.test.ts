@@ -89,3 +89,30 @@ describe("palabras clave completas", () => {
     );
   });
 });
+
+describe("dominios propios de una marca", () => {
+  test("desde supabase.com, supabase.help es de la misma organización", () => {
+    const link = inspectLink("https://status-supabase.help/", "supabase.com");
+    expect(link.sameOrg).toBe(true);
+    expect(link.flags).not.toContain("lookalike-brand");
+    expect(link.risk).toBe("safe");
+  });
+
+  test("una letra distinta sigue siendo imitación", () => {
+    const link = inspectLink("https://supabace.help/login", "supabase.com");
+    expect(link.sameOrg).toBe(false);
+    expect(link.flags).toContain("lookalike-brand");
+  });
+
+  test("desde otro remitente, un dominio con la marca es imitación", () => {
+    const link = inspectLink("https://supabase-billing.net/", "cobros.xyz");
+    expect(link.flags).toContain("lookalike-brand");
+    expect(link.risk).toBe("dangerous");
+  });
+
+  test("desde un correo gratuito no se presume que la marca sea suya", () => {
+    const link = inspectLink("https://google-verificacion.net/", "gmail.com");
+    expect(link.sameOrg).toBe(false);
+    expect(link.flags).toContain("lookalike-brand");
+  });
+});
