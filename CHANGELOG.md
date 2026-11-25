@@ -5,6 +5,15 @@ Todas las versiones de Mail Guard siguen [SemVer](https://semver.org/lang/es/):
 `.github/workflows/release.yml` (imagen en GHCR + GitHub Release con la
 extensión).
 
+## [2.4.1]
+
+### Corregido
+
+- **Despertar servicios:** mientras analysis o history duermen en Render, las
+  llamadas del gateway fallaban varios minutos sin despertarlos. `/api/status`
+  del panel ahora llama además al `/health` directo de cada servicio, que los
+  despierta en unos 20 s. La extensión despierta a través de esa ruta del panel.
+
 ## [2.4.0]
 
 ### Nuevo
@@ -32,10 +41,6 @@ extensión).
 
 ### Corregido
 
-- **Despertar servicios:** mientras analysis o history duermen en Render, las
-  llamadas del gateway fallaban varios minutos sin despertarlos. `/api/status`
-  del panel ahora llama además al `/health` directo de cada servicio, que los
-  despierta en unos 20 s. La extensión despierta a través de esa ruta del panel.
 - **Migración 0007:** funciona tanto si `profiles.role` es texto como si es un
   enum del proyecto (le agrega `user` y `admin`).
 
