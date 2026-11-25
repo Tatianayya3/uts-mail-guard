@@ -3,7 +3,13 @@ import type { ScanAnalysis } from "@mail-guard/contracts";
 import type { Logger } from "@mail-guard/service-kit";
 import type { AnalysisCache } from "../../application/ports";
 
-const PREFIX = "mail-guard:analysis:";
+/**
+ * Súbelo cuando cambie cómo se decide o se redacta un análisis: los resultados
+ * guardados con la versión anterior dejan de servirse (la huella no cambia,
+ * así el historial sigue sin duplicados).
+ * v2: veredictos coherentes y textos en lenguaje natural.
+ */
+const PREFIX = "mail-guard:analysis:v2:";
 
 /** Caché en memoria con TTL y tamaño máximo (desarrollo / una sola instancia). */
 export function createMemoryCache(
