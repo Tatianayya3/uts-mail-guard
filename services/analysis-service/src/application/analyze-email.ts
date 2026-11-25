@@ -6,13 +6,14 @@ import {
 } from "@mail-guard/contracts";
 import type { Logger } from "@mail-guard/service-kit";
 import { collectEvidence, type Evidence } from "../domain/evidence";
-import { buildAdvice, buildSummary } from "../domain/narrative";
+import { narrateAdvice, narrateSummary } from "../domain/narrative";
 import {
-  clampScore,
   domainStatusOf,
   heuristicDecision,
+  linksSignal,
   mergeLinks,
   mergeSignals,
+  reconcileVerdict,
   type Decision,
 } from "../domain/scoring";
 import { applyThreatIntel, matchThreats } from "../domain/threat-intel";
@@ -92,13 +93,31 @@ function compose(
   baseline: Decision,
   analyzedAt: Date,
 ): ScanAnalysis {
-  const signals = mergeSignals(decision.signals, baseline.signals);
-  const verdict = evidence.hasContent ? decision.verdict : "unknown";
-  return {
-    trustScore: clampScore(decision.trustScore),
+  const links = mergeLinks(decision.links, baseline.links);
+  // La señal de enlaces se recalcula con los enlaces FINALES (modelo + reglas):
+  // así nunca dice «sin alertas» mientras la lista muestra un enlace marcado.
+  const signals = mergeSignals(decision.signals, baseline.signals).map((s) =>
+    s.key === "links" ? linksSignal(evidence, links) : s,
+  );
+  const { verdict, trustScore } = reconcileVerdict({
+    verdict: evidence.hasContent ? decision.verdict : "unknown",
+    trustScore: decision.trustScore,
+    signals,
+    links,
+    baseline,
+  });
+  const narrative = {
     verdict,
-    summary: (decision.summary ?? buildSummary(verdict, signals)).slice(0, 500),
-    advice: (decision.advice ?? buildAdvice(verdict)).slice(0, 300),
+    evidence,
+    signals,
+    links,
+    notes: decision.notes,
+  };
+  return {
+    trustScore,
+    verdict,
+    summary: (decision.summary ?? narrateSummary(narrative)).slice(0, 500),
+    advice: (decision.advice ?? narrateAdvice(narrative)).slice(0, 300),
     sender: {
       email: email.sender,
       domain: evidence.senderDomain || "desconocido",
@@ -110,7 +129,7 @@ function compose(
       ).slice(0, 200),
     },
     signals,
-    links: mergeLinks(decision.links, baseline.links),
+    links,
     model: decision.model.slice(0, 100),
     // Siempre la hora real del servidor: los modelos no saben qué hora es.
     analyzedAt: analyzedAt.toISOString(),

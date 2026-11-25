@@ -5,6 +5,37 @@ Todas las versiones de Mail Guard siguen [SemVer](https://semver.org/lang/es/):
 `.github/workflows/release.yml` (imagen en GHCR + GitHub Release con la
 extensión).
 
+## [2.5.0]
+
+### Mejorado
+
+- **Veredictos más justos:**
+  - Un aviso legítimo con plazo («tu proyecto se pausará») ya no sale
+    sospechoso. La urgencia sola no es alerta; sí lo es junto con pedir datos o
+    dinero, con una suplantación o con enlaces que llevan a otro sitio.
+  - Un enlace solo se marca si Jev está razonablemente seguro (60 % para
+    sospechoso, 50 % para peligroso) y no pertenece a la misma organización
+    del remitente (`supabase.com` ↔ `supabase.link`).
+  - Paso final de coherencia (`reconcileVerdict`): «sospechoso» exige al menos
+    una alerta y «peligroso» al menos una falla. El puntaje queda en la franja
+    de su veredicto, y las fallas objetivas de las reglas nunca quedan como
+    «seguro».
+  - La señal «Enlaces» se calcula con los enlaces finales: ya no dice «0 con
+    alertas» mientras la lista muestra uno marcado.
+  - Preguntas a Jev más precisas, con contexto de qué enlaces son del mismo
+    remitente y una pregunta nueva sobre el tipo de correo (aviso, seguridad,
+    facturación…).
+  - Marcas nuevas: Supabase, GitHub, Vercel, Netlify, LinkedIn, Spotify,
+    Discord, Dropbox, DocuSign, Airbnb, Nubank, Falabella y Rappi.
+- **Textos para personas:** resumen, consejo, señales y enlaces en segunda
+  persona y sin porcentajes ni jerga del modelo. Por ejemplo: «Parece un aviso
+  legítimo de Supabase. Viene de supabase.com, una dirección oficial de
+  Supabase, y sus enlaces llevan al mismo sitio…».
+- Extensión: «Dominio no reconocido» en lugar de «sin verificar», y «Mejor no
+  abras estos enlaces».
+- Caché de análisis `v2`: los resultados con los textos anteriores dejan de
+  servirse.
+
 ## [2.4.2]
 
 ### Corregido

@@ -185,12 +185,12 @@ Respuesta (resumida):
   "scan": {
     "trustScore": 0,
     "verdict": "dangerous",
-    "summary": "Este correo presenta señales claras de phishing o fraude. Hallazgos: Imita a Bancolombia; …",
+    "summary": "Este correo parece una estafa: se hace pasar por Bancolombia desde una dirección que no es la oficial, te apura para que entregues datos o hagas un pago y …",
     "signals": [
       {
         "key": "sender",
         "status": "fail",
-        "value": "Imita a Bancolombia",
+        "value": "Se hace pasar por Bancolombia",
         "detail": "…"
       }
     ],
@@ -198,7 +198,7 @@ Respuesta (resumida):
       {
         "url": "http://192.168.1.20/login",
         "status": "dangerous",
-        "detail": "El enlace apunta a una IP…"
+        "detail": "Este enlace lleva a una dirección numérica en lugar de un sitio con nombre…"
       }
     ],
     "model": "mail-guard-heuristics-v1"

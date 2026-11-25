@@ -52,6 +52,34 @@ export const BRANDS: Record<string, { name: string; domains: string[] }> = {
   fedex: { name: "FedEx", domains: ["fedex.com"] },
   servientrega: { name: "Servientrega", domains: ["servientrega.com"] },
   binance: { name: "Binance", domains: ["binance.com"] },
+  // Servicios digitales comunes (estudiantes y desarrolladores). Las claves
+  // son nombres distintivos: una palabra genérica (render, notion, zoom…)
+  // marcaría como imitación a cualquier dominio que la contenga.
+  supabase: {
+    name: "Supabase",
+    domains: ["supabase.com", "supabase.io", "supabase.link", "supabase.co"],
+  },
+  github: {
+    name: "GitHub",
+    domains: ["github.com", "githubusercontent.com", "github.io"],
+  },
+  vercel: { name: "Vercel", domains: ["vercel.com", "vercel.app"] },
+  netlify: { name: "Netlify", domains: ["netlify.com", "netlify.app"] },
+  linkedin: { name: "LinkedIn", domains: ["linkedin.com", "lnkd.in"] },
+  spotify: { name: "Spotify", domains: ["spotify.com"] },
+  discord: { name: "Discord", domains: ["discord.com", "discord.gg"] },
+  dropbox: { name: "Dropbox", domains: ["dropbox.com", "dropboxmail.com"] },
+  docusign: {
+    name: "DocuSign",
+    domains: ["docusign.com", "docusign.net"],
+  },
+  airbnb: { name: "Airbnb", domains: ["airbnb.com", "airbnb.com.co"] },
+  nubank: { name: "Nubank", domains: ["nubank.com.co", "nu.com.co"] },
+  falabella: {
+    name: "Falabella",
+    domains: ["falabella.com", "falabella.com.co", "bancofalabella.com.co"],
+  },
+  rappi: { name: "Rappi", domains: ["rappi.com", "rappi.com.co"] },
 };
 
 export const FREE_MAIL_DOMAINS = new Set([

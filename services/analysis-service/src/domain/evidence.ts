@@ -30,6 +30,8 @@ export type LinkEvidence = {
   flags: LinkFlag[];
   risk: Exclude<Verdict, "unknown">;
   imitatedBrand?: string;
+  /** El destino pertenece a la misma organización que envía el correo. */
+  sameOrg: boolean;
 };
 
 export type Evidence = {
@@ -57,7 +59,7 @@ const DANGEROUS_FLAGS: LinkFlag[] = [
   "credentials-in-url",
 ];
 
-function officialBrandOf(domain: string): string | undefined {
+export function officialBrandOf(domain: string): string | undefined {
   const registrable = registrableDomain(domain);
   return Object.values(BRANDS).find((brand) =>
     brand.domains.some((d) => d === domain || d === registrable),
@@ -95,12 +97,18 @@ export function inspectLink(url: string, senderDomain: string): LinkEvidence {
   try {
     parsed = new URL(url);
   } catch {
-    return { url, host: "", flags: ["credentials-in-url"], risk: "dangerous" };
+    return {
+      url,
+      host: "",
+      flags: ["credentials-in-url"],
+      risk: "dangerous",
+      sameOrg: false,
+    };
   }
   const host = parsed.hostname.toLowerCase();
   const flags: LinkFlag[] = [];
   const brand = imitatedBrand(host);
-  const sameOrg = registrableDomain(host) === registrableDomain(senderDomain);
+  const sameOrg = sameOrganization(host, senderDomain);
 
   if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host) || host.startsWith("["))
     flags.push("ip-host");
@@ -119,7 +127,19 @@ export function inspectLink(url: string, senderDomain: string): LinkEvidence {
     : flags.length > 0
       ? "suspicious"
       : "safe";
-  return { url, host, flags, risk, imitatedBrand: brand };
+  return { url, host, flags, risk, imitatedBrand: brand, sameOrg };
+}
+
+/**
+ * Dos hosts son de la misma organización si comparten dominio registrable
+ * (mail.x.com ↔ x.com) o si ambos son dominios oficiales de la misma marca
+ * (supabase.com ↔ supabase.link).
+ */
+export function sameOrganization(host: string, senderDomain: string): boolean {
+  if (!host || !senderDomain) return false;
+  if (registrableDomain(host) === registrableDomain(senderDomain)) return true;
+  const brand = officialBrandOf(host);
+  return Boolean(brand) && brand === officialBrandOf(senderDomain);
 }
 
 /** Extrae evidencias objetivas del correo. Función pura y determinista. */

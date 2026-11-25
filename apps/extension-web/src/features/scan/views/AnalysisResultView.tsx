@@ -35,7 +35,7 @@ const VERDICT_CHIP: Record<Verdict, string> = {
 const DOMAIN_LABEL: Record<DomainStatus, string> = {
   valid: "Dominio reconocido",
   suspicious: "Dominio sospechoso",
-  unknown: "Dominio sin verificar",
+  unknown: "Dominio no reconocido",
 };
 
 const dateFormat = new Intl.DateTimeFormat("es", {
@@ -198,7 +198,7 @@ export default function AnalysisResultView({
           {riskyLinks.length > 0 && (
             <section className="rounded-2xl border border-red-400/15 bg-red-400/5 p-3">
               <p className="mb-2 text-[10px] font-semibold tracking-wide text-red-200">
-                ENLACES CON ALERTAS · no los abras
+                MEJOR NO ABRAS ESTOS ENLACES
               </p>
               <ul className="flex flex-col gap-1.5">
                 {riskyLinks.slice(0, 5).map((link) => (
