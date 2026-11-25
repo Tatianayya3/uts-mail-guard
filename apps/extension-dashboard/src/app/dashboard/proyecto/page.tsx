@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import PageHeader from "@/features/dashboard/PageHeader";
 import ServiceStatus from "@/features/status/ServiceStatus";
+import { requireAdmin } from "@/features/dashboard/dashboard.data";
 import { REPO_URL } from "@/features/tests/tests.data";
 
 export const metadata = { title: "Entregables | Mail Guard" };
@@ -115,7 +116,8 @@ const DEMO_STEPS = [
   "Escanea un correo tranquilo de ese dominio: sale peligroso con «Reportado por el agente Centinela».",
 ];
 
-export default function ProjectPage() {
+export default async function ProjectPage() {
+  await requireAdmin();
   return (
     <>
       <PageHeader

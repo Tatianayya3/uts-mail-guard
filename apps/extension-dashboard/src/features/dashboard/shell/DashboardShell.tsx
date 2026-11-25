@@ -10,6 +10,7 @@ type DashboardShellProps = {
   displayName: string;
   email: string;
   avatarUrl: string | null;
+  isAdmin: boolean;
   children: ReactNode;
 };
 
@@ -18,6 +19,7 @@ export default function DashboardShell({
   displayName,
   email,
   avatarUrl,
+  isAdmin,
   children,
 }: DashboardShellProps) {
   const initials = displayName.slice(0, 2).toUpperCase();
@@ -36,9 +38,11 @@ export default function DashboardShell({
             <span className="text-sm font-bold">Mail Guard</span>
           </Link>
           <div className="flex items-center gap-2">
-            <div className="lg:hidden">
-              <ServiceStatus variant="compact" />
-            </div>
+            {isAdmin && (
+              <div className="lg:hidden">
+                <ServiceStatus variant="compact" />
+              </div>
+            )}
             <RefreshButton />
             <SignOutButton />
             <div className="ml-1 flex items-center gap-2.5 border-l border-guard-surface-raised pl-3">
@@ -58,8 +62,13 @@ export default function DashboardShell({
                 </span>
               )}
               <div className="hidden min-w-0 md:block">
-                <p className="max-w-40 truncate text-xs font-semibold">
-                  {displayName}
+                <p className="flex max-w-40 items-center gap-1.5 text-xs font-semibold">
+                  <span className="truncate">{displayName}</span>
+                  {isAdmin && (
+                    <span className="shrink-0 rounded-full bg-guard-accent/15 px-1.5 py-px text-[10px] font-bold text-guard-accent">
+                      Admin
+                    </span>
+                  )}
                 </p>
                 <p className="max-w-40 truncate text-[11px] text-guard-text-muted">
                   {email}
@@ -69,14 +78,14 @@ export default function DashboardShell({
           </div>
         </div>
         <div className="lg:hidden">
-          <NavLinks orientation="horizontal" />
+          <NavLinks orientation="horizontal" isAdmin={isAdmin} />
         </div>
       </header>
 
       <div className="mx-auto flex w-full max-w-[1440px]">
         <aside className="sticky top-[61px] hidden h-[calc(100vh-61px)] w-60 shrink-0 flex-col justify-between gap-4 overflow-y-auto border-r border-guard-surface-raised p-4 lg:flex">
-          <NavLinks orientation="vertical" />
-          <ServiceStatus />
+          <NavLinks orientation="vertical" isAdmin={isAdmin} />
+          {isAdmin && <ServiceStatus />}
         </aside>
         <main id="contenido" className="min-w-0 flex-1 px-6 py-8 lg:px-10">
           {children}

@@ -239,9 +239,23 @@ Solo el gateway se publica (`:4000`); los servicios internos quedan en la red de
    `SUPABASE_SECRET_KEY` **solo** en `services/history-service/.env` (o en Render).
 
 Sin la clave, el Centinela queda desactivado y todo lo demás funciona igual.
+
+### 3. Roles (admin)
+
+1. En **SQL Editor** ejecuta [`0007_roles.sql`](supabase/migrations/0007_roles.sql).
+2. Nombra el primer admin (después lo puedes hacer desde **Usuarios** en el panel):
+
+   ```sql
+   update public.profiles set role = admin
+   where id in (select id from auth.users where email = tu-correo@ejemplo.com);
+   ```
+
+Los admins ven además **Usuarios**, **Entregables**, **Minería**, **Pruebas**, el estado
+de servicios y la bitácora del Centinela. La página Usuarios usa la misma
+`SUPABASE_SECRET_KEY` del history-service.
 Detalles en [`docs/AGENTES.md`](docs/AGENTES.md).
 
-### 3. Jev (opcional, recomendado)
+### 4. Jev (opcional, recomendado)
 
 Solicita acceso en [typesafe.ai](https://typesafe.ai) y define `TYPESAFE_API_KEY` en
 `services/analysis-service/.env`. Con `DECISION_ENGINE=auto` se usará automáticamente.

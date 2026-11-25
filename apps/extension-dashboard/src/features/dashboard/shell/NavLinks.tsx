@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Pickaxe,
   UserCog,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@mail-guard/ui";
@@ -24,11 +25,11 @@ type NavItem = {
 };
 
 /**
- * Tres grupos: lo que usa cualquier persona (Protección), los entregables de
- * la materia (Proyecto) y la ayuda. Así las páginas «de clase» no se mezclan
- * con las del día a día.
+ * Grupos por rol: «Protección» y «Ayuda» son para todos; «Administración» y
+ * «Proyecto de clase» solo aparecen a los admins. Ocultar el menú es solo
+ * comodidad: cada página y cada servicio vuelven a comprobar el rol.
  */
-const GROUPS: { title: string; items: NavItem[] }[] = [
+const GROUPS: { title: string; adminOnly?: boolean; items: NavItem[] }[] = [
   {
     title: "Protección",
     items: [
@@ -43,7 +44,13 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
     ],
   },
   {
+    title: "Administración",
+    adminOnly: true,
+    items: [{ href: "/dashboard/usuarios", label: "Usuarios", icon: Users }],
+  },
+  {
     title: "Proyecto de clase",
+    adminOnly: true,
     items: [
       {
         href: "/dashboard/proyecto",
@@ -95,10 +102,13 @@ function NavLink({
 /** Navegación del panel: columna agrupada en escritorio, pestañas en móvil. */
 export default function NavLinks({
   orientation,
+  isAdmin = false,
 }: {
   orientation: "vertical" | "horizontal";
+  isAdmin?: boolean;
 }) {
   const pathname = usePathname();
+  const groups = GROUPS.filter((g) => isAdmin || !g.adminOnly);
   const vertical = orientation === "vertical";
   const isActive = (item: NavItem) =>
     item.exact ? pathname === item.href : pathname.startsWith(item.href);
@@ -107,7 +117,7 @@ export default function NavLinks({
     return (
       <nav aria-label="Secciones del panel">
         <ul className="flex items-center gap-1 overflow-x-auto px-6 pb-2">
-          {GROUPS.map((group, g) => (
+          {groups.map((group, g) => (
             <Fragment key={group.title}>
               {g > 0 && (
                 <li
@@ -133,7 +143,7 @@ export default function NavLinks({
 
   return (
     <nav aria-label="Secciones del panel" className="flex flex-col gap-5">
-      {GROUPS.map((group) => (
+      {groups.map((group) => (
         <div key={group.title}>
           <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wide text-guard-text-muted/70">
             {group.title}

@@ -81,14 +81,13 @@ describe("Agentes · Analista + Centinela", () => {
     expect(system.threats.get("pagos-express-co.com")?.active).toBe(true);
   });
 
-  test("el panel ve amenazas, bitácora y solo sus propias alertas", async () => {
+  test("el panel ve amenazas y solo sus propias alertas", async () => {
     const res = await system.call("/v1/agents", { token: luis });
     const overview = agentsOverviewResponseSchema.parse(await res.json());
     expect(overview.sentinel.enabled).toBe(true);
     expect(overview.threats.map((t) => t.domain)).toContain(
       "pagos-express-co.com",
     );
-    expect(overview.runs).toHaveLength(1);
     expect(overview.alerts).toHaveLength(1);
     expect(overview.alerts[0]!.domain).toBe("pagos-express-co.com");
   });
@@ -100,6 +99,46 @@ describe("Agentes · Analista + Centinela", () => {
     expect(res.scan.model).toContain("centinela");
     expect(res.scan.signals.find((s) => s.key === "sender")?.value).toBe(
       "Reportado por el agente Centinela",
+    );
+  });
+});
+
+describe("Agentes · permisos por rol", () => {
+  test("un usuario normal no puede ejecutar al Centinela (403)", async () => {
+    const res = await system.call("/v1/agents/sentinel/run", {
+      method: "POST",
+      token: luis,
+    });
+    expect(res.status).toBe(403);
+  });
+
+  test("un usuario normal ve sus alertas pero no la bitácora", async () => {
+    const overview = agentsOverviewResponseSchema.parse(
+      await (await system.call("/v1/agents", { token: luis })).json(),
+    );
+    expect(overview.runs).toEqual([]);
+    expect(overview.sentinel.lastRun).toBeNull();
+    expect(overview.threats.length).toBeGreaterThan(0);
+  });
+
+  test("un admin sí ve la bitácora", async () => {
+    const overview = agentsOverviewResponseSchema.parse(
+      await (await system.call("/v1/agents", { token: ana })).json(),
+    );
+    expect(overview.runs.length).toBeGreaterThan(0);
+    expect(overview.sentinel.lastRun).not.toBeNull();
+  });
+
+  test("solo un admin puede listar usuarios", async () => {
+    expect((await system.call("/v1/admin/users", { token: luis })).status).toBe(
+      403,
+    );
+    // Sin clave secreta en el sistema de pruebas, el admin pasa el permiso y
+    // recibe un error claro de configuración (5xx interno → 502 en el gateway).
+    const res = await system.call("/v1/admin/users", { token: ana });
+    expect(res.status).toBe(502);
+    expect(((await res.json()) as { error: string }).error).toContain(
+      "SUPABASE_SECRET_KEY",
     );
   });
 });

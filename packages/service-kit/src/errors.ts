@@ -19,6 +19,8 @@ export const badRequest = (message: string) =>
   new AppError(400, message, "bad_request");
 export const unauthorized = (message = "Autenticación requerida.") =>
   new AppError(401, message, "unauthorized");
+export const forbidden = (message = "No tienes permiso para hacer esto.") =>
+  new AppError(403, message, "forbidden");
 export const tooManyRequests = (message: string) =>
   new AppError(429, message, "rate_limited");
 export const unavailable = (message: string) =>

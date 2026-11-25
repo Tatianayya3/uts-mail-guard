@@ -1,6 +1,8 @@
 import type {
+  AdminUser,
   Analytics,
   Profile,
+  Role,
   ScanRecord,
   StoredScan,
 } from "@mail-guard/contracts";
@@ -35,4 +37,14 @@ export interface UserContextFactory {
     /** Alertas del Centinela para este usuario (sin la migración 0006 no hay). */
     alerts?: AlertRepository;
   } | null>;
+}
+
+/**
+ * Administración de usuarios (clave secreta del servicio). Solo se usa
+ * después de comprobar que quien llama es admin.
+ */
+export interface AdminRepository {
+  listUsers(): Promise<AdminUser[]>;
+  /** Cambia el rol. Devuelve el usuario actualizado, o null si no existe. */
+  setRole(userId: string, role: Role): Promise<AdminUser | null>;
 }

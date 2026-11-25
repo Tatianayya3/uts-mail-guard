@@ -1,19 +1,23 @@
 import type { z } from "zod";
 import {
+  adminUsersResponseSchema,
   agentsOverviewResponseSchema,
   deleteHistoryResponseSchema,
   markAlertsReadResponseSchema,
   sentinelRunResponseSchema,
+  updateUserRoleResponseSchema,
   overviewResponseSchema,
   scanDetailResponseSchema,
   scanListResponseSchema,
   scanResponseSchema,
   syncScansResponseSchema,
+  type AdminUser,
   type AgentRun,
   type AgentsOverview,
   type EmailSnapshot,
   type Overview,
   type ScanRecord,
+  type Role,
   type ScanResponse,
   type StoredScan,
   type UpdateProfileValues,
@@ -163,6 +167,24 @@ export function createMailGuardApi(options: MailGuardApiOptions) {
     /** UC-09: perfil + métricas agregadas. */
     getOverview(): Promise<Overview> {
       return request("/v1/me", overviewResponseSchema, { auth: "required" });
+    },
+    /** Admin: todas las personas registradas con su rol. */
+    async listUsers(): Promise<AdminUser[]> {
+      const { users } = await request(
+        "/v1/admin/users",
+        adminUsersResponseSchema,
+        { auth: "required" },
+      );
+      return users;
+    },
+    /** Admin: cambia el rol de una persona (user ↔ admin). */
+    async setUserRole(id: string, role: Role): Promise<AdminUser> {
+      const { user } = await request(
+        `/v1/admin/users/${encodeURIComponent(id)}`,
+        updateUserRoleResponseSchema,
+        { method: "PATCH", body: { role }, auth: "required" },
+      );
+      return user;
     },
     /** Agentes: estado del Centinela, amenazas, alertas propias y bitácora. */
     getAgents(): Promise<AgentsOverview> {
