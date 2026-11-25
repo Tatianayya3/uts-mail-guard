@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import ServiceStatus from "@/features/status/ServiceStatus";
 import NavLinks from "./NavLinks";
 import RefreshButton from "./RefreshButton";
 import SignOutButton from "./SignOutButton";
@@ -35,6 +36,9 @@ export default function DashboardShell({
             <span className="text-sm font-bold">Mail Guard</span>
           </Link>
           <div className="flex items-center gap-2">
+            <div className="lg:hidden">
+              <ServiceStatus variant="compact" />
+            </div>
             <RefreshButton />
             <SignOutButton />
             <div className="ml-1 flex items-center gap-2.5 border-l border-guard-surface-raised pl-3">
@@ -70,8 +74,9 @@ export default function DashboardShell({
       </header>
 
       <div className="mx-auto flex w-full max-w-[1440px]">
-        <aside className="sticky top-[61px] hidden h-[calc(100vh-61px)] w-60 shrink-0 border-r border-guard-surface-raised p-4 lg:block">
+        <aside className="sticky top-[61px] hidden h-[calc(100vh-61px)] w-60 shrink-0 flex-col justify-between gap-4 overflow-y-auto border-r border-guard-surface-raised p-4 lg:flex">
           <NavLinks orientation="vertical" />
+          <ServiceStatus />
         </aside>
         <main id="contenido" className="min-w-0 flex-1 px-6 py-8 lg:px-10">
           {children}

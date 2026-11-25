@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { AuthCard } from "@/features/auth";
+import WakeServices from "@/features/status/WakeServices";
 
 export default function Home() {
   return (
@@ -10,6 +11,8 @@ export default function Home() {
         <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-80 h-80 bg-guard-accent-bright rounded-full mix-blend-screen filter blur-[90px] opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
+      {/* Despierta los servicios de Render mientras la persona inicia sesión. */}
+      <WakeServices />
       <header className="relative z-10 px-6 py-6 md:px-12 md:py-8 max-w-7xl mx-auto w-full flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Image src="/logo.png" alt="" width={48} height={48} priority />

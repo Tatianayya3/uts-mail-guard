@@ -1,0 +1,11 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      // next build y next typegen (check-types) escriben .next/types; en
+      // paralelo chocaban en el CI. El build espera a que termine check-types.
+      "dependsOn": ["$TURBO_EXTENDS$", "check-types"]
+    }
+  }
+}

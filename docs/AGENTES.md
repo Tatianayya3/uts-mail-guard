@@ -134,7 +134,8 @@ también borra sus alertas.
 
 ## 5. Guion de demo (5 minutos)
 
-1. Panel → **Agentes**: presenta ambos agentes (clasificación, modo y PEAS).
+1. Panel → **Entregables** → **Despertar servicios** y espera «Todo en línea». Luego
+   **Agentes IA**: presenta ambos agentes (clasificación, modo y PEAS).
 2. Con la extensión, escanea **2 o 3 correos de phishing del mismo dominio falso**. Sirven
    cuentas distintas o correos distintos.
 3. Pulsa **Ejecutar Centinela** (semiautomático) o espera unos 45 s para el disparo por evento
