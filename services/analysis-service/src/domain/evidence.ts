@@ -84,9 +84,28 @@ export function imitatedBrand(domain: string): string | undefined {
   return undefined;
 }
 
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Letras, números y apóstrofos: lo que forma parte de una palabra. */
+const WORD_CHAR = "[\\p{L}\\p{N}'’]";
+
+/**
+ * ¿Aparece la palabra clave como palabra completa? Así «you won» no coincide
+ * dentro de «you won't» ni «clave» dentro de «autoclave». Acepta plural
+ * («claves»); un «*» final marca una raíz que puede continuar.
+ */
+export function containsKeyword(text: string, keyword: string): boolean {
+  const stem = keyword.endsWith("*");
+  const body = escapeRegex(stem ? keyword.slice(0, -1) : keyword);
+  const end = stem ? "" : `(?:es|s)?(?!${WORD_CHAR})`;
+  return new RegExp(`(?<!${WORD_CHAR})${body}${end}`, "u").test(text);
+}
+
 /** Palabras clave presentes, sin repetir las contenidas en otra ("urgent" ⊂ "urgente"). */
-function matches(text: string, words: readonly string[]): string[] {
-  const found = words.filter((word) => text.includes(word));
+function matches(text: string, keywords: readonly string[]): string[] {
+  const words = keywords.map((k) => k.replace(/\*$/, ""));
+  const found = words.filter((_, i) => containsKeyword(text, keywords[i]!));
   return found.filter(
     (word) => !found.some((other) => other !== word && other.includes(word)),
   );

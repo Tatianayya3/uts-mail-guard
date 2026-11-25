@@ -5,6 +5,18 @@ Todas las versiones de Mail Guard siguen [SemVer](https://semver.org/lang/es/):
 `.github/workflows/release.yml` (imagen en GHCR + GitHub Release con la
 extensión).
 
+## [2.5.1]
+
+### Corregido
+
+- **Palabras clave como palabras completas.** En producción, el aviso de
+  Supabase mostraba «Habla de pagos o premios» porque «you won» (ganaste)
+  coincidía dentro de «you won't be able». Ahora las palabras clave coinciden
+  solo como palabras completas: aceptan plural, y `*` marca las raíces
+  («sera bloquead*»).
+- Un resultado «seguro» con una advertencia leve de contenido ya no dice «no te
+  pide nada»: lo menciona con calma.
+
 ## [2.5.0]
 
 ### Mejorado

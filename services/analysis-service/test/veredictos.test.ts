@@ -23,7 +23,7 @@ const supabaseNotice: EmailSnapshot = {
   senderName: "Supabase",
   subject: "Your Supabase Project ReciclaTIC is going to be paused.",
   bodyText:
-    "Hi there, To save on cloud resources I just did a scan of all our projects and identified those which have not seen sufficient activity for more than 7 days. Your project ReciclaTIC from your organization UTS Org was one of those and it is scheduled to be paused in the near future. Your project is not currently paused, but if it continues not to receive sufficient activity, it will be paused automatically. You can unpause it from the dashboard within 90 days of the pause date. To prevent future automatic pausing, upgrade to Pro from your billing settings. Happy Hacking! Ant, CTO & Co-founder @ Supabase",
+    "Hi there, To save on cloud resources I just did a scan of all our projects and identified those which have not seen sufficient activity for more than 7 days. Your project ReciclaTIC from your organization UTS Org was one of those and it is scheduled to be paused in the near future. Your project is not currently paused, but if it continues not to receive sufficient activity, it will be paused automatically. You can unpause it from the dashboard within 90 days of the pause date. Beyond that point, you won't be able to unpause your project, but you'll be able to download your data. To prevent future automatic pausing, upgrade to Pro from your billing settings. Happy Hacking! Ant, CTO & Co-founder @ Supabase",
   links: [
     "https://supabase.link/HFIG8I8",
     "https://supabase.com/dashboard/project/aawoqemhbjnlwzfhtxys",
@@ -75,6 +75,10 @@ describe("Aviso legítimo de Supabase", () => {
     expect(analysis.sender.domainStatus).toBe("valid");
     expect(analysis.links.every((l) => l.status === "safe")).toBe(true);
     expect(analysis.summary).toContain("Supabase");
+    // «you won't be able» no es «you won» (premio): el contenido queda en verde.
+    expect(analysis.signals.find((x) => x.key === "content")?.status).toBe(
+      "pass",
+    );
   });
 
   test("con Jev: aunque detecte urgencia, sale seguro y en lenguaje natural", async () => {
